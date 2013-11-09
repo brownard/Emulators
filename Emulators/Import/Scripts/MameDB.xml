@@ -1,0 +1,141 @@
+﻿<ScriptableScraper>
+  <details>
+    <name>mamedb.com</name>
+    <author>Brownard</author>
+    <description>Grabs game data from mamedb.com</description>
+    <id>10</id>
+    <version major="1" minor="0" point="0"/>
+    <published month="13" day="6" year="2013"/>
+    <type>MovieDetailsFetcher|MovieCoverFetcher</type>
+    <language>en</language>
+  </details>
+
+  <action name="search">
+    <if test="${search.platform}=Arcade">
+      <if test="${search.filename}!=">
+        <set name="rxDetailsPage"><![CDATA[<h1>Game Details</h1><br/><b>Name:&nbsp</b>(.*?)&nbsp;.*?<br/><b>Year:&nbsp</b>\s*<a[^>]*>(\d*)</a><br/><b>Manufacturer:&nbsp</b>\s*<a[^>]*>([^<]*)</a><br/><b>Filename:&nbsp;</b>([^<]*)]]></set>
+        <retrieve name="directPage" url="http://www.mamedb.com/game/${search.filename}"/>
+        <parse name="directMatch" input="${directPage}" regex="${rxDetailsPage}" />
+        <set name="gameCount" value="0" />
+        <if test="${directMatch.count}=1">
+          <set name="game[0].site_id" value="${directMatch[0][3]:htmldecode}"/>
+          <set name="game[0].title" value="${directMatch[0][0]:htmldecode}"/>
+          <set name="game[0].matchtitle" value="${search.title}" />
+          <set name="game[0].yearmade" value="${directMatch[0][1]:htmldecode}"/>
+          <set name="game[0].system" value="Arcade"/>
+          <set name="game[0].score" value="0"/>
+          <set name="game[0].details_url" value="http://www.mamedb.com/game/${directMatch[0][3]}"/>
+          <add name="gameCount" value1="${gameCount}" value2="1" />
+        </if>
+      </if>
+
+      <if test="${directMatch.count}!=1">
+        <retrieve name="searchPage" url="http://www.mamedb.com/list.php?fuzzy_name=${search.title:safe}"/>
+        <parse name="directSearchMatch" input="${searchPage}" regex="${rxDetailsPage}" />
+        <if test="${directSearchMatch.count}=1">
+          <set name="game[${gameCount}].site_id" value="${directSearchMatch[0][3]:htmldecode}"/>
+          <set name="game[${gameCount}].title" value="${directSearchMatch[0][0]:htmldecode}"/>
+          <set name="game[${gameCount}].yearmade" value="${directSearchMatch[0][1]:htmldecode}"/>
+          <set name="game[${gameCount}].system" value="Arcade"/>
+          <set name="game[${gameCount}].score" value="0"/>
+          <set name="game[${gameCount}].details_url" value="http://www.mamedb.com/game/${directSearchMatch[0][3]}"/>
+        </if>
+        <if test="${directSearchMatch.count}=0">
+          <set name="rxSearchPage"><![CDATA[--><td[^>]*><a href='/game/([^']*)'>.*?</a></td><td[^>]*>(.*?)&nbsp;.*?</td><td[^>]*><a[^>]*>(\d*)]]></set>
+          <parse name="searchMatches" input="${searchPage}" regex="${rxSearchPage}" />
+          <loop name="searchMatch" on="searchMatches">
+            <set name="game[${gameCount}].site_id" value="${searchMatch[0]:htmldecode}"/>
+            <set name="game[${gameCount}].title" value="${searchMatch[1]:htmldecode}"/>
+            <set name="game[${gameCount}].yearmade" value="${searchMatch[2]:htmldecode}"/>
+            <set name="game[${gameCount}].system" value="Arcade"/>
+            <set name="game[${gameCount}].details_url" value="http://www.mamedb.com/game/${searchMatch[0]}"/>
+            <add name="gameCount" value1="${gameCount}" value2="1" />
+          </loop>
+        </if>
+      </if>
+    </if>
+  </action>
+
+  <action name="get_details">
+    <retrieve name="detailsPage" url="http://www.mamedb.com/game/${game.site_id}"/>
+    
+    <set name="rxTitle"><![CDATA[Name:&nbsp</b>(.*?)&nbsp;]]></set>
+    <parse name="titleMatch" input="${detailsPage}" regex="${rxTitle}" />
+    <set name="game.title" value="${titleMatch[0][0]:htmldecode}"/>
+
+    <set name="rxYear"><![CDATA[Year:&nbsp</b> <a[^>]*>(\d+)]]></set>
+    <parse name="yearMatch" input="${detailsPage}" regex="${rxYear}" />
+    <set name="game.yearmade" value="${yearMatch[0][0]:htmldecode}"/>
+
+    <set name="rxCompany"><![CDATA[Manufacturer:&nbsp</b>\s*<a[^>]*>([^<]*)]]></set>
+    <parse name="companyMatch" input="${detailsPage}" regex="${rxCompany}" />
+    <set name="game.company" value="${companyMatch[0][0]:htmldecode}"/>
+
+    <set name="rxGenre"><![CDATA[Category:&nbsp;</b>\s*<a[^>]*>([^<]*)]]></set>
+    <parse name="genreMatch" input="${detailsPage}" regex="${rxGenre}" />
+    <replace name="game.genre" input="${genreMatch[0][0]:htmldecode}" pattern="\s*/\s*" with="|"/>
+
+    <set name="rxGrade"><![CDATA[<b>Score:&nbsp;</b>(\d+[.]?\d*)]]></set>
+    <parse name="gradeMatch" input="${detailsPage}" regex="${rxGrade}" />
+    <set name="game.grade" value="${gradeMatch[0][0]:htmldecode}"/>
+  </action>
+
+  <action name="get_cover_art">
+    <if test="${game.site_id}!=">
+      <set name="game.baseurl" value="http://www.mamedb.com"/>
+      <retrieve name="details_page" url="http://www.mamedb.com/game/${game.site_id}"/>
+      <set name="rx_images">
+        <![CDATA[<a href='([^']*)'><img[^>]*></a></td></tr><tr><td[^>]*>(Cabinet|Marquee|Control Panel)]]>
+      </set>
+      <set name="rx_image">
+        <![CDATA[<td><img src='([^']*)']]>
+      </set>
+
+      <parse name="images" input="${details_page}" regex="${rx_images}"/>
+      <set name="game.images" value=""/>
+      <loop name="currImage" on="images">
+        <retrieve name="imagePage" url="http://www.mamedb.com${currImage[0]:htmldecode}" />
+        <parse name="imageUrl" input="${imagePage}" regex="${rx_image}" />
+        <if test="${imageUrl.count}!=0">
+          <set name="game.images" value="${game.images}|${imageUrl[0][0]:htmldecode}"/>
+          <if test="${currImage[1]}=Cabinet">
+            <set name="game.cover.front" value="${imageUrl[0][0]:htmldecode}" />
+          </if>
+          <if test="${currImage[1]}=Control Panel">
+            <set name="game.cover.back" value="${imageUrl[0][0]:htmldecode}" />
+          </if>
+        </if>
+      </loop>
+    </if>
+  </action>
+
+  <action name="get_screenshots">
+    <if test="${game.site_id}!=">
+      <set name="game.baseurl" value="http://www.mamedb.com"/>
+      <retrieve name="details_page" url="http://www.mamedb.com/game/${game.site_id}"/>
+      <set name="rx_images">
+        <![CDATA[<a href='([^']*)'><img[^>]*></a></td></tr><tr><td[^>]*>(Snapshot|Title)]]>
+      </set>
+      <set name="rx_image">
+        <![CDATA[<td><img src='([^']*)']]>
+      </set>
+
+      <parse name="images" input="${details_page}" regex="${rx_images}"/>
+      <set name="game.images" value=""/>
+      <loop name="currImage" on="images">
+        <retrieve name="imagePage" url="http://www.mamedb.com${currImage[0]:htmldecode}" />
+        <parse name="imageUrl" input="${imagePage}" regex="${rx_image}" />
+        <if test="${imageUrl.count}!=0">
+          <set name="game.images" value="${game.images}|${imageUrl[0][0]:htmldecode}"/>
+          <if test="${currImage[1]}=Snapshot">
+            <set name="game.screen.ingame" value="${imageUrl[0][0]:htmldecode}" />
+          </if>
+          <if test="${currImage[1]}=Title">
+            <set name="game.screen.title" value="${imageUrl[0][0]:htmldecode}" />
+          </if>
+        </if>
+      </loop>
+    </if>
+  </action>
+
+</ScriptableScraper>

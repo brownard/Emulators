@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- This screen acts as a simple base screen for each special screen which shows media items and which
+     doesn't bring in special images/controls/etc. -->
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_menu.xaml"
+    >
+    <Include.Resources>
+
+        <Model x:Key="NewEmulatorModel" Id="03F534A5-4495-4223-A7EB-0FC8D477CF4B"/>
+        <!-- Header_Text resource has to be added by including screen -->
+
+        <!-- Contents -->
+        <ControlTemplate x:Key="Contents_Template">
+            <Grid DataContext="{Binding Source={StaticResource NewEmulatorModel}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label x:Name="NameLabel" Grid.Row="0" Grid.Column="0"
+                    Content="[Emulators.Name]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
+                <TextBox x:Name="Title" Grid.Row="0" Grid.Column="1"
+                    Text="{Binding Name}" Margin="10,10,10,0"/>
+
+                <Label x:Name="PathLabel" Grid.Row="1" Grid.Column="0"
+                    Content="[Emulators.Path]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
+                <Button x:Name="Path" Grid.Row="1" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
+                    Content="{Binding EmulatorPath}" Command="{Command ChooseEmulatorPath}" SetFocusPrio="Default" Margin="10,10,10,0"/>
+
+            </Grid>
+        </ControlTemplate>
+    </Include.Resources>
+</Include>

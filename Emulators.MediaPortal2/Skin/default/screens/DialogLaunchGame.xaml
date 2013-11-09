@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_dialog_bare.xaml"
+    >
+    <Include.Resources>
+
+        <!-- Header -->
+        <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.Launch]"/>
+
+        <Model x:Key="Model" Id="2471F9F2-CAE1-4AEE-96BD-6647FF191F6E"/>
+
+        <!-- Contents -->
+        <ControlTemplate x:Key="Contents_Template">
+            <DockPanel Width="600" Height="200" DataContext="{Binding Source={StaticResource Model}}" LastChildFill="true" Margin="10">
+                <ProgressBar x:Name="ProgressBar" DockPanel.Dock="Top" Height="15" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                  Value="{Binding Path=Progress}" Margin="0,0,0,10"/>
+                <Label Content="{Binding Path=Info}" FontSize="{ThemeResource SmallFontSize}" Color="{ThemeResource TextColor}" Wrap="true"/>
+            </DockPanel>
+        </ControlTemplate>
+
+    </Include.Resources>
+</Include>

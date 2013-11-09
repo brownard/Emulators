@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\ShowItems.xaml"
+    >
+    <Include.Resources>
+
+        <!-- Header -->
+        <ResourceWrapper x:Key="Header_Text" Resource="[Emulators.Emulators]"/>
+
+        <ControlTemplate x:Key="Emulators_List_Template">
+            <ListView Style="{ThemeResource emuItemsListViewStyle}" DataContext="{Binding Source={StaticResource EmulatorsModel}}" CurrentItem="{Binding Path=FocusedItem, Mode=OneWayToSource}" ItemsSource="{Binding EmulatorsList}">
+                <ListView.Resources>
+                    <Command x:Key="Menu_Command" Source="{StaticResource EmulatorsModel}" Path="SelectEmulator"
+                    Parameters="{LateBoundValue BindingValue={Binding}}"/>
+                    <Command x:Key="Context_Command" Source="{StaticResource EmulatorsModel}" Path="ShowEmulatorContext"
+                    Parameters="{LateBoundValue BindingValue={Binding}}"/>
+                </ListView.Resources>
+            </ListView>
+        </ControlTemplate>
+
+    </Include.Resources>
+</Include>

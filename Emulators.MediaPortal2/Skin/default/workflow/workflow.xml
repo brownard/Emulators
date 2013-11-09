@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- OnlineVideos workflow state actions -->
+<Workflow DescriptorVersion="1.0">
+    <MenuActions>
+        <!-- This is the workflow action which will be shown in the main menu in the home screen.
+         A PushNavigationTransition is a static action which is always visible in one or more defined
+         workflow states. When executed, the given target state will be pushed onto the workflow navigation stack.
+         There are also other action types which can be used at this place, for example it is possible to
+         make the action visible and invisible programmatically when using a workflow contributor action.
+
+         The action's name is only needed for debugging purposes and won't be shown to the user.
+
+         The DisplayCategory is used to group actions together. There is no detailed definition which groups
+         are present but the idea is that each plugin developer uses its own display categories to group its actions
+         together. There are also some common display categories which can be reused here. Use the first letter
+         as an indicator for the sort ordering, for example "z" for actions which should be posed at the end,
+         "a" for the beginning, etc.
+
+         The SortOrder is used for finer grained sorting inside a display category. We suggest to use a single, lower-case
+         letter here.
+
+         The SourceState attribute is needed to tell the system in which states the action should be visible.
+         Use the state's id here. You can also use a star ("*"). In that case, the action will be shown in each
+         state.
+
+         The TargetState attribute must always contain an id of a valid target state where the sytem will navigate to
+         when this action is executed.
+
+         The DisplayTitle will be shown in the main menu for this action. -->
+        <PushNavigationTransition Id="99D23164-5761-4F1C-A16B-F4301DB43C3A"
+        Name="Home->Emulators"
+        DisplayCategory="z-Emulators"
+        SortOrder="a"
+        SourceStates="7F702D9C-F2DD-42da-9ED8-0BA92F07787F"
+        TargetState="F1F446EC-03FD-4A22-BA04-7C45E6D72E06"
+        DisplayTitle="Emulators"/>
+
+        <!--<WorkflowContributorAction Id="C1AD49D6-28F3-493E-94B8-886E90A119DA"
+        Name="OnlineVideos->Search"
+        DisplayCategory="z-OnlineVideos"
+        SortOrder="a"
+        SourceStates="*"
+        ContributorModelId="C43F4CD9-418A-4DFB-A0BD-DF24704B5BD6"
+        DisplayTitle="[OnlineVideos.Search]"/>
+
+        <PushNavigationTransition Id="C6F39B9F-149C-488F-B0CD-3C4779132FED"
+        Name="OnlineVideos->AutomaticUpdate"
+        DisplayCategory="z-OnlineVideos"
+        SortOrder="a"
+        SourceStates="026DF45C-86CB-44AE-9174-114810A6BAFF"
+        TargetState="F6E1864A-4B9E-45FF-8200-23F4C1798562"
+        DisplayTitle="[OnlineVideos.AutomaticUpdate]"
+        NavigationContextDisplayLabel="[OnlineVideos.AutomaticUpdate]"/>
+
+        <PushNavigationTransition Id="C8106544-ECF2-4E91-A050-5FCEED9AB328"
+        Name="OnlineVideos->ManualUpdate"
+        DisplayCategory="z-OnlineVideos"
+        SortOrder="ab"
+        SourceStates="026DF45C-86CB-44AE-9174-114810A6BAFF"
+        TargetState="F6E1864A-4B9E-45FF-8200-23F4C1798562"
+        DisplayTitle="[OnlineVideos.UpdateAll]"
+        NavigationContextDisplayLabel="[OnlineVideos.UpdateAll]"/>
+
+        <MethodCallAction Id="CFF5C4A4-E9E1-48ED-97D5-27F90007F3A9"
+        Name="OnlineVideosRemoveSites"
+        DisplayCategory="z-OnlineVideos"
+        SortOrder="b"
+        DisplayTitle="[OnlineVideos.RemoveAllFromMySites]"
+        SourceStates="026DF45C-86CB-44AE-9174-114810A6BAFF"
+        ModelId="C39D6682-90B5-4813-8A28-A1C9118D4F3E"
+        MethodName="RemoveAllSites"/>-->
+
+    </MenuActions>
+</Workflow>

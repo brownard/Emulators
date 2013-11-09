@@ -1,0 +1,124 @@
+﻿<Plugin
+    DescriptorVersion="1.0"
+    Name="Emulators"
+    PluginId="{65F18961-497B-45F9-BD53-8CFE005F47EC}"
+    AutoActivate="True"
+    Author="Brownard"
+    Copyright="GPL"
+    Description="Emulators Plugin"
+    PluginVersion="1.0">
+  
+  <DependsOn>
+    <PluginReference PluginId="{D87D92F0-5E71-470a-A2A4-430F90A28BF3}"/> <!-- SkinEngine -->
+    <PluginReference PluginId="{1AFF4467-64B0-4ca1-AF28-9AEDF3525BCE}"/> <!-- ConfigurationManager -->
+    <PluginReference PluginId="{B765A4B6-F455-4941-BDAE-2CE45208BFEB}"/> <!-- Configuration plugin -->
+  </DependsOn>
+  
+  <Runtime>
+    <Assembly FileName="Emulators.MediaPortal2.dll"/>
+    <Assembly FileName="Emulators.dll"/>
+  </Runtime>
+
+  <Register Location="/Models">
+    <Model Id="3C370162-2586-416A-963C-F34DDDE184D4" Name="EmulatorsWorkflowModel" ClassName="Emulators.MediaPortal2.EmulatorsWorkflowModel"/>
+    <Model Id="03F534A5-4495-4223-A7EB-0FC8D477CF4B" Name="NewEmulatorModel" ClassName="Emulators.MediaPortal2.NewEmulatorModel"/>
+    <Model Id="D49AE151-645E-487D-87AC-308290EC0332" Name="GoodmergeSelectModel" ClassName="Emulators.MediaPortal2.GoodmergeSelectModel"/>
+    <Model Id="2471F9F2-CAE1-4AEE-96BD-6647FF191F6E" Name="GameLaunchModel" ClassName="Emulators.MediaPortal2.GameLaunchWorkflowModel"/>
+    <Model Id="F140F32F-9F24-47D2-99B1-09A3A58D69FB" Name="ListDialogModel" ClassName="Emulators.MediaPortal2.ListDialogModel"/>
+  </Register>
+
+  <Register Location="/Workflow/States">
+    <WorkflowState Id="F1F446EC-03FD-4A22-BA04-7C45E6D72E06"
+        Name="StartupView" 
+        MainScreen="emulators" 
+        WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
+        DisplayLabel="Startup"
+        Temporary="true"/>
+    
+    <WorkflowState Id="97F9A2D9-B857-4890-9EF2-5E2BC66A53BB"
+        Name="EmulatorsView" MainScreen="emulators" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
+        DisplayLabel="Emulators"/>
+    <WorkflowState Id="11A040E8-6845-490A-8EAE-1A5662324A4A"
+            Name="GamesView" MainScreen="games" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
+            DisplayLabel="Games"/>
+
+    <WorkflowState Id="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
+            Name="NewEmulatorView" MainScreen="NewEmulator" WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
+            DisplayLabel="New Emulator"/>
+    
+    <DialogState Id="2C33ADFD-1E82-4756-B3B3-81F2271330BE"
+        Name="ShowPlaylist"
+        DialogScreen="DialogGoodmergeSelect"
+        DisplayLabel="Goodmerge"
+        Temporary="true"
+        WorkflowModel="D49AE151-645E-487D-87AC-308290EC0332"/>
+    <DialogState Id="95639608-6CCC-4604-921C-AC34C4BFEFC5"
+        Name="LaunchGame"
+        DialogScreen="DialogLaunchGame"
+        DisplayLabel="Launch"
+        Temporary="true"
+        WorkflowModel="2471F9F2-CAE1-4AEE-96BD-6647FF191F6E"/>
+  </Register>
+  
+  <!-- Registration of our skin directory -->
+  <Register Location="/Resources/Skin">
+    <!-- This registration is necessary to declare the skin directory. You can use an arbitrary directory name or
+         relative path; the path must be the relative to directory of the plugin.
+         The id of the plugin can be arbitrary but must be unique in the MP 2 system. It is not referenced directly
+         in any place. -->
+    <Resource Id="EmulatorsSkin" Directory="Skin" Type="Skin"/>
+  </Register>
+
+  <!-- Registration of our language directory -->
+  <Register Location="/Resources/Language">
+    <!-- This registration is necessary to declare the language directory. Just like for the skin directory,
+         you can use an arbitrary directory name or relative path; the path must be the relative to the directory of the plugin.
+         The id of the plugin can be arbitrary but must be unique in the MP 2 system. It is not referenced directly
+         in any place. -->
+    <Resource Id="EmulatorsLanguage" Directory="Language" Type="Language"/>
+  </Register>
+
+  <!-- Registration of our configuration section --><!--
+  <Register Location="/Configuration/Settings/Plugins">
+    <ConfigSection
+        Id="OnlineVideos"
+        Redundant="true"
+        Text="OnlineVideos"/>
+  </Register>
+
+  --><!-- Contents of '/Plugins/OnlineVideos' section --><!--
+  <Register Location="/Configuration/Settings/Plugins/OnlineVideos">
+    <ConfigSetting
+        Id="OnlineVideosUseAgeConfirmation"
+        Text="Use Age Confirmation"
+        HelpText="Require a pin for adult sites?"
+        ClassName="OnlineVideos.MediaPortal2.Configuration.UseAgeConfirmation"/>
+    <ConfigSetting
+        Id="OnlineVideosAgeConfirmationPin"
+        Text="Pin for Age Confirmation"
+        HelpText="What is the pin for adult sites?"
+        ClassName="OnlineVideos.MediaPortal2.Configuration.AgeConfirmationPin"/>
+    <ConfigSetting
+        Id="OnlineVideosUtilTimeout"
+        Text="[OnlineVideos.Settings_UtilTimeout]"
+        HelpText="After how many seconds should a request for online data be aborted?"
+        ClassName="OnlineVideos.MediaPortal2.Configuration.UtilTimeout"/>
+    <ConfigSetting
+        Id="OnlineVideosCacheTimeout"
+        Text="[OnlineVideos.Settings_CacheTimeout]"
+        HelpText="After how many minutes should http data be invalidated in the cache?"
+        ClassName="OnlineVideos.MediaPortal2.Configuration.CacheTimeout"/>
+    <ConfigSetting
+        Id="OnlineVideosDownloadFolder"
+        Text="Download Folder"
+        HelpText="Choose a folder where to store downloaded videos."
+        ClassName="OnlineVideos.MediaPortal2.Configuration.DownloadFolder"/>
+    <CustomConfigSetting
+        Id="OnlineVideosSiteManagement"
+        Text="[OnlineVideos.ManageSites]"
+        HelpText="Add, remove and update your Sites."
+        ClassName="OnlineVideos.MediaPortal2.Configuration.SiteManagement"
+        AdditionalData="WorkflowState=026DF45C-86CB-44AE-9174-114810A6BAFF,ConfAppPanel=..."/>
+  </Register>-->
+  
+</Plugin>

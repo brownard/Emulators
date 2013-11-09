@@ -1,0 +1,486 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FEB4B7BE-0436-4839-B175-8693349990F9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Emulators.MediaPortal1</RootNamespace>
+    <AssemblyName>Emulators.MediaPortal1</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Common.Utils">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\Common.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Core">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Databases">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\Databases.dll</HintPath>
+    </Reference>
+    <Reference Include="Dialogs">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\Dialogs.dll</HintPath>
+    </Reference>
+    <Reference Include="RemotePlugins">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\RemotePlugins.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Utils">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\Utils.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\Conf_DBBackup.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_DBBackup.Designer.cs">
+      <DependentUpon>Conf_DBBackup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_DBBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_DBBrowser.Designer.cs">
+      <DependentUpon>Conf_DBBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_DBImporter.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_DBImporter.Designer.cs">
+      <DependentUpon>Conf_DBImporter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_EmuBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_EmuBrowser.Designer.cs">
+      <DependentUpon>Conf_EmuBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_EmuLookupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_EmuLookupDialog.Designer.cs">
+      <DependentUpon>Conf_EmuLookupDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_EmuThumbRetriever.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_EmuThumbRetriever.Designer.cs">
+      <DependentUpon>Conf_EmuThumbRetriever.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_Groups.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_Groups.Designer.cs">
+      <DependentUpon>Conf_Groups.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_IgnoredFiles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_IgnoredFiles.Designer.cs">
+      <DependentUpon>Conf_IgnoredFiles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_Main.Designer.cs">
+      <DependentUpon>Conf_Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_ManualSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_ManualSearch.Designer.cs">
+      <DependentUpon>Conf_ManualSearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_NewProfile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_NewProfile.Designer.cs">
+      <DependentUpon>Conf_NewProfile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_Options.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_Options.Designer.cs">
+      <DependentUpon>Conf_Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_ProgressDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_ProgressDialog.Designer.cs">
+      <DependentUpon>Conf_ProgressDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_RestoreDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_RestoreDlg.Designer.cs">
+      <DependentUpon>Conf_RestoreDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Conf_ThumbRetriever.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Conf_ThumbRetriever.Designer.cs">
+      <DependentUpon>Conf_ThumbRetriever.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\ContentPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Controls\thumbContext.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Config\Controls\thumbContext.Designer.cs">
+      <DependentUpon>thumbContext.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Controls\ThumbPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Config\Controls\ThumbPanel.Designer.cs">
+      <DependentUpon>ThumbPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Config.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Config.Designer.cs">
+      <DependentUpon>Wzd_NewEmu_Config.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Config2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Config2.Designer.cs">
+      <DependentUpon>Wzd_NewEmu_Config2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Info.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Info.Designer.cs">
+      <DependentUpon>Wzd_NewEmu_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Main.Designer.cs">
+      <DependentUpon>Wzd_NewEmu_Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Roms.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Roms.Designer.cs">
+      <DependentUpon>Wzd_NewEmu_Roms.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Start.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Emu\Wzd_NewEmu_Start.Designer.cs">
+      <DependentUpon>Wzd_NewEmu_Start.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Rom\Wzd_NewRom_Info.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Rom\Wzd_NewRom_Info.Designer.cs">
+      <DependentUpon>Wzd_NewRom_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Rom\Wzd_NewRom_Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Rom\Wzd_NewRom_Main.Designer.cs">
+      <DependentUpon>Wzd_NewRom_Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\New Rom\Wzd_NewRom_Start.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\New Rom\Wzd_NewRom_Start.Designer.cs">
+      <DependentUpon>Wzd_NewRom_Start.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\WzdMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\WzdMain.Designer.cs">
+      <DependentUpon>WzdMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\Wizard\WzdPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Config\Wizard\WzdPanel.Designer.cs">
+      <DependentUpon>WzdPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Cornerstone.MP\AsyncImageResource.cs" />
+    <Compile Include="Cornerstone.MP\ImageSwapper.cs" />
+    <Compile Include="EmulatorScraperHandler.cs" />
+    <Compile Include="LaunchHandler.cs" />
+    <Compile Include="MediaPortal GUI\ExtendedGUIListItem.cs" />
+    <Compile Include="MediaPortal GUI\GUIImporter.cs">
+      <DependentUpon>GUIPresenter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MediaPortal GUI\GUIPresenter.cs" />
+    <Compile Include="MediaPortal GUI\GUIProgressDialogHandler.cs" />
+    <Compile Include="MediaPortal GUI\ListItemComparer.cs" />
+    <Compile Include="MediaPortal GUI\MenuPresenter.cs" />
+    <Compile Include="MP1DataProvider.cs" />
+    <Compile Include="MP1Logger.cs" />
+    <Compile Include="MP1Utils.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="MediaPortal GUI\ViewState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Translator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Emulators\Emulators.csproj">
+      <Project>{f976622b-e8a2-41ac-9dad-f341d17883b3}</Project>
+      <Name>Emulators</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Config\Conf_DBBackup.resx">
+      <DependentUpon>Conf_DBBackup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_DBBrowser.resx">
+      <DependentUpon>Conf_DBBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_DBImporter.resx">
+      <DependentUpon>Conf_DBImporter.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_EmuBrowser.resx">
+      <DependentUpon>Conf_EmuBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_EmuLookupDialog.resx">
+      <DependentUpon>Conf_EmuLookupDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_EmuThumbRetriever.resx">
+      <DependentUpon>Conf_EmuThumbRetriever.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_Groups.resx">
+      <DependentUpon>Conf_Groups.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_IgnoredFiles.resx">
+      <DependentUpon>Conf_IgnoredFiles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_Main.resx">
+      <DependentUpon>Conf_Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_ManualSearch.resx">
+      <DependentUpon>Conf_ManualSearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_NewProfile.resx">
+      <DependentUpon>Conf_NewProfile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_Options.resx">
+      <DependentUpon>Conf_Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_ProgressDialog.resx">
+      <DependentUpon>Conf_ProgressDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_RestoreDlg.resx">
+      <DependentUpon>Conf_RestoreDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Conf_ThumbRetriever.resx">
+      <DependentUpon>Conf_ThumbRetriever.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\ContentPanel.resx">
+      <DependentUpon>ContentPanel.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Controls\thumbContext.resx">
+      <DependentUpon>thumbContext.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Emu\Wzd_NewEmu_Config.resx">
+      <DependentUpon>Wzd_NewEmu_Config.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Emu\Wzd_NewEmu_Config2.resx">
+      <DependentUpon>Wzd_NewEmu_Config2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Emu\Wzd_NewEmu_Info.resx">
+      <DependentUpon>Wzd_NewEmu_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Emu\Wzd_NewEmu_Main.resx">
+      <DependentUpon>Wzd_NewEmu_Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Emu\Wzd_NewEmu_Roms.resx">
+      <DependentUpon>Wzd_NewEmu_Roms.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Emu\Wzd_NewEmu_Start.resx">
+      <DependentUpon>Wzd_NewEmu_Start.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Rom\Wzd_NewRom_Info.resx">
+      <DependentUpon>Wzd_NewRom_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\New Rom\Wzd_NewRom_Start.resx">
+      <DependentUpon>Wzd_NewRom_Start.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\WzdMain.resx">
+      <DependentUpon>WzdMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\Wizard\WzdPanel.resx">
+      <DependentUpon>WzdPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="language\Dutch.xml" />
+    <Content Include="language\English.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="language\German.xml" />
+    <Content Include="language\Italiano.xml" />
+    <None Include="Resources\view1.png" />
+    <None Include="Resources\view_refresh.png" />
+    <None Include="Resources\view.png" />
+    <None Include="Resources\Up.png" />
+    <None Include="Resources\timeout.png" />
+    <None Include="Resources\tick.png" />
+    <None Include="Resources\Save.png" />
+    <None Include="Resources\resultset_next.png" />
+    <None Include="Resources\page_white_edit.png" />
+    <None Include="Resources\information.png" />
+    <None Include="Resources\ignored.png" />
+    <None Include="Resources\find.png" />
+    <None Include="Resources\exclamation.png" />
+    <EmbeddedResource Include="Resources\Emulators2Icon_faded.png" />
+    <EmbeddedResource Include="Resources\Emulators2Icon.png" />
+    <Content Include="Resources\Emulators2_Square_Large.png" />
+    <Content Include="Resources\Emulators2_Square_Med.png" />
+    <Content Include="Resources\Emulators2_Square_Small.png" />
+    <None Include="Resources\Down.png" />
+    <None Include="Resources\dlThumbIco.png" />
+    <None Include="Resources\cross.png" />
+    <None Include="Resources\arrow_undo.png" />
+    <None Include="Resources\arrow_join.png" />
+    <None Include="Resources\arrow_divide.png" />
+    <None Include="Resources\arrow_cross.png" />
+    <None Include="Resources\approved.png" />
+    <None Include="Resources\Add.png" />
+    <None Include="Resources\accept.png" />
+    <Content Include="Skin\Avalon\Emulators2.details.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Avalon\Emulators2.hiddenmenu.xml" />
+    <Content Include="Skin\Avalon\Emulators2.overlays.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Avalon\Emulators2.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Avalon\Media\Emulators2_favourite.png" />
+    <Content Include="Skin\Avalon\Media\Emulators2_goodmerge.png" />
+    <Content Include="Skin\Avalon\Media\Emulators2_Logo.png" />
+    <Content Include="Skin\Avalon\Media\Emulators2_overlay.png" />
+    <Content Include="Skin\Avalon\Media\Emulators2_transparency_mask.png" />
+    <Content Include="Skin\Common\Emulators2.dummy.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Common\Emulators2_Fanart.jpg" />
+    <Content Include="Skin\DefaultWide\Emulators2.detailsview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\DefaultWide\Emulators2.facade.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\DefaultWide\Emulators2.listview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\DefaultWide\Emulators2.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\DefaultWide\Media\Emulators2_favourite.png" />
+    <Content Include="Skin\DefaultWide\Media\Emulators2_goodmerge.png" />
+    <Content Include="Skin\DefaultWide\Media\Emulators2_Logo.png" />
+    <Content Include="Skin\DefaultWide\Media\hover_Emulators2.png" />
+    <Content Include="Skin\Default\Emulators2.detailsview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Default\Emulators2.facade.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Default\Emulators2.listview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Default\Emulators2.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\Default\Media\Emulators2_favourite.png" />
+    <Content Include="Skin\Default\Media\Emulators2_goodmerge.png" />
+    <Content Include="Skin\Default\Media\Emulators2_Logo.png" />
+    <Content Include="Skin\Default\Media\hover_Emulators2.png" />
+    <Content Include="Skin\StreamedMP\Emulators2.coverflowview.xml" />
+    <Content Include="Skin\StreamedMP\Emulators2.detailsview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\StreamedMP\Emulators2.facade.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\StreamedMP\Emulators2.filmstripview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\StreamedMP\Emulators2.listview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\StreamedMP\Emulators2.overlays.xml" />
+    <Content Include="Skin\StreamedMP\Emulators2.thumbsview.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\StreamedMP\Emulators2.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\StreamedMP\Media\Emulators2_favourite.png" />
+    <Content Include="Skin\StreamedMP\Media\Emulators2_goodmerge.png" />
+    <Content Include="Skin\StreamedMP\Media\Emulators2_Logo.png" />
+    <Content Include="Skin\Titan\Emulators2.background.xml" />
+    <Content Include="Skin\Titan\Emulators2.details.xml" />
+    <Content Include="Skin\Titan\Emulators2.facade.xml" />
+    <Content Include="Skin\Titan\Emulators2.hiddenmenu.xml" />
+    <Content Include="Skin\Titan\Emulators2.views.xml" />
+    <Content Include="Skin\Titan\Emulators2.xml" />
+    <Content Include="Skin\Titan\Media\icon_emulators.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetPath)" "$(SolutionDir)Emulators.MediaPortal1\Release" /Y /E /I
+xcopy "$(TargetPath)" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows" /Y /E /I
+xcopy "$(TargetDir)Emulators.MediaPortal1.pdb" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows" /Y /E /I
+xcopy "$(SolutionDir)Emulators.MediaPortal1\External" "$(SolutionDir)Emulators.MediaPortal1\Release" /Y /E /I 
+xcopy "$(SolutionDir)Emulators.MediaPortal1\Skin" "$(SolutionDir)Emulators.MediaPortal1\Release\Skin" /Y /E /I 
+xcopy "$(SolutionDir)Emulators.MediaPortal1\Language" "$(SolutionDir)Emulators.MediaPortal1\Release\Language" /Y /E /I</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

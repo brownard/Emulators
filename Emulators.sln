@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emulators", "Emulators\Emulators.csproj", "{F976622B-E8A2-41AC-9DAD-F341D17883B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emulators.MediaPortal2", "Emulators.MediaPortal2\Emulators.MediaPortal2.csproj", "{8512867E-8D8D-42CA-B53F-8664B209E03B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emulators.MediaPortal1", "Emulators.MediaPortal1\Emulators.MediaPortal1.csproj", "{FEB4B7BE-0436-4839-B175-8693349990F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F976622B-E8A2-41AC-9DAD-F341D17883B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F976622B-E8A2-41AC-9DAD-F341D17883B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F976622B-E8A2-41AC-9DAD-F341D17883B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F976622B-E8A2-41AC-9DAD-F341D17883B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8512867E-8D8D-42CA-B53F-8664B209E03B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8512867E-8D8D-42CA-B53F-8664B209E03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8512867E-8D8D-42CA-B53F-8664B209E03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8512867E-8D8D-42CA-B53F-8664B209E03B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEB4B7BE-0436-4839-B175-8693349990F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEB4B7BE-0436-4839-B175-8693349990F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEB4B7BE-0436-4839-B175-8693349990F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEB4B7BE-0436-4839-B175-8693349990F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
