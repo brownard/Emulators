@@ -291,7 +291,7 @@ namespace Emulators
                     return thumbs;
                 checkedThumbs = true;
 
-                DBItem thumbItem = null;
+                ThumbItem thumbItem = null;
                 Random r = new Random();
                 int index = r.Next(groupItemInfos.Count);
                 int tries = 0;
@@ -328,6 +328,7 @@ namespace Emulators
         public void Refresh()
         {
             groupItems = null;
+            RefreshThumbs();
         }
 
         public XmlElement GetXML(XmlDocument doc)

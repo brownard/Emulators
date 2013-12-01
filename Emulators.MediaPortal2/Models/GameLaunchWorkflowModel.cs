@@ -47,7 +47,7 @@ namespace Emulators.MediaPortal2
             currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(() =>
             {
                 setProgress("Launching " + game.Title, 0);
-                string errorStr = null;
+                //string errorStr = null;
                 string path = null;
                 EmulatorProfile profile = game.CurrentProfile;
                 if (game.IsGoodmerge)

@@ -135,7 +135,7 @@ namespace Emulators.MediaPortal1
                 GUIListItem goodmergeItem = new GUIListItem(Translator.Instance.goodmerge);
                 if (game.IsGoodmerge)
                 {
-                    goodmergeItem.Label2 = game.CurrentDisc.LaunchFile.Replace(game.CurrentDisc.Filename, "").Trim();
+                    goodmergeItem.Label2 = string.IsNullOrEmpty(game.CurrentDisc.LaunchFile) ? "" : game.CurrentDisc.LaunchFile.Replace(game.CurrentDisc.Filename, "").Trim();
                     dlg.Add(goodmergeItem);
                 }
 
@@ -212,31 +212,34 @@ namespace Emulators.MediaPortal1
                 }
                 else if (id == goodmergeItem.ItemId)
                 {
-                    try
+                    int selectedGoodmergeIndex;
+                    List<string> games;
+                    if (game.CurrentDisc.GoodmergeFiles != null)
                     {
-                        int selectedGoodmergeIndex;
-                        List<string> games = Extractor.Instance.ViewFiles(game, out selectedGoodmergeIndex);
-                        if (games != null)
-                        {
-                            string launchFile = games[selectedGoodmergeIndex];
-                            if (ShowGoodmergeSelect(ref launchFile, games, game.CurrentDisc.Filename, windowID))
-                            {
-                                game.CurrentDisc.LaunchFile = launchFile;
-                                game.CurrentDisc.Commit();
-                                result = true;
-                            }
-                        }
+                        games = game.CurrentDisc.GoodmergeFiles;
+                        selectedGoodmergeIndex = Extractor.SelectEntry(games, game.CurrentDisc.LaunchFile, game.CurrentProfile.GetGoodmergeTags());
                     }
-                    catch (ExtractException ex)
+                    else
                     {
-                        MP1Utils.ShowMPDialog("{0} - {1}", Translator.Instance.goodmergeerror, ex.Message);
+                        games = Extractor.Instance.ViewFiles(game, out selectedGoodmergeIndex);
+                        game.CurrentDisc.GoodmergeFiles = games;
+                    }
+                    if (games != null)
+                    {
+                        string launchFile = selectedGoodmergeIndex > -1 ? games[selectedGoodmergeIndex] : null;
+                        if (ShowGoodmergeSelect(ref launchFile, games, game.CurrentDisc.Filename, windowID))
+                        {
+                            game.CurrentDisc.LaunchFile = launchFile;
+                            game.CurrentDisc.Commit();
+                            result = true;
+                        }
                     }
                 }
                 else if (id == viewItem.ItemId)
                 {
                     presenter.SwitchView();
                     reload = false;
-                }                
+                }
                 else if (id == importItem.ItemId)
                 {
                     presenter.AddToImporter(game);

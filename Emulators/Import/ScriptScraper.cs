@@ -108,8 +108,7 @@ namespace Emulators.Import
             while (scraperResults.ContainsKey("game[" + count + "].site_id"))
             {
                 string siteId, 
-                    title, 
-                    matchTitle, 
+                    title,
                     yearmade, 
                     system, 
                     scoreStr,

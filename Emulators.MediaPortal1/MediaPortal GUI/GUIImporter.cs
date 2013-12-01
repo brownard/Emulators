@@ -27,8 +27,8 @@ namespace Emulators.MediaPortal1
                 autoimport = null;
                         
             importer = new Importer(true, autoimport == false);
-            importer.ImportStatusChanged += new ImportStatusChangedHandler(importerStatusChangedHandler);
-            importer.RomStatusChanged += new RomStatusChangedHandler(romStatusChangedHandler);
+            importer.ImportStatusChanged += importerStatusChangedHandler;
+            importer.RomStatusChanged += romStatusChangedHandler;
             //pause importer during game execution
             LaunchHandler.Instance.StatusChanged += launch_StatusChanged;
             if (autoimport != null)
@@ -62,7 +62,7 @@ namespace Emulators.MediaPortal1
                 importer.AddGames(new Game[] { game });
         }
 
-        void importerStatusChangedHandler(object sender, ImportStatusChangedEventArgs e)
+        void importerStatusChangedHandler(object sender, ImportStatusEventArgs e)
         {
             bool working = false;
             switch (e.Action)
@@ -90,7 +90,7 @@ namespace Emulators.MediaPortal1
             Logger.LogDebug("Importer action: {0}", e.Action.ToString());
         }
 
-        void romStatusChangedHandler(object sender, RomStatusChangedEventArgs e)
+        void romStatusChangedHandler(object sender, RomStatusEventArgs e)
         {
             if (e.Status == RomMatchStatus.Committed)
             {

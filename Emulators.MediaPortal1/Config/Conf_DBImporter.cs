@@ -46,9 +46,9 @@ namespace Emulators
             comboBoxChangedHandler = new EventHandler(resultsComboBox_SelectedIndexChanged);
             
             importer = Emulators2Settings.Instance.Importer;
-            importer.Progress += new ImportProgressHandler(importer_Progress);
-            importer.ImportStatusChanged += new ImportStatusChangedHandler(importer_ImportStatusChanged);
-            importer.RomStatusChanged += new RomStatusChangedHandler(importer_RomStatusChanged);
+            importer.ProgressChanged += importer_Progress;
+            importer.ImportStatusChanged += importer_ImportStatusChanged;
+            importer.RomStatusChanged += importer_RomStatusChanged;
 
             statusImages = new[] { Resources.information, Resources.approved, Resources.accept };
             mergeImages = new[] { Resources.arrow_divide, Resources.arrow_join };
@@ -165,7 +165,7 @@ namespace Emulators
 
         #region Importer Events
 
-        void importer_Progress(int percentDone, int taskCount, int taskTotal, string taskDescription)
+        void importer_Progress(object sender, ImportProgressEventArgs e)
         {
             if (closing)
                 return;
@@ -174,9 +174,9 @@ namespace Emulators
                 try
                 {
                     //Make sure we only execute on main thread
-                    BeginInvoke(new MethodInvoker(delegate()
+                    Invoke(new MethodInvoker(delegate()
                     {
-                        importer_Progress(percentDone, taskCount, taskTotal, taskDescription);
+                        importer_Progress(sender, e);
                     }
                         ));
                 }
@@ -187,17 +187,17 @@ namespace Emulators
             if (closing)
                 return;
 
-            progressBar.Value = percentDone;
-            if (taskTotal > 0)
-                progressLabel.Text = string.Format("{0}/{1} - {2}", taskCount, taskTotal, taskDescription);
+            progressBar.Value = e.Percent;
+            if (e.Total > 0)
+                progressLabel.Text = string.Format("{0}/{1} - {2}", e.Current, e.Total, e.Description);
             else
-                progressLabel.Text = taskDescription;
+                progressLabel.Text = e.Description;
 
             progressBar.Visible = true;
             progressLabel.Visible = true;
         }
 
-        void importer_ImportStatusChanged(object sender, ImportStatusChangedEventArgs e)
+        void importer_ImportStatusChanged(object sender, ImportStatusEventArgs e)
         {
             if (closing)
                 return;
@@ -236,12 +236,12 @@ namespace Emulators
                     break;
                 //occurs after DB refresh on importer load, add all files to grid
                 case ImportAction.PendingFilesAdded:
-                    addRow(e.Object as List<RomMatch>);
+                    addRow(e.NewItems);
                     break;
             }
         }
 
-        void importer_RomStatusChanged(object sender, RomStatusChangedEventArgs e)
+        void importer_RomStatusChanged(object sender, RomStatusEventArgs e)
         {
             if (closing || restarting)
                 return;
@@ -410,9 +410,9 @@ namespace Emulators
             closing = true;
             if (importer != null)
             {
-                importer.Progress -= new ImportProgressHandler(importer_Progress);
-                importer.ImportStatusChanged -= new ImportStatusChangedHandler(importer_ImportStatusChanged);
-                importer.RomStatusChanged -= new RomStatusChangedHandler(importer_RomStatusChanged);
+                importer.ProgressChanged -= importer_Progress;
+                importer.ImportStatusChanged -= importer_ImportStatusChanged;
+                importer.RomStatusChanged -= importer_RomStatusChanged;
                 new System.Threading.Thread(importer.Stop).Start();
             }
             base.ClosePanel();
@@ -584,21 +584,7 @@ namespace Emulators
             BackgroundTaskHandler<Game> handler = new BackgroundTaskHandler<Game>() { Items = games };
             handler.StatusDelegate = game => { return "removing " + game.Title; };
             handler.ActionDelegate = game =>
-            {
-                importer.Remove(game.Id);
-                using (ThumbGroup thumbGroup = new ThumbGroup(game))
-                {
-                    try
-                    {
-                        if (System.IO.Directory.Exists(thumbGroup.ThumbPath))
-                            System.IO.Directory.Delete(thumbGroup.ThumbPath, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError("Error deleting {0} thumb directory - {1}", game.Title, ex.Message);
-                    }
-                }
-
+            {                
                 foreach (GameDisc disc in game.Discs)
                     Options.Instance.AddIgnoreFile(disc.Path);                    
                 game.Delete();
@@ -606,20 +592,6 @@ namespace Emulators
 
             using (Conf_ProgressDialog progressDlg = new Conf_ProgressDialog(handler))
                 progressDlg.ShowDialog();
-
-            //string sql = "DELETE FROM {0} WHERE id IN ({1})";
-            //string ids = "";
-            //for (int x = 0; x < games.Count; x++)
-            //{
-            //    if (x > 0)
-            //        ids += ",";
-            //    ids += games[x].Id;
-            //}
-            //lock (DB.Instance.SyncRoot)
-            //{
-            //    DB.Instance.Execute(sql, DB.GetTableName(typeof(Game)), ids);
-            //    DB.Instance.Execute(sql, DB.GetTableName(typeof(GameDisc)), ids);
-            //}
         }
 
         void mergeButton_Click(object sender, EventArgs e)

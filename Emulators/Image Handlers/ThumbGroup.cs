@@ -15,6 +15,7 @@ namespace Emulators
     /// </summary>
     public class ThumbGroup : IDisposable
     {
+        #region Constants
         public const string THUMB_DIR_NAME = "Emulators 2";
         public const string EMULATOR_DIR_NAME = "Emulators";
         public const string GAME_DIR_NAME = "Games";
@@ -26,7 +27,9 @@ namespace Emulators
         public const string INGAME_NAME = "IngameScreenshot";
         public const string FANART_NAME = "Fanart";
         public const string MANUAL_NAME = "Manual";
+        #endregion
 
+        #region Utility Methods
         public static bool IsThumbFile(string path, out ThumbType thumbType)
         {
             thumbType = ThumbType.FrontCover;
@@ -83,42 +86,43 @@ namespace Emulators
                 return true;
             return false;
         }
-
+        #endregion
 
         ImageCodecInfo jpegCodec = null;
         EncoderParameters encoderParams = null;
-        double thumbaspect = 0;
+        ThumbItem parentItem;
+        double thumbAspect = 0;
                 
         /// <summary>
         /// Initialises a new ThumbGroup with the thumbs of the specified parent
         /// </summary>
         /// <param name="parent">An Emulator or Game</param>
-        public ThumbGroup(DBItem parent)
+        public ThumbGroup(ThumbItem parent)
         {
+            if (parent == null)
+                throw new ArgumentException("The parent item cannot be null", "parent");
+
+            string thumbFolder = parent.ThumbFolder;
+            thumbAspect = parent.AspectRatio;
+            parentItem = parent;
+            lock (parent.SyncRoot)
+            {
+                if (parent.Id != null)
+                    thumbPath = string.Format(@"{0}\{1}\{2}\{3}\", Emulators2Settings.Instance.ThumbDirectory, THUMB_DIR_NAME, thumbFolder, parent.Id);
+            }
+
             //init Thumbs
+            logo = new Thumb(ThumbType.Logo);
             frontCover = new Thumb(ThumbType.FrontCover);
             backCover = new Thumb(ThumbType.BackCover);
             titleScreen = new Thumb(ThumbType.TitleScreen);
             inGame = new Thumb(ThumbType.InGameScreen);
             fanart = new Thumb(ThumbType.Fanart);
-
-            //set parent info and thumbaspect
-            updateParent(parent);
-
             //load the paths/images
             loadThumbs();
         }
 
-        #region Properties
-        
-        string parentTitle;
-        bool parentItemIsGame;
-        DBItem parentItem;
-        public DBItem ParentItem
-        {
-            get { return parentItem; }
-        }
-
+        #region Properties        
 
         string thumbPath;
         /// <summary>
@@ -127,6 +131,12 @@ namespace Emulators
         public string ThumbPath
         {
             get { return thumbPath; }
+        }
+
+        Thumb logo = null;
+        public Thumb Logo
+        {
+            get { return logo; }
         }
 
         Thumb frontCover = null;
@@ -166,11 +176,19 @@ namespace Emulators
             {
                 if (manualPath == null) //we haven't tried loading existing manual yet
                 {
-                    string lPath = ThumbPath + MANUAL_NAME + ".pdf";
-                    if (System.IO.File.Exists(lPath))
-                        manualPath = lPath;
-                    else
+                    if (string.IsNullOrEmpty(thumbPath))
+                    {
+                        Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
                         manualPath = "";
+                    }
+                    else
+                    {
+                        string lPath = thumbPath + MANUAL_NAME + ".pdf";
+                        if (System.IO.File.Exists(lPath))
+                            manualPath = lPath;
+                        else
+                            manualPath = "";
+                    }
                 }
 
                 return manualPath; 
@@ -199,15 +217,21 @@ namespace Emulators
         /// <param name="thumbType">The thumb to select</param>
         public void BrowseThumbs(ThumbType thumbType)
         {
+            if (string.IsNullOrEmpty(thumbPath))
+            {
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                return;
+            }
+
             string file = "";
             //get file name
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    file = LOGO_NAME;
+                    break;
                 case ThumbType.FrontCover:
-                    if (parentItemIsGame)
-                        file = BOX_FRONT_NAME;
-                    else
-                        file = LOGO_NAME;
+                    file = BOX_FRONT_NAME;
                     break;
                 case ThumbType.BackCover:
                     file = BOX_BACK_NAME;
@@ -224,36 +248,34 @@ namespace Emulators
             }
             
             string args = "";
-            string path = ThumbPath;
-
-            if (System.IO.File.Exists(path + file + ".jpg"))
+            if (System.IO.File.Exists(thumbPath + file + ".jpg"))
             {
                 //selected thumb exists, set arguments to highlight file
-                args = "/select," + path + file + ".jpg";
+                args = "/select," + thumbPath + file + ".jpg";
             }
-            else if (System.IO.File.Exists(path + file + ".png"))
+            else if (System.IO.File.Exists(thumbPath + file + ".png"))
             {
                 //selected thumb exists, set arguments to highlight file
-                args = "/select," + path + file + ".png";
+                args = "/select," + thumbPath + file + ".png";
             }
             else
             {
                 //selected thumb doesn't exist, 
                 //check if directory exists and create if necessary
-                if (!System.IO.Directory.Exists(ThumbPath))
+                if (!System.IO.Directory.Exists(thumbPath))
                 {
                     try
                     {
-                        System.IO.Directory.CreateDirectory(ThumbPath);
+                        System.IO.Directory.CreateDirectory(thumbPath);
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("Error creating thumb directory for {0} - {1}", parentTitle, ex.Message);
+                        Logger.LogError("Error creating thumb directory for {0} - {1}", parentItem.Title, ex.Message);
                         return;
                     }
                 }
                 //set args to just open directory
-                args = ThumbPath;
+                args = thumbPath;
             }
 
             // launch Explorer with selected args
@@ -275,6 +297,8 @@ namespace Emulators
         {
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    return logo.Path;
                 case ThumbType.FrontCover:
                     return frontCover.Path;
                 case ThumbType.BackCover:
@@ -312,6 +336,8 @@ namespace Emulators
         {
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    return logo.Image;
                 case ThumbType.FrontCover:
                     return frontCover.Image;
                 case ThumbType.BackCover:
@@ -336,6 +362,9 @@ namespace Emulators
         {
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    logo.Path = thumbPath;
+                    break;
                 case ThumbType.FrontCover:
                     frontCover.Path = thumbPath;
                     break;
@@ -363,6 +392,9 @@ namespace Emulators
         {
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    logo.Image = thumb;
+                    break;
                 case ThumbType.FrontCover:
                     frontCover.Image = thumb;
                     break;
@@ -386,6 +418,7 @@ namespace Emulators
         /// </summary>
         public void SaveAllThumbs()
         {
+            SaveThumb(ThumbType.Logo);
             SaveThumb(ThumbType.FrontCover);
             SaveThumb(ThumbType.BackCover);
             SaveThumb(ThumbType.TitleScreen);
@@ -398,173 +431,150 @@ namespace Emulators
         /// </summary>
         public void SaveThumb(ThumbType thumbType)
         {
-            string friendlyName = null;
-            string fileName = null;
-            Image thumb = null;
-            bool resize = false;
-            string savePath = ThumbPath;
-
-            //check and create thumb directory
-            if (!System.IO.Directory.Exists(savePath))
+            if (string.IsNullOrEmpty(thumbPath))
             {
-                try
-                {
-                    System.IO.Directory.CreateDirectory(savePath);
-                }
-                catch(Exception ex)
-                {
-                    Logger.LogError("Error creating thumb directory for {0} - {1}", parentTitle, ex.Message);
-                    return;
-                }
-            }
-
-            //get file/friendly name and set resize option
-            switch (thumbType)
-            {
-                case ThumbType.FrontCover:
-                    if (parentItemIsGame)
-                    {
-                        friendlyName = "Front Cover";
-                        savePath += BOX_FRONT_NAME;
-                        resize = Options.Instance.GetBoolOption("resizethumbs");
-                    }
-                    else
-                    {
-                        //Emulator so set front cover to Logo
-                        friendlyName = "Logo";
-                        savePath += LOGO_NAME;
-                    }
-                    fileName = frontCover.Path;
-                    thumb = frontCover.Image;
-                    break;
-                case ThumbType.BackCover:
-                    friendlyName = "Back Cover";
-                    savePath += BOX_BACK_NAME;
-                    resize = Options.Instance.GetBoolOption("resizethumbs");
-                    fileName = backCover.Path;
-                    thumb = backCover.Image;
-                    break;
-                case ThumbType.TitleScreen:
-                    friendlyName = "Title Screen";
-                    savePath += TITLESCREEN_NAME;
-                    fileName = titleScreen.Path;
-                    thumb = titleScreen.Image;
-                    break;
-                case ThumbType.InGameScreen:
-                    friendlyName = "In Game Screen";
-                    savePath += INGAME_NAME;
-                    fileName = inGame.Path;
-                    thumb = inGame.Image;
-                    break;
-                case ThumbType.Fanart:
-                    friendlyName = "Fanart";
-                    savePath += FANART_NAME;
-                    fileName = fanart.Path;
-                    thumb = fanart.Image;
-                    break;
-            }
-
-            if (thumb == null)
-            {
-                //only delete if filename is also empty, else there was a problem
-                //loading the image but path may still be valid
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    //Delete thumb
-                    try
-                    {
-                        System.IO.File.Delete(savePath + ".jpg");
-                    }
-                    catch { }
-                    try
-                    {
-                        System.IO.File.Delete(savePath + ".png");
-                    }
-                    catch { }
-                }
-                else
-                    Logger.LogError("Unable to save {0} for {1} - error loading path '{2}'", friendlyName, parentTitle, fileName);
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
                 return;
             }
 
-            bool shrinkThumb = false;
-            int maxThumbDimension = 0;
-            if (thumbType != ThumbType.Fanart)
+            Thumb thumbObject;
+            string thumbName;
+            bool shrink = true;
+            bool isCover = false;
+            //get file/friendly name and set resize option
+            switch (thumbType)
             {
-                maxThumbDimension = Options.Instance.GetIntOption("maxthumbdimension");
-                if (maxThumbDimension < 0)
-                    maxThumbDimension = 0;
-
-                shrinkThumb = maxThumbDimension > 0 && (thumb.Width > maxThumbDimension || thumb.Height > maxThumbDimension);
+                case ThumbType.Logo:
+                    thumbObject = logo;
+                    thumbName = LOGO_NAME;
+                    break;
+                case ThumbType.FrontCover:
+                    thumbObject = frontCover;
+                    thumbName = BOX_FRONT_NAME;
+                    isCover = true;
+                    break;
+                case ThumbType.BackCover:
+                    thumbObject = backCover;
+                    thumbName = BOX_BACK_NAME;
+                    isCover = true;
+                    break;
+                case ThumbType.TitleScreen:
+                    thumbObject = titleScreen;
+                    thumbName = TITLESCREEN_NAME;
+                    break;
+                case ThumbType.InGameScreen:
+                    thumbObject = inGame;
+                    thumbName = INGAME_NAME;
+                    break;
+                case ThumbType.Fanart:
+                    thumbObject = fanart;
+                    thumbName = FANART_NAME;
+                    shrink = false;
+                    break;
+                default:
+                    return;
             }
 
+            if (!thumbObject.NeedsUpdate)
+                return;
 
-            string ext;
-            //if we are not resizing and we have a reference to an image in a valid format
-            //on the local file system, copy the file to the thumb location
-            if (!resize && !shrinkThumb && isValidThumbPath(fileName, out ext))
+            if (thumbObject.Image == null)
             {
-                if (fileName != savePath + ext) //check that image actually needs updating
-                {
-                    try
-                    {
-                        System.IO.File.Copy(fileName, savePath + ext, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError("Error copying new {0} for {1} - {2}", friendlyName, parentTitle, ex.Message);
-                        return;
-                    }
-                }
+                //only delete if filename is also empty, else there was a problem
+                //loading the image but path may still be valid
+                if (string.IsNullOrEmpty(thumbObject.Path))
+                    deleteThumb(thumbPath, thumbName);
+                else
+                    Logger.LogError("Unable to save {0} for {1} - error loading path '{2}'", thumbType, parentItem.Title, thumbObject.Path);
             }
             else
             {
-                ext = ".png";
-                //If first save set image encoder parameters
-                if (jpegCodec == null)
-                    initImageEncoder();
-                try
-                {
-                    if (resize || shrinkThumb)
-                        thumb = ImageHandler.ResizeImage(thumb, resize ? thumbaspect : 0, shrinkThumb ? maxThumbDimension : 0);
-                    //save image to thumb location
-                    thumb.Save(savePath + ext, jpegCodec, encoderParams);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError("Error saving new {0} for {1} - {2}", friendlyName, parentTitle, ex.Message);
-                    return;
-                }
+                saveThumb(thumbObject, thumbPath + thumbName, isCover, shrink);
             }
+            thumbObject.NeedsUpdate = false;
+        }
 
-            //if image is jpg, remove any png's and vice versa
-            RemoveAlternateThumb(savePath + ext); 
-
-            //update thumb path to save location
-            switch (thumbType)
+        void saveThumb(Thumb thumbObject, string savePathWithoutExt, bool isCover, bool shrink)
+        {
+            int maxThumbDimension = 0;
+            if (shrink)
             {
-                case ThumbType.FrontCover:
-                    frontCover.Path = savePath + ext;
-                    break;
-                case ThumbType.BackCover:
-                    backCover.Path = savePath + ext;
-                    break;
-                case ThumbType.TitleScreen:
-                    titleScreen.Path = savePath + ext;
-                    break;
-                case ThumbType.InGameScreen:
-                    inGame.Path = savePath + ext;
-                    break;
-                case ThumbType.Fanart:
-                    fanart.Path = savePath + ext;
-                    break;
+                maxThumbDimension = Options.Instance.GetIntOption("maxthumbdimension");
+                if (maxThumbDimension < 0 || (thumbObject.Image.Width <= maxThumbDimension && thumbObject.Image.Height <= maxThumbDimension))
+                    maxThumbDimension = 0;
             }
+
+            string newPath;
+            string extension;
+            if (!isCover && maxThumbDimension == 0 && isValidThumbPath(thumbObject.Path, out extension))
+            {
+                newPath = savePathWithoutExt + extension;
+                if (!copyThumbFromFile(thumbObject.Path, newPath))
+                    return;
+            }
+            else
+            {
+                newPath = savePathWithoutExt + ".png";
+                double aspectRatio = isCover ? thumbAspect : 0;
+                if (!copyThumbFromImage(thumbObject.Image, aspectRatio, maxThumbDimension, newPath))
+                    return;
+            }
+
+            RemoveAlternateThumb(newPath);
+            thumbObject.Path = newPath;
+        }
+
+        bool copyThumbFromFile(string currentPath, string newPath)
+        {
+            if (currentPath != newPath)
+            {
+                try 
+                { 
+                    File.Copy(currentPath, newPath, true);
+                    return true;
+                }
+                catch (Exception ex) 
+                { 
+                    Logger.LogError("Error copying '{0}' to '{1}' - {2}", currentPath, newPath, ex.Message);
+                }
+            }
+            return false;
+        }
+
+        bool copyThumbFromImage(Image image, double aspectRatio, int maxThumbDimension, string newPath)
+        {
+            initImageEncoder();
+            try
+            {
+                if (aspectRatio > 0 || maxThumbDimension > 0)
+                    image = ImageHandler.ResizeImage(image, aspectRatio, maxThumbDimension);
+                image.Save(newPath, jpegCodec, encoderParams);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Error saving image to '{0}' - {1}", newPath, ex.Message);
+                return false;
+            }
+            return true;
+        }
+
+        void deleteThumb(string directory, string thumbName)
+        {
+            try { File.Delete(Path.Combine(directory, thumbName + ".jpg")); }
+            catch { }
+            try { File.Delete(Path.Combine(directory, thumbName + ".png")); }
+            catch { }
         }
 
         public void SaveManual()
         {
-            string savePath = ThumbPath + MANUAL_NAME + ".pdf"; //destination dir
+            if (string.IsNullOrEmpty(thumbPath))
+            {
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                return;
+            }
 
+            string savePath = thumbPath + MANUAL_NAME + ".pdf"; //destination dir
             string lPath = ManualPath; //initialise property and get configured manual path
             if (lPath == savePath) //configured manual is already in destination dir
                 return;
@@ -586,7 +596,7 @@ namespace Emulators
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("Error copying new Manual for {1} - {2}", parentTitle, ex.Message);
+                    Logger.LogError("Error copying new Manual for {1} - {2}", parentItem.Title, ex.Message);
                     return;
                 }
             }
@@ -603,6 +613,9 @@ namespace Emulators
             //get specified thumb
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    thumb = logo;
+                    break;
                 case ThumbType.FrontCover:
                     thumb = frontCover;
                     break;
@@ -620,13 +633,9 @@ namespace Emulators
                     break;
             }
 
-            if (thumb == null)
-                return;
-
-            string thumbPath = "";
-
+            string thumbPath;
             //path is in local file system use that
-            if (thumb.Path != "" && !thumb.Path.ToLower().StartsWith("http://"))
+            if (!string.IsNullOrEmpty(thumb.Path) && !thumb.Path.ToLower().StartsWith("http://"))
                 thumbPath = thumb.Path;
             //else if we have an image, save a temp image and use temp path
             else if (thumb.Image != null)
@@ -634,16 +643,14 @@ namespace Emulators
             else
                 return; //no path or image
 
-            if (thumbPath == "")
+            if (thumbPath != null)
             {
-                return;
-            }
-
-            //open selected path
-            using (Process proc = new Process())
-            {
-                proc.StartInfo = new ProcessStartInfo(thumbPath);
-                proc.Start();
+                //open selected path
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo = new ProcessStartInfo(thumbPath);
+                    proc.Start();
+                }
             }
         }
         
@@ -654,69 +661,51 @@ namespace Emulators
         //initialise image encoder settings, called on first image save
         void initImageEncoder()
         {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();            
-            for (int x = 0; x < codecs.Length; x++)
-            {
-                if (codecs[x].MimeType == "image/png")
-                    jpegCodec = codecs[x];
-            }
             if (jpegCodec == null)
             {
-                Logger.LogError("Error saving images - Unable to locate the PNG codec");
-            }
-            encoderParams = new EncoderParameters(1);
-            encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 85L);
-        }
-
-        //check if parent is an Emulator or Game and update thumbaspect
-        void updateParent(DBItem parent)
-        {
-            if(parent == null)
-                throw new ArgumentException("The parent item cannot be null", "parent");
-            else if(!parent.Id.HasValue)
-                throw new ArgumentException("The parent item must have an Id", "parent");
-
-            string thumbFolder;
-            Game game = parent as Game;
-            if (game != null)
-            {
-                parentItemIsGame = true;
-                parentTitle = game.Title;
-                thumbFolder = GAME_DIR_NAME;
-                thumbaspect = game.ParentEmulator.CaseAspect;
-            }
-            else
-            {
-                Emulator emulator = parent as Emulator;
-                if (emulator != null)
+                ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+                for (int x = 0; x < codecs.Length; x++)
                 {
-                    parentItemIsGame = false;
-                    parentTitle = emulator.Title;
-                    thumbFolder = EMULATOR_DIR_NAME;
-                    thumbaspect = 0;
+                    if (codecs[x].MimeType == "image/png")
+                        jpegCodec = codecs[x];
                 }
-                else throw new ArgumentException("The parent item must be an Emulator or Game", "parent");
-
+                if (jpegCodec == null)
+                {
+                    Logger.LogError("Unable to locate the PNG codec");
+                }
+                encoderParams = new EncoderParameters(1);
+                encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 85L);
             }
-
-            parentItem = parent;
-            thumbPath = string.Format(@"{0}\{1}\{2}\{3}\", Emulators2Settings.Instance.ThumbDirectory, THUMB_DIR_NAME, thumbFolder, parent.Id);
         }
 
         //loads all configured thumbs for the specified parent
         void loadThumbs()
         {
-            frontCover.Path = getThumbPath(ThumbType.FrontCover);
             fanart.Path = getThumbPath(ThumbType.Fanart);
-
-            if (parentItemIsGame)
+            fanart.NeedsUpdate = false;
+            if (parentItem.HasGameArt)
             {
+                frontCover.Path = getThumbPath(ThumbType.FrontCover);
+                frontCover.NeedsUpdate = false;
                 backCover.Path = getThumbPath(ThumbType.BackCover);
+                backCover.NeedsUpdate = false;
                 titleScreen.Path = getThumbPath(ThumbType.TitleScreen);
+                titleScreen.NeedsUpdate = false;
                 inGame.Path = getThumbPath(ThumbType.InGameScreen);
+                inGame.NeedsUpdate = false;
+            }
+            else
+            {
+                logo.Path = getThumbPath(ThumbType.Logo);
+                logo.NeedsUpdate = false;
             }
         }
 
+        static bool isValidThumbPath(string path)
+        {
+            string ext;
+            return isValidThumbPath(path, out ext);
+        }
         /// <summary>
         /// Checks if the specified image is in the local file system
         /// and is a supported image type.
@@ -732,14 +721,14 @@ namespace Emulators
             if (path.ToLower().StartsWith("http://") || !System.IO.File.Exists(path))
                 return false;
 
-            if (path.ToLower().EndsWith(".jpg"))
-            {
-                ext = ".jpg";
-                return true;
-            }
             if (path.ToLower().EndsWith(".png"))
             {
                 ext = ".png";
+                return true;
+            }
+            if (path.ToLower().EndsWith(".jpg"))
+            {
+                ext = ".jpg";
                 return true;
             }
 
@@ -748,15 +737,19 @@ namespace Emulators
 
         string getThumbPath(ThumbType thumbType)
         {
-            string path = ThumbPath;
-
+            if (string.IsNullOrEmpty(thumbPath))
+            {
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                return null;
+            }
+            string path = thumbPath;
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    path += LOGO_NAME;
+                    break;
                 case ThumbType.FrontCover:
-                    if (parentItemIsGame)
-                        path += BOX_FRONT_NAME;
-                    else
-                        path += LOGO_NAME;
+                    path += BOX_FRONT_NAME;
                     break;
                 case ThumbType.BackCover:
                     path += BOX_BACK_NAME;
@@ -772,20 +765,18 @@ namespace Emulators
                     break;
             }
 
-            if (System.IO.File.Exists(path + ".jpg"))
-                return path + ".jpg";
-            
             if (System.IO.File.Exists(path + ".png"))
                 return path + ".png";
-
-            return "";
+            if (System.IO.File.Exists(path + ".jpg"))
+                return path + ".jpg";
+            return null;
         }
 
         //save the image to temp directory and return temp image path
         static string getTempThumbPath(Image thumb)
         {
             if (thumb == null)
-                return "";
+                return null;
 
             //create unique temp save path
             string savePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "myEmulators2." + Guid.NewGuid().ToString() + ".bmp");
@@ -796,13 +787,13 @@ namespace Emulators
             catch(Exception ex)
             {
                 Logger.LogError("Error saving temp image - {0}", ex.Message);
-                return "";
+                return null;
             }
             return savePath;
         }
 
         //if savePath is jpg, remove png and vica versa
-        public static void RemoveAlternateThumb(string savePath)
+        static void RemoveAlternateThumb(string savePath)
         {            
             if(savePath == null || savePath.Length <= 4) //invalid path
                 return;
@@ -839,6 +830,8 @@ namespace Emulators
 
         public void Dispose()
         {
+            if (logo != null)
+                logo.Dispose();
             if (frontCover != null)
                 frontCover.Dispose();
             if (backCover != null)
@@ -849,33 +842,30 @@ namespace Emulators
                 inGame.Dispose();
             if (fanart != null)
                 fanart.Dispose();
-
-            if (parentThumbs != null)
-            {
-                parentThumbs.Dispose();
-                parentThumbs = null;
-            }
         }
 
         #endregion
-
-        ThumbGroup parentThumbs = null;
 
         public string FrontCoverDefaultPath
         {
             get
             {
-                string path = "";
-                //check if we have a local reference
-                if (!frontCover.Path.ToLower().StartsWith("http://"))
-                    path = frontCover.Path;
-                //if not, load parent emulator ThumbGroup
-                if (parentItemIsGame && string.IsNullOrEmpty(path))
+                string path = null;
+                if (parentItem.HasGameArt)
                 {
-                    using (parentThumbs = new ThumbGroup(((Game)parentItem).ParentEmulator)) //ensure latest emu settings are loaded
-                        path = parentThumbs.FrontCoverDefaultPath;
+                    if (isValidThumbPath(frontCover.Path))
+                        path = frontCover.Path;
+                }
+                else if (isValidThumbPath(logo.Path))
+                {
+                    path = logo.Path;
                 }
 
+                if (string.IsNullOrEmpty(path) && parentItem.DefaultThumbItem != null)
+                {
+                    using (ThumbGroup defaultThumbs = new ThumbGroup(parentItem.DefaultThumbItem))
+                        path = defaultThumbs.FrontCoverDefaultPath;
+                }
                 return path;
             }
         }
@@ -888,17 +878,16 @@ namespace Emulators
         {
             get
             {
-                string path = "";
+                string path = null;
                 //check if we have a local reference
-                if (!fanart.Path.ToLower().StartsWith("http://"))
+                if (isValidThumbPath(fanart.Path))
                     path = fanart.Path;
-                //if not, load parent emulator ThumbGroup
-                if (parentItemIsGame && string.IsNullOrEmpty(path))
+                //if not, load parent ThumbGroup
+                if (string.IsNullOrEmpty(path) && parentItem.DefaultThumbItem != null)
                 {
-                    using (parentThumbs = new ThumbGroup(((Game)parentItem).ParentEmulator)) //ensure latest emu settings are loaded
-                        path = parentThumbs.FanartDefaultPath;
+                    using (ThumbGroup defaultThumbs = new ThumbGroup(parentItem.DefaultThumbItem))
+                        path = defaultThumbs.FanartDefaultPath;
                 }
-
                 return path;
             }
         }

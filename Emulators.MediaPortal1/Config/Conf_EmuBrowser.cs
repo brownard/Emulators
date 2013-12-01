@@ -48,7 +48,6 @@ namespace Emulators
             platformComboBox.SelectedIndexChanged += new EventHandler(onItemChanged);
             romDirTextBox.TextChanged += new EventHandler(onItemChanged);
             filterTextBox.TextChanged += new EventHandler(onItemChanged);
-            isArcadeCheckBox.CheckedChanged += new EventHandler(onItemChanged);
             txt_company.TextChanged += new EventHandler(onItemChanged);
             txt_yearmade.TextChanged += new EventHandler(onItemChanged);
             txt_description.TextChanged += new EventHandler(onItemChanged);
@@ -112,11 +111,16 @@ namespace Emulators
         //profile details.
         void profileComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            updateProfile();
+            if (!allowChangedEvents)
+                return;
 
+            updateProfile();
             selectedProfile = profileComboBox.SelectedItem as EmulatorProfile;
             if (selectedProfile == null)
+            {
+                clearProfileForm();
                 return;
+            }
 
             allowChangedEvents = false; //don't fire changed event when we are updating
 
@@ -330,6 +334,7 @@ namespace Emulators
             setEmulatorToPanel(selectedListItem);
             //update panel enablings
             updatePanels();
+            updateButtons();
         }
 
         //disables the profile panel when the PC Emulator is selected
@@ -429,34 +434,21 @@ namespace Emulators
             saveThumbs = false;
 
             txt_Title.Text = "";
-            romDirTextBox.Text = "";
-            filterTextBox.Text = "";
-            txt_company.Text = "";
-            txt_yearmade.Text = "";
-            txt_description.Text = "";
-            gradeUpDown.Value = 0;
-
-            thumbAspectComboBox.Text = "";
-
-            txt_Manual.Text = "";
-            idLabel.Text = "";
-
-            enableGoodCheckBox.Checked = false;
-            videoTextBox.Text = "";
-
             if (platformComboBox.Items.Count > 0)
                 platformComboBox.SelectedIndex = 0;
-            emuPathTextBox.Text = "";
-            argumentsTextBox.Text = "";
-            workingDirTextBox.Text = "";
-            useQuotesCheckBox.Checked = true;
-            suspendMPCheckBox.Checked = false;
-            goodComboBox.Text = "";
+            romDirTextBox.Text = "";
+            filterTextBox.Text = "";
+            idLabel.Text = "";
+            txt_company.Text = "";
+            txt_description.Text = "";
+            txt_yearmade.Text = "";
+            gradeUpDown.Value = 0;
+            thumbAspectComboBox.Text = "";
+            videoTextBox.Text = "";
+            txt_Manual.Text = "";
 
-            mountImagesCheckBox.Checked = false;
-            escExitCheckBox.Checked = false;
-            checkControllerCheckBox.Checked = false;
-
+            clearProfileForm();
+            
             if (emuThumbs != null)
             {
                 emuThumbs.Dispose();
@@ -466,6 +458,30 @@ namespace Emulators
             pnlFanart.ThumbGroup = null;
 
             allowChangedEvents = true;
+        }
+
+        void clearProfileForm()
+        {
+            profileComboBox.Items.Clear();
+            emuPathTextBox.Text = "";
+            workingDirTextBox.Text = "";
+            argumentsTextBox.Text = "";
+            preCommandText.Text = "";
+            preCommandWaitCheck.Checked = false;
+            preCommandWindowCheck.Checked = false;
+            postCommandText.Text = "";
+            postCommandWaitCheck.Checked = false;
+            postCommandWindowCheck.Checked = false;
+            useQuotesCheckBox.Checked = false;
+            escExitCheckBox.Checked = false;
+            suspendMPCheckBox.Checked = false;
+            delayResumeCheckBox.Checked = false;
+            resumeDelayUpDown.Value = 0;
+            mountImagesCheckBox.Checked = false;
+            stopEmulationCheckBox.Checked = false;
+            checkControllerCheckBox.Checked = false;
+            enableGoodCheckBox.Checked = false;
+            goodComboBox.Text = "";
         }
 
         private void updateEmulator()
@@ -648,7 +664,9 @@ namespace Emulators
         }
 
         private void emuPathBrowseButton_Click(object sender, EventArgs e)
-        {            
+        {
+            if (selectedEmulator == null)
+                return;
             string filter = "Executables (*.bat, *.exe) | *.bat;*.exe";
 
             string initialDirectory;
@@ -768,8 +786,8 @@ namespace Emulators
                     {
                         if (wzd.Logo != null)
                         {
-                            thumbGroup.FrontCover.Image = wzd.Logo;
-                            thumbGroup.SaveThumb(ThumbType.FrontCover);
+                            thumbGroup.Logo.Image = wzd.Logo;
+                            thumbGroup.SaveThumb(ThumbType.Logo);
                         }
                         if (wzd.Fanart != null)
                         {
@@ -792,6 +810,8 @@ namespace Emulators
 
         private void romDirButton_Click(object sender, EventArgs e)
         {
+            if (selectedEmulator == null)
+                return;
             string title = "Select directory containing Roms";
             string initialDir;
             if (System.IO.Directory.Exists(romDirTextBox.Text))
@@ -808,6 +828,8 @@ namespace Emulators
 
         private void workingDirBrowseButton_Click(object sender, EventArgs e)
         {
+            if (selectedEmulator == null)
+                return;
             string title = "Select working directory";
             string initialDir;
             if (System.IO.Directory.Exists(workingDirTextBox.Text))
@@ -915,6 +937,8 @@ The VirtualDrive must be configured and enabled in MediaPortal's Configuration."
 
         private void btnNewManual_Click(object sender, EventArgs e)
         {
+            if (selectedEmulator == null)
+                return;
             string filter = "PDF | *.pdf";
 
             string initialDirectory;
@@ -966,12 +990,7 @@ The VirtualDrive must be configured and enabled in MediaPortal's Configuration."
         }
 
         private void updateInfoButton_Click(object sender, EventArgs e)
-        {
-            updateEmuInfo();            
-        }
-
-        void updateEmuInfo()
-        {
+        {            
             if (selectedEmulator == null)
                 return;
 
@@ -1002,8 +1021,8 @@ The VirtualDrive must be configured and enabled in MediaPortal's Configuration."
                 {
                     if (!string.IsNullOrEmpty(emuInfo.LogoUrl))
                     {
-                        thumbGroup.FrontCover.Path = emuInfo.LogoUrl;
-                        thumbGroup.SaveThumb(ThumbType.FrontCover);
+                        thumbGroup.Logo.Path = emuInfo.LogoUrl;
+                        thumbGroup.SaveThumb(ThumbType.Logo);
                     }
                     if (!string.IsNullOrEmpty(emuInfo.FanartUrl))
                     {

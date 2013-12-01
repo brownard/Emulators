@@ -152,9 +152,9 @@ namespace Emulators
         #region Random Artwork
 
         object artworkCacheSync = new object();
-        Dictionary<string, DBItem> sqlRandomArtwork = new Dictionary<string, DBItem>();
-        Dictionary<int, DBItem> emuRandomArtwork = new Dictionary<int, DBItem>();
-        Dictionary<int, DBItem> gameRandomArtwork = new Dictionary<int, DBItem>();
+        Dictionary<string, ThumbItem> sqlRandomArtwork = new Dictionary<string, ThumbItem>();
+        Dictionary<int, ThumbItem> emuRandomArtwork = new Dictionary<int, ThumbItem>();
+        Dictionary<int, ThumbItem> gameRandomArtwork = new Dictionary<int, ThumbItem>();
         static System.Text.RegularExpressions.Regex orderByRegEx = new System.Text.RegularExpressions.Regex(@"\bORDER BY\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
         public void ResetThumbCache()
@@ -167,12 +167,12 @@ namespace Emulators
             }
         }
 
-        public DBItem GetRandomThumbItem(GroupItemInfo info)
+        public ThumbItem GetRandomThumbItem(GroupItemInfo info)
         {
             if (info == null || info.ItemType == GroupItemType.DYNAMIC)
                 return null;
 
-            DBItem thumbItem = null;
+            ThumbItem thumbItem = null;
             switch (info.ItemType)
             {
                 case GroupItemType.SQL:

@@ -34,7 +34,7 @@ namespace Emulators
 
         #endregion
         
-        public static void LaunchDocument(DBItem item)
+        public static void LaunchDocument(ThumbItem item)
         {
             string manualPath = null;
             using (ThumbGroup thumbGroup = new ThumbGroup(item))
@@ -136,16 +136,7 @@ namespace Emulators
                 }
             };
 
-            if (isConfig)
-            {
-                using (Conf_ProgressDialog dlg = new Conf_ProgressDialog(handler))
-                    dlg.ShowDialog();
-            }
-            else
-            {
-                GUIProgressDialogHandler guiDlg = new GUIProgressDialogHandler(handler);
-                guiDlg.ShowDialog();
-            }
+            MP1Utils.ShowProgressDialog(handler);
         }
         
         ExecutorItem createLauncher(string path, EmulatorProfile profile, bool isPc)

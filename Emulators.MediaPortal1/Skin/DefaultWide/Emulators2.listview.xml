@@ -16,10 +16,25 @@ This file should contain the list view
       <align>center</align>
       <valign>middle</valign>
       <texture flipY="true" diffuse="Thumb_Mask.png">#Emulators2.CurrentItem.coverpath</texture>
-      <visible>facadeview.list+control.isvisible(50)</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isemulator,yes)|string.contains(#Emulators2.CurrentItem.isgame,yes)]</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
-        
+    <control>
+      <description>Group Cover Art</description>
+      <type>image</type>
+      <id>0</id>
+      <posX>730</posX>
+      <posY>200</posY>
+      <width>520</width>
+      <height>260</height>
+      <keepaspectratio>yes</keepaspectratio>
+      <align>center</align>
+      <valign>middle</valign>
+      <texture flipY="true" diffuse="Thumb_Mask.png">#Emulators2.CurrentItem.coverpath</texture>
+      <visible>facadeview.list+control.isvisible(50)+string.contains(#Emulators2.CurrentItem.isemulator,no)+string.contains(#Emulators2.CurrentItem.isgame,no)</visible>
+      <animation effect="fade" time="250" delay="0">WindowClose</animation>
+    </control>
+    
     <control>
       <id>0</id>
       <type>label</type>
@@ -66,7 +81,7 @@ This file should contain the list view
       <height>1</height>
       <texture>hbar1white.png</texture>
       <colordiffuse>60ffffff</colordiffuse>
-      <visible>facadeview.list+control.isvisible(50)</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isemulator,yes)|string.contains(#Emulators2.CurrentItem.isgame,yes)]</visible>
     </control>
     <control>
       <description>Summary</description>
@@ -75,7 +90,7 @@ This file should contain the list view
       <posX>730</posX>
       <posY>470</posY>
       <width>520</width>
-      <height>125</height>
+      <height>132</height>
       <textcolor>ivory</textcolor>
       <font>font11</font>
       <label>#Emulators2.CurrentItem.description</label>

@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace Emulators
 {
-    public abstract class DBItem
+    public partial class DBItem
     {
         object syncRoot = new object();
         public object SyncRoot 
@@ -82,27 +83,5 @@ namespace Emulators
         public virtual void AfterCommit() { }
         public virtual void BeforeDelete() { }
         public virtual void AfterDelete() { }
-
-        internal void DeleteThumbs()
-        {
-            using (ThumbGroup thumbs = new ThumbGroup(this))
-            {
-                System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(thumbs.ThumbPath);
-                if (dir.Exists)
-                {
-                    Logger.LogDebug("Deleting thumb folder {0}", dir.FullName);
-                    try
-                    {
-                        dir.Delete(true);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogDebug("Failed to delete pre-existing thumb folder {0} - {1}", dir.FullName, ex.Message);
-                    }
-                }
-            }
-        }
-
-
     }
 }

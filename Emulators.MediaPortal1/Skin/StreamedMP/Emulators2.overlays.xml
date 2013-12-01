@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <window>
   <controls>
     <control>
@@ -7,8 +7,8 @@
       <id>0</id>
       <posX>-2</posX>
       <posY>-2</posY>
-      <width>1284</width>
-      <height>724</height>
+      <width>1924</width>
+      <height>1084</height>
       <texture>mainoverlay.png</texture>
       <visible>!facadeview.filmstrip+!facadeview.coverflow+control.isvisible(50)</visible>
     </control>
@@ -18,8 +18,8 @@
       <id>0</id>
       <posX>0</posX>
       <posY>0</posY>
-      <width>1280</width>
-      <height>50</height>
+      <width>1920</width>
+      <height>75</height>
       <texture>overlay_topbar.png</texture>
       <visible>facadeview.coverflow+control.isvisible(50)</visible>
     </control>
@@ -28,9 +28,9 @@
       <type>image</type>
       <id>0</id>
       <posX>0</posX>
-      <posY>470</posY>
-      <width>1280</width>
-      <height>250</height>
+      <posY>705</posY>
+      <width>1920</width>
+      <height>375</height>
       <texture>filmstrip_overlay.png</texture>
       <visible>facadeview.coverflow+control.isvisible(50)</visible>
     </control>
@@ -39,9 +39,9 @@
       <type>image</type>
       <id>0</id>
       <posX>0</posX>
-      <posY>504</posY>
-      <width>1280</width>
-      <height>221</height>
+      <posY>756</posY>
+      <width>1920</width>
+      <height>331</height>
       <colordiffuse>ffFFFFFF</colordiffuse>
       <texture>black.png</texture>
       <visible>facadeview.filmstrip+control.isvisible(50)</visible>
@@ -52,8 +52,8 @@
       <id>0</id>
       <posX>-2</posX>
       <posY>-2</posY>
-      <width>1284</width>
-      <height>726</height>
+      <width>1924</width>
+      <height>1084</height>
       <texture>movieviewbg.png</texture>
       <visible>facadeview.filmstrip+control.isvisible(50)</visible>
     </control>
@@ -61,12 +61,13 @@
       <description>Glasstitlebar - FilmStrip</description>
       <type>image</type>
       <id>0</id>
-      <posX>280</posX>
-      <posY>64</posY>
-      <width>512</width>
-      <height>43</height>
+      <posX>420</posX>
+      <posY>96</posY>
+      <width>768</width>
+      <height>64</height>
       <texture>glasstitlebar.png</texture>
       <visible>facadeview.filmstrip+control.isvisible(50)</visible>
     </control>
   </controls>
 </window>
+<!--Checksum:f8cea2f822a9557eba1182629ee78219-->

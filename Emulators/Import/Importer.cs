@@ -12,30 +12,22 @@ using Emulators.Database;
 
 namespace Emulators.Import
 {
-    #region Delegates
-
-    //Sends progress updates
-    public delegate void ImportProgressHandler(int percentDone, int taskCount, int taskTotal, string taskDescription);
-    //Sends item update events
-    public delegate void ImportStatusChangedHandler(object sender, ImportStatusChangedEventArgs e);
-    //Sends item update events
-    public delegate void RomStatusChangedHandler(object sender, RomStatusChangedEventArgs e);
-
-    public class ImportStatusChangedEventArgs
+    #region EventArgs
+    public class ImportStatusEventArgs : EventArgs
     {
-        public ImportStatusChangedEventArgs(object obj, ImportAction action)
+        public ImportStatusEventArgs(ImportAction action, List<RomMatch> newItems)
         {
-            Object = obj;
+            NewItems = newItems;
             Action = action;
         }
 
-        public object Object { get; protected set; }
+        public List<RomMatch> NewItems { get; protected set; }
         public ImportAction Action { get; protected set; }
     }
 
-    public class RomStatusChangedEventArgs
+    public class RomStatusEventArgs : EventArgs
     {
-        public RomStatusChangedEventArgs(RomMatch romMatch, RomMatchStatus status)
+        public RomStatusEventArgs(RomMatch romMatch, RomMatchStatus status)
         {
             RomMatch = romMatch;
             Status = status;
@@ -45,6 +37,21 @@ namespace Emulators.Import
         public RomMatchStatus Status { get; protected set; }
     }
 
+    public class ImportProgressEventArgs : EventArgs
+    {
+        public ImportProgressEventArgs(int percent, int current, int total, string description)
+        {
+            Percent = percent;
+            Current = current;
+            Total = total;
+            Description = description;
+        }
+
+        public int Percent { get; protected set; }
+        public int Current { get; protected set; }
+        public int Total { get; protected set; }
+        public string Description { get; protected set; }
+    }
     #endregion
 
     //Scans the file system and attempts to retrieve details for any new items.
@@ -96,62 +103,48 @@ namespace Emulators.Import
         #region Events
 
         //Sends progress updates
-        public event ImportProgressHandler Progress;
+        public event EventHandler<ImportProgressEventArgs> ProgressChanged;
+        protected virtual void OnProgressChanged(ImportProgressEventArgs e)
+        {
+            if (ProgressChanged != null)
+                ProgressChanged(this, e);
+        }
         //Sends import status events
-        public event ImportStatusChangedHandler ImportStatusChanged;
+        public event EventHandler<ImportStatusEventArgs> ImportStatusChanged;
+        protected virtual void OnImportStatusChanged(ImportStatusEventArgs e)
+        {
+            if (ImportStatusChanged != null)
+                ImportStatusChanged(this, e);
+        }
         //Sends item update events
-        public event RomStatusChangedHandler RomStatusChanged;
+        public event EventHandler<RomStatusEventArgs> RomStatusChanged;
+        protected virtual void OnRomStatusChanged(RomStatusEventArgs e)
+        {
+            if (RomStatusChanged != null)
+                RomStatusChanged(this, e);
+        }
 
         void setRomStatus(RomMatch romMatch, RomMatchStatus status)
         {
             if (ImporterStatus == ImportAction.ImportRestarting)
                 return;
-            if (RomStatusChanged != null)
-                RomStatusChanged(this, new RomStatusChangedEventArgs(romMatch, status));
-        }
-
-        void setImporterStatus(object obj, ImportAction action)
-        {
-            if (ImportStatusChanged != null)
-                ImportStatusChanged(this, new ImportStatusChangedEventArgs(obj, action));
+            OnRomStatusChanged(new RomStatusEventArgs(romMatch, status));
         }
 
         void scanProgress(string message)
         {
-            if (Progress != null)
-            {
-                UpdatePercentDone();
-                int processed = lookupMatch.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
-                int total = lookupMatch.Count;
-                Progress(percentDone, processed, total, message);
-            }
+            UpdatePercentDone();
+            int processed = lookupMatch.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
+            int total = lookupMatch.Count;
+            OnProgressChanged(new ImportProgressEventArgs(percentDone, processed, total, message));
         }
 
         private void retrieveProgress(string message)
         {
-            if (Progress != null)
-            {
-                UpdatePercentDone();
-                int total = lookupMatch.Count - matchesNeedingInput.Count;
-                int processed = total - approvedMatches.Count - priorityApprovedMatches.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
-                Progress(percentDone, processed, total, message);
-            }
-        }
-
-        void setProgress(int current, int total, string message)
-        {
-            if (Progress != null)
-            {
-                int perc = 0;
-                if (current > 0 && total > 0)
-                {
-                    if (current == total)
-                        perc = 100;
-                    else
-                        perc = (int)(((double)current / total) * 100);
-                }
-                Progress(perc, current, total, message);
-            }
+            UpdatePercentDone();
+            int total = lookupMatch.Count - matchesNeedingInput.Count;
+            int processed = total - approvedMatches.Count - priorityApprovedMatches.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
+            OnProgressChanged(new ImportProgressEventArgs(percentDone, processed, total, message));
         }
 
         private void UpdatePercentDone()
@@ -212,7 +205,7 @@ namespace Emulators.Import
                     if (importerStatus == value || (importerStatus == ImportAction.ImportRestarting && value != ImportAction.ImportStarting))
                         return;
                     importerStatus = value;
-                    setImporterStatus(null, importerStatus);
+                    OnImportStatusChanged(new ImportStatusEventArgs(importerStatus, null));
                 }
             }
         }
@@ -410,8 +403,7 @@ namespace Emulators.Import
                     importerThreads.Clear();
                 }
 
-                if (Progress != null)
-                    Progress(100, 0, 0, "Stopped");
+                OnProgressChanged(new ImportProgressEventArgs(100, 0, 0, "Stopped"));
                 ImporterStatus = ImportAction.ImportStopped;
                 Logger.LogInfo("Stopped Importer");
             }
@@ -667,12 +659,12 @@ namespace Emulators.Import
                     if (pause)
                     {
                         if (raiseEvents)
-                            setImporterStatus(null, ImportAction.ImportPaused);
+                            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.ImportPaused, null));
                         while (pause)
                             if (!checkAndWait(100, 10, true))
                                 return;
                         if (raiseEvents)
-                            setImporterStatus(null, ImportAction.ImportResumed);
+                            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.ImportResumed, null));
                     }
 
                     int previousCommittedCount = commitedMatches.Count;
@@ -722,9 +714,7 @@ namespace Emulators.Import
                             lookupMatch.Count == commitedMatches.Count + matchesNeedingInput.Count &&
                             matchesNeedingInput.Count > 0)
                         {
-                            if (Progress != null)
-                                Progress(percentDone, 0, matchesNeedingInput.Count, "Waiting for Approvals...");
-
+                            OnProgressChanged(new ImportProgressEventArgs(percentDone, 0, matchesNeedingInput.Count, "Waiting for Approvals..."));
                             if (isBackground)
                             {
                                 doWork = false;
@@ -742,12 +732,9 @@ namespace Emulators.Import
                         {
                             if (commitedMatches.Count == lookupMatch.Count)
                             {
-                                if (Progress != null)
-                                {
-                                    UpdatePercentDone();
-                                    if (percentDone == 100)
-                                        Progress(100, 0, 0, "Done!");
-                                }
+                                UpdatePercentDone();
+                                if (percentDone == 100)
+                                    OnProgressChanged(new ImportProgressEventArgs(100, 0, 0, "Done!"));
 
                                 if (isBackground)
                                 {
@@ -839,7 +826,7 @@ namespace Emulators.Import
                     for (int x = 0; x < localMatches.Count; x++)
                     {
                         RomMatch romMatch = localMatches[x];
-                        setProgress(x, localMatches.Count, string.Format("Importing {0}", romMatch.Path));
+                        OnProgressChanged(new ImportProgressEventArgs((x * 100) / localMatches.Count, x, localMatches.Count, string.Format("Importing {0}", romMatch.Path)));
                         lock (lookupSync)
                         {
                             if (!lookupMatch.ContainsKey(romMatch.ID))
@@ -853,9 +840,8 @@ namespace Emulators.Import
                         }
                     }
 
-                    setImporterStatus(localMatches, ImportAction.PendingFilesAdded);
-                    if (Progress != null)
-                        Progress(0, 0, 0, "Ready");
+                    OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.PendingFilesAdded, localMatches));
+                    OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Ready"));
                 }
                 else //no files need importing
                 {
@@ -865,7 +851,7 @@ namespace Emulators.Import
                         return;
                     }
                     else
-                        setImporterStatus(null, ImportAction.NoFilesFound);
+                        OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NoFilesFound, null));
                 }
             }
             catch (Exception e)
@@ -876,53 +862,38 @@ namespace Emulators.Import
 
         void refreshDatabase()
         {
-            Logger.LogDebug("Refreshing list of roms");
+            Logger.LogDebug("Refreshing database");
+            OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Refreshing database"));
+
             List<Game> allGames = Game.GetAll();
             deleteMissingGames(allGames);
-            if (!doWork)
-                return;
+            if (!doWork) return;
 
-            List<string> dbPaths = DB.Instance.GetAll<GameDisc>().Select(g => g.Path).ToList();
+            List<string> dbPaths = DB.Instance.GetAll(typeof(GameDisc)).Select(g => ((GameDisc)g).Path).ToList();
             List<Emulator> emus = Emulator.GetAll();
+            if (!doWork) return;
 
-            if (!doWork)
-                return;
-
-            Dictionary<Emulator, List<string>> allNewPaths = new Dictionary<Emulator, List<string>>();
+            List<Game> newGames = new List<Game>();
             int filesFound = 0;
-            if (Progress != null)
-                Progress(0, 0, 0, "Refreshing Database");
-
             //loop through each emu
             foreach (Emulator emu in emus)
             {
-                if (!doWork)
-                    return;
-
+                if (!doWork) return;
                 Logger.LogDebug("Getting files for emulator {0}", emu.Title);
-
                 //check if rom dir exists
                 string romDir = emu.PathToRoms;
-                if (string.IsNullOrEmpty(romDir))
-                    continue;
-                if (!System.IO.Directory.Exists(romDir))
+                if (string.IsNullOrEmpty(romDir) || !System.IO.Directory.Exists(romDir))
                 {
-                    Logger.LogError("{0} rom directory does not exist", emu.Title);
-                    continue; //rom directory doesn't exist, skip
+                    Logger.LogWarn("Could not locate {0} rom directory '{1}'", emu.Title, romDir);
+                    continue;
                 }
 
-                List<string> newPaths = new List<string>();
                 //get list of files using each filter
                 foreach (string filter in emu.Filter.Split(';'))
                 {
-                    if (!doWork)
-                        return;
-
+                    if (!doWork) return;
                     string[] gamePaths;
-                    try
-                    {
-                        gamePaths = System.IO.Directory.GetFiles(romDir, filter, System.IO.SearchOption.AllDirectories); //get list of matches
-                    }
+                    try { gamePaths = System.IO.Directory.GetFiles(romDir, filter, System.IO.SearchOption.AllDirectories); }
                     catch
                     {
                         Logger.LogError("Error locating files in {0} rom directory using filter '{1}'", emu.Title, filter);
@@ -932,62 +903,41 @@ namespace Emulators.Import
                     //loop through each new file
                     for (int x = 0; x < gamePaths.Length; x++)
                     {
-                        if (!doWork)
-                            return;
-
+                        if (!doWork) return;
                         string path = gamePaths[x];
                         //check that path is not ignored, already in DB or not already picked up by a previous filter
-                        if (!Options.Instance.ShouldIgnoreFile(path) && !dbPaths.Contains(path) && !newPaths.Contains(path))
+                        if (!Options.Instance.ShouldIgnoreFile(path) && !dbPaths.Contains(path))
                         {
-                            newPaths.Add(path);
                             filesFound++;
-                            if (Progress != null)
-                                Progress(0, 0, filesFound, "Getting new items");
+                            OnProgressChanged(new ImportProgressEventArgs(0, 0, filesFound, string.Format("Updating {0}", emu.Title)));
+                            dbPaths.Add(path);
+                            newGames.Add(new Game(emu, path));
                         }
                     }
                 }
-
-                Logger.LogDebug("Found {0} new file(s)", newPaths.Count);
-                if (newPaths.Count > 0)
-                    allNewPaths.Add(emu, newPaths);
             }
-
-            if (allNewPaths.Count < 1)
+            Logger.LogDebug("Found {0} new game(s)", filesFound);
+            if (filesFound < 1)
                 return;
 
             int filesAdded = 0;
-
-            Logger.LogDebug("Commit started at {0}", DateTime.Now.ToLongTimeString());
-            DateTime startTime = DateTime.Now;
-
-            foreach (KeyValuePair<Emulator, List<string>> val in allNewPaths)
+            DB.Instance.BeginTransaction();
+            foreach (Game game in newGames)
             {
-                //loop through each new file and commit
-                DB.Instance.ExecuteTransaction(val.Value, path =>
-                {
-                    Game game = new Game(val.Key, path);
-                    DB.Instance.Commit(game);
-                    filesAdded++;
-                    int perc = (int)Math.Round(((double)filesAdded / filesFound) * 100);
-                    if (Progress != null)
-                        Progress(perc, filesAdded, filesFound, "Adding " + game.Title);
-                });
+                filesAdded++;
+                Logger.LogDebug("Commiting " + game.Title);
+                OnProgressChanged(new ImportProgressEventArgs((filesAdded * 100) / filesFound, filesAdded, filesFound, "Commiting " + game.Title));
+                game.Commit();
             }
-
-            DateTime finishTime = DateTime.Now;
-            setImporterStatus(null, ImportAction.NewFilesFound);
-            Logger.LogDebug("Commit finished at {0}", finishTime.ToLongTimeString());
-            Logger.LogDebug("Total time {0}ms", finishTime.Subtract(startTime).TotalMilliseconds);
+            DB.Instance.EndTransaction();
+            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NewFilesFound, null));
         }
 
         void deleteMissingGames(List<Game> games)
         {
-            if (Progress != null)
-                Progress(0, 0, 0, "Removing deleted games");
+            OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Removing deleted games"));
             List<string> missingDrives = new List<string>();
-            List<Game> gamesToDelete = new List<Game>();
-            List<Game> gamesToUpdate = new List<Game>();
-            List<GameDisc> discsToDelete = new List<GameDisc>();
+            DB.Instance.BeginTransaction();
             foreach (Game game in games)
             {
                 List<GameDisc> missingDiscs = new List<GameDisc>();
@@ -1008,39 +958,25 @@ namespace Emulators.Import
 
                 if (missingDiscs.Count == game.Discs.Count)
                 {
-                    gamesToDelete.Add(game);
+                    Logger.LogDebug("Removing {0} from the database, file not found", game.Title);
+                    OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, string.Format("Removing {0}", game.Title)));
+                    game.Delete();
                 }
                 else if (missingDiscs.Count > 0)
                 {
                     foreach (GameDisc disc in missingDiscs)
+                    {
+                        Logger.LogDebug("Removing disc {0}, file not found", disc.Path);
+                        OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, string.Format("Removing disc {0}", disc.Path)));
                         game.Discs.Remove(disc);
-                    gamesToUpdate.Add(game);
+                        disc.Delete();
+                    }
+                    Logger.LogDebug("Updating {0}, disc not found", game.Title);
+                    game.Discs.Commit();
                 }
+                if (!doWork) break;
             }
-
-            DB.Instance.ExecuteTransaction(discsToDelete, disc =>
-            {
-                if (Progress != null)
-                    Progress(0, 0, 0, string.Format("Removing disc {0}", disc.Path));
-                Logger.LogDebug("Removing disc {0}, file not found", disc.Path);
-                disc.Delete();
-            });
-
-            DB.Instance.ExecuteTransaction(gamesToUpdate, game =>
-            {
-                if (Progress != null)
-                    Progress(0, 0, 0, string.Format("Updating {0}", game.Title));
-                Logger.LogDebug("Updating {0}, disc not found", game.Title);
-                game.Commit();
-            });
-
-            DB.Instance.ExecuteTransaction(gamesToDelete, game =>
-            {
-                if (Progress != null)
-                    Progress(0, 0, 0, string.Format("Removing {0}", game.Title));
-                Logger.LogDebug("Removing {0} from the database, file not found", game.Title);
-                game.Delete();
-            });
+            DB.Instance.EndTransaction();
         }
 
         void setListCapacities(int capacity)
@@ -1163,17 +1099,12 @@ namespace Emulators.Import
         /// <returns></returns>
         public int OnHashProgress(string fileName, int percentComplete)
         {
-            if (Progress != null)
-            {
-                UpdatePercentDone();
-                int processed = lookupMatch.Count - pendingHashes.Count - priorityPendingHashes.Count;
-                int total = lookupMatch.Count;
-                Progress(percentDone, processed, total, "Hashing File: " + fileName + " - " + percentComplete + "%");
-            }
-
+            UpdatePercentDone();
+            int processed = lookupMatch.Count - pendingHashes.Count - priorityPendingHashes.Count;
+            int total = lookupMatch.Count;
+            OnProgressChanged(new ImportProgressEventArgs(percentDone, processed, total, "Hashing File: " + fileName + " - " + percentComplete + "%"));
             if (!doWork)
                 return 0;
-
             return 1; //continue hashing (return 0 to abort)
         }
         #endregion

@@ -110,7 +110,6 @@ namespace Emulators.MediaPortal1
 
             clearGUIProperties();
             currentLayout = -1;
-
             int prevWindow = GUIWindowManager.GetPreviousActiveWindow();
             if (GUIWindowManager.ActiveWindow == prevWindow || prevWindow == (int)GUIWindow.Window.WINDOW_FULLSCREEN_VIDEO)
             {
@@ -119,6 +118,7 @@ namespace Emulators.MediaPortal1
             }
             else
             {
+                GroupHandler.Instance.ResetThumbCache();
                 resetStartupItem(startupItem);
                 this.launchStartupItem = launch;
                 SortProperty = ListItemProperty.DEFAULT; //set skin property
@@ -365,14 +365,18 @@ namespace Emulators.MediaPortal1
             int itemCount = 0;
             int selectedGoodmerge = -1;
             List<string> goodMergeGames = null;
-
             if (selectedGame.IsGoodmerge)
             {
-                try
+                if (selectedGame.CurrentDisc.GoodmergeFiles != null)
+                {
+                    goodMergeGames = selectedGame.CurrentDisc.GoodmergeFiles;
+                    selectedGoodmerge = Extractor.SelectEntry(goodMergeGames, selectedGame.CurrentDisc.LaunchFile, selectedGame.CurrentProfile.GetGoodmergeTags());
+                }
+                else
                 {
                     goodMergeGames = Extractor.Instance.ViewFiles(selectedGame, out selectedGoodmerge);
+                    selectedGame.CurrentDisc.GoodmergeFiles = goodMergeGames;
                 }
-                catch (ExtractException) { }
 
                 if (goodMergeGames != null)
                 {
@@ -381,10 +385,7 @@ namespace Emulators.MediaPortal1
                     else
                         itemCount = goodMergeGames.Count;
                 }
-
-                selectedGame.GoodmergeFiles = goodMergeGames;
             }
-
 
             if (goodmergeList != null)
                 GUIControl.ClearControl(Plugin.WINDOW_ID, goodmergeList.GetID);
@@ -397,21 +398,19 @@ namespace Emulators.MediaPortal1
                 if (lClickToDetails && goodmergeList != null)
                 {
                     selectedGame.CurrentDisc.LaunchFile = goodMergeGames[selectedGoodmerge];
-                    bool selected = false;
                     for (int x = 0; x < goodMergeGames.Count; x++)
                     {
                         GUIListItem item = new GUIListItem(goodMergeGames[x].Replace(selectedGame.CurrentDisc.Filename, "").Trim()) { DVDLabel = goodMergeGames[x] };
                         GUIControl.AddListItemControl(Plugin.WINDOW_ID, goodmergeList.GetID, item);
-                        if (!selected && x == selectedGoodmerge)
+                        if (x == selectedGoodmerge)
                         {
-                            selected = true;
                             item.Selected = true;
-                            goodmergeList.SelectedListItemIndex = x;                            
+                            goodmergeList.SelectedListItemIndex = x;
                         }
                     }
                 }
                 else if (selectedGame.CurrentDisc.LaunchFile != goodMergeGames[selectedGoodmerge])
-                    selectedGame.CurrentDisc.LaunchFile = "";
+                    selectedGame.CurrentDisc.LaunchFile = null;
             }
 
             GUIPropertyManager.SetProperty("#Emulators2.CurrentItem.goodmergecount", itemCount.ToString());
@@ -737,6 +736,7 @@ namespace Emulators.MediaPortal1
             if (facade == null)
                 return;
 
+            GroupHandler.Instance.ResetThumbCache();
             clearGUIProperties();
             int index = pageLoad ? facadeIndex : facade.SelectedListItemIndex;
             itemSelected(lastItem, index, lastitemIndex, true, pageLoad, false);
@@ -746,10 +746,17 @@ namespace Emulators.MediaPortal1
                 if (item != null && item.AssociatedGame != null && detailsItem != null && detailsItem.AssociatedGame.Id == item.AssociatedGame.Id)
                     detailsItem = item;
 
-                if (pageLoad)
-                    gameSelected(detailsItem, true);
+                if (detailsItem.AssociatedGame.Id == null) //game deleted
+                {
+                    toggleDetails(detailsItem, true);
+                }
                 else
-                    onFacadeItemSelected(detailsItem, facade, true);
+                {
+                    if (pageLoad)
+                        gameSelected(detailsItem, true);
+                    else
+                        onFacadeItemSelected(detailsItem, facade, true);
+                }
             }
         }
 
@@ -831,7 +838,9 @@ namespace Emulators.MediaPortal1
 
             GUIWindowManager.SendThreadCallback((a, b, c) =>
             {
-                item.UpdateGameInfo(game);
+                lock (item.SyncRoot)
+                    item.UpdateGameInfo(game);
+
                 if (facade != null && facade.SelectedListItem == item)
                 {
                     if (currentView == ViewState.Details)
@@ -840,7 +849,9 @@ namespace Emulators.MediaPortal1
                             toggleDetails(item);
                     }
                     else
+                    {
                         item.ItemSelected(facade);
+                    }
                 }
 
                 return 0;
@@ -897,7 +908,7 @@ namespace Emulators.MediaPortal1
             if (game != null)
             {
                 if (auto)
-                    game.GoodmergeFiles = null;
+                    game.CurrentDisc.GoodmergeFiles = null;
                 launchGame(game);
                 return true;
             }
@@ -907,12 +918,12 @@ namespace Emulators.MediaPortal1
 
         void launchGame(Game game)
         {
-            if (game.GoodmergeFiles != null && game.GoodmergeFiles.Count > 0)
+            if (game.CurrentDisc.GoodmergeFiles != null && game.CurrentDisc.GoodmergeFiles.Count > 0)
             {
                 if (alwaysShowGoodmergeDialog || (showGoodmergeDialogOnce && string.IsNullOrEmpty(game.CurrentDisc.LaunchFile)))
                 {
                     string launchFile = "";
-                    if (!MenuPresenter.ShowGoodmergeSelect(ref launchFile, game.GoodmergeFiles, game.CurrentDisc.Filename, Plugin.WINDOW_ID))
+                    if (!MenuPresenter.ShowGoodmergeSelect(ref launchFile, game.CurrentDisc.GoodmergeFiles, game.CurrentDisc.Filename, Plugin.WINDOW_ID))
                         return;
                     game.CurrentDisc.LaunchFile = launchFile;
                     game.CurrentDisc.Commit();
@@ -959,7 +970,8 @@ namespace Emulators.MediaPortal1
                 controlId = facade.GetID;
                 ExtendedGUIListItem item = (ExtendedGUIListItem)facade.SelectedListItem;
                 if (this.detailsItem != null && item != null && item.AssociatedGame != null && this.detailsItem.AssociatedGame.Id == item.AssociatedGame.Id)
-                    item.UpdateGameInfo(this.detailsItem.AssociatedGame);
+                    lock (item.SyncRoot)
+                        item.UpdateGameInfo(this.detailsItem.AssociatedGame);
                 this.detailsItem = null;
                 onFacadeItemSelected(facade.SelectedListItem, facade);
             }

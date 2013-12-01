@@ -41,7 +41,6 @@
             this.newEmuButton = new System.Windows.Forms.Button();
             this.mainTabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.isArcadeCheckBox = new System.Windows.Forms.CheckBox();
             this.gradeUpDown = new System.Windows.Forms.NumericUpDown();
             this.txt_yearmade = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -236,7 +235,6 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.Window;
-            this.tabPage1.Controls.Add(this.isArcadeCheckBox);
             this.tabPage1.Controls.Add(this.gradeUpDown);
             this.tabPage1.Controls.Add(this.txt_yearmade);
             this.tabPage1.Controls.Add(this.label9);
@@ -271,17 +269,6 @@
             this.tabPage1.Size = new System.Drawing.Size(499, 485);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Details";
-            // 
-            // isArcadeCheckBox
-            // 
-            this.isArcadeCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.isArcadeCheckBox.AutoSize = true;
-            this.isArcadeCheckBox.Location = new System.Drawing.Point(297, 42);
-            this.isArcadeCheckBox.Name = "isArcadeCheckBox";
-            this.isArcadeCheckBox.Size = new System.Drawing.Size(60, 17);
-            this.isArcadeCheckBox.TabIndex = 122;
-            this.isArcadeCheckBox.Text = "Arcade";
-            this.isArcadeCheckBox.UseVisualStyleBackColor = true;
             // 
             // gradeUpDown
             // 
@@ -959,7 +946,7 @@
             this.pnlLogo.Size = new System.Drawing.Size(190, 190);
             this.pnlLogo.TabIndex = 4;
             this.pnlLogo.ThumbGroup = null;
-            this.pnlLogo.ThumbType = Emulators.ThumbType.FrontCover;
+            this.pnlLogo.ThumbType = Emulators.ThumbType.Logo;
             // 
             // label17
             // 
@@ -1023,6 +1010,7 @@
             this.emulatorListView.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
             listViewItem1});
             this.emulatorListView.Location = new System.Drawing.Point(3, 33);
+            this.emulatorListView.MultiSelect = false;
             this.emulatorListView.Name = "emulatorListView";
             this.emulatorListView.Size = new System.Drawing.Size(208, 489);
             this.emulatorListView.TabIndex = 1;
@@ -1149,7 +1137,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Button emuPathBrowseButton;
-        private System.Windows.Forms.CheckBox isArcadeCheckBox;
         private System.Windows.Forms.CheckBox enableGoodCheckBox;
     }
 }

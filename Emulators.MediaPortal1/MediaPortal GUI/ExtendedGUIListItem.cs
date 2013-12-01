@@ -13,107 +13,85 @@ namespace Emulators
             Game game = item as Game;
             if (game != null)
             {
-                AssociatedGame = game;
+                Sortable = true;
+                UpdateGameInfo(game);
                 return;
             }
 
             Emulator emu = item as Emulator;
             if (emu != null)
             {
-                AssociatedEmulator = emu;
+                associatedEmulator = emu;
+                Label = emu.Title;
+                thumbGroup = new ThumbGroup(emu);
+                ThumbnailImage = thumbGroup.FrontCoverDefaultPath;
+                if (string.IsNullOrEmpty(ThumbnailImage))
+                    ThumbnailImage = MP1Utils.DefaultLogo;
+                videoPreview = emu.VideoPreview;
+                if (!string.IsNullOrEmpty(videoPreview))
+                    VideoPreviewId = "emu" + emu.Id.ToString();
                 return;
             }
 
             RomGroup group = item as RomGroup;
             if (group != null)
-                RomGroup = group;
+            {
+                romGroup = group;
+                Label = group.Title;
+                IsGroup = true;
+                IsFavourites = group.Favourite;
+                if (group.ThumbGroup != null)
+                {
+                    thumbGroup = group.ThumbGroup;
+                    ThumbnailImage = thumbGroup.FrontCoverDefaultPath;
+                }
+                if (string.IsNullOrEmpty(ThumbnailImage))
+                    ThumbnailImage = MP1Utils.DefaultLogo;
+            }
         }
 
-        private Emulator associatedEmulator = null;
+        public void UpdateGameInfo(Game game)
+        {
+            lock (game.SyncRoot)
+            {
+                if (game.Id == null)
+                    return;
+
+                associatedGame = game;
+                Label = game.Title;
+                thumbGroup = new ThumbGroup(game);
+                ThumbnailImage = thumbGroup.FrontCoverDefaultPath;
+                if (string.IsNullOrEmpty(ThumbnailImage))
+                    ThumbnailImage = MP1Utils.DefaultLogo;
+                ReleaseYear = game.Year;
+                PlayCount = game.PlayCount;
+                LastPlayed = game.Latestplay;
+                Company = game.Developer;
+                Grade = game.Grade;
+                videoPreview = game.VideoPreview;
+                if (string.IsNullOrEmpty(videoPreview) && Options.Instance.GetBoolOption("defaultvideopreview"))
+                    videoPreview = game.ParentEmulator.VideoPreview;
+                if (!string.IsNullOrEmpty(videoPreview))
+                    VideoPreviewId = "game" + game.Id.ToString();
+            }
+        }
+
+        Emulator associatedEmulator = null;
         public Emulator AssociatedEmulator
         {
             get { return associatedEmulator; }
-            set
-            {
-                if (thumbGroup != null)
-                {
-                    thumbGroup.Dispose();
-                    thumbGroup = null;
-                }
-                associatedEmulator = value;
-                if (associatedEmulator != null)
-                {
-                    Label = associatedEmulator.Title;
-                    ThumbnailImage = ThumbGroup.FrontCoverDefaultPath;
-                    if (string.IsNullOrEmpty(ThumbnailImage))
-                        ThumbnailImage = MP1Utils.DefaultLogo;
-                    videoPreview = associatedEmulator.VideoPreview;
-                    if (!string.IsNullOrEmpty(videoPreview))
-                        VideoPreviewId = "emu" + associatedEmulator.Id.ToString();
-                }
-            }
         }
 
-        private Game associatedGame = null;
+        Game associatedGame = null;
         public Game AssociatedGame
         {
             get { return associatedGame; }
-            set 
-            {
-                if (thumbGroup != null)
-                {
-                    thumbGroup.Dispose();
-                    thumbGroup = null;
-                }
-                associatedGame = value;
-                if (associatedGame != null)
-                {
-                    Sortable = true;
-                    Label = associatedGame.Title;
-                    ThumbnailImage = ThumbGroup.FrontCoverDefaultPath;
-                    if (string.IsNullOrEmpty(ThumbnailImage))
-                        ThumbnailImage = MP1Utils.DefaultLogo;
-                    ReleaseYear = associatedGame.Year;
-                    PlayCount = associatedGame.PlayCount;
-                    LastPlayed = associatedGame.Latestplay;
-                    Company = associatedGame.Developer;
-                    Grade = associatedGame.Grade;
-                    videoPreview = associatedGame.VideoPreview;
-                    if (string.IsNullOrEmpty(videoPreview) && Options.Instance.GetBoolOption("defaultvideopreview"))
-                        videoPreview = associatedGame.ParentEmulator.VideoPreview;
-                    if (!string.IsNullOrEmpty(videoPreview))
-                        VideoPreviewId = "game" + associatedGame.Id.ToString();
-                }                    
-            }
         }
 
         RomGroup romGroup = null;
         public RomGroup RomGroup
         {
-            get
-            {
-                return romGroup;
-            }
-            protected set 
-            {
-                if (thumbGroup != null)
-                {
-                    thumbGroup.Dispose();
-                    thumbGroup = null;
-                }
-                romGroup = value;
-                if (romGroup != null)
-                {
-                    Label = romGroup.Title;
-                    IsGroup = true;
-                    IsFavourites = romGroup.Favourite;
-                    if (romGroup.ThumbGroup != null)
-                        ThumbnailImage = romGroup.ThumbGroup.FrontCoverDefaultPath;
-
-                    if (string.IsNullOrEmpty(ThumbnailImage))
-                        ThumbnailImage = MP1Utils.DefaultLogo;
-                }
-            }
+            get { return romGroup; }
         }
         public bool IsGroup { get; set; }
         bool isFavourites = false;
@@ -342,15 +320,7 @@ namespace Emulators
             foreach (KeyValuePair<string, string> prop in guiProperties)
                 GUIPropertyManager.SetProperty(prop.Key, prop.Value);
         }
-
-        internal void UpdateGameInfo(Game game)
-        {
-            lock (syncRoot)
-            {
-                AssociatedGame = game;
-            }
-        }
-
+        
         public int ListPosition { get; set; }
     }
 

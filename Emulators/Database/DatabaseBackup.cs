@@ -212,25 +212,21 @@ namespace Emulators.Database
             }
 
             if (backupThumbs)
-                copyThumbs(dbItem, thumbDirectory);
+            {
+                ThumbItem thumbItem = dbItem as ThumbItem;
+                if (thumbItem != null)
+                    copyThumbs(thumbItem, thumbDirectory);
+            }
         }
 
-        void copyThumbs(DBItem item, string saveDir)
+        void copyThumbs(ThumbItem item, string saveDir)
         {
-            string dirName;
-            if (item.GetType() == typeof(Emulator))
-                dirName = ThumbGroup.EMULATOR_DIR_NAME;
-            else if (item.GetType() == typeof(Game))
-                dirName = ThumbGroup.GAME_DIR_NAME;
-            else
-                return;
-
             using (ThumbGroup thumbGroup = new ThumbGroup(item))
             {
                 if (!Directory.Exists(thumbGroup.ThumbPath))
                     return;
 
-                string newDir = string.Format(@"{0}\{1}\{2}", saveDir, dirName, item.Id);
+                string newDir = string.Format(@"{0}\{1}\{2}", saveDir, item.ThumbFolder, item.Id);
                 if (!Directory.Exists(newDir))
                 {
                     try { Directory.CreateDirectory(newDir); }
@@ -241,20 +237,30 @@ namespace Emulators.Database
                     }
                 }
 
-                string thumbFile;
-                if (thumbGroup.HasLocalThumb(ThumbType.FrontCover, out thumbFile))
-                    copyThumb(thumbFile, newDir);
-                if (thumbGroup.HasLocalThumb(ThumbType.BackCover, out thumbFile))
-                    copyThumb(thumbFile, newDir);
-                if (thumbGroup.HasLocalThumb(ThumbType.TitleScreen, out thumbFile))
-                    copyThumb(thumbFile, newDir);
-                if (thumbGroup.HasLocalThumb(ThumbType.InGameScreen, out thumbFile))
-                    copyThumb(thumbFile, newDir);
-                if (thumbGroup.HasLocalThumb(ThumbType.Fanart, out thumbFile))
-                    copyThumb(thumbFile, newDir);
                 string manualFile = thumbGroup.ManualPath;
                 if (!string.IsNullOrEmpty(manualFile) && File.Exists(manualFile))
                     copyThumb(manualFile, newDir);
+
+                string thumbFile;
+                if (thumbGroup.HasLocalThumb(ThumbType.Fanart, out thumbFile))
+                    copyThumb(thumbFile, newDir);
+
+                if (item.HasGameArt)
+                {
+                    if (thumbGroup.HasLocalThumb(ThumbType.FrontCover, out thumbFile))
+                        copyThumb(thumbFile, newDir);
+                    if (thumbGroup.HasLocalThumb(ThumbType.BackCover, out thumbFile))
+                        copyThumb(thumbFile, newDir);
+                    if (thumbGroup.HasLocalThumb(ThumbType.TitleScreen, out thumbFile))
+                        copyThumb(thumbFile, newDir);
+                    if (thumbGroup.HasLocalThumb(ThumbType.InGameScreen, out thumbFile))
+                        copyThumb(thumbFile, newDir);
+                }
+                else
+                {
+                    if (thumbGroup.HasLocalThumb(ThumbType.Logo, out thumbFile))
+                        copyThumb(thumbFile, newDir);
+                }
             }
         }
 
@@ -593,20 +599,12 @@ namespace Emulators.Database
                 newGame.Latestplay = oldGame.Latestplay;            
         }
 
-        void mergeThumbs(DBItem thumbItem, int oldId)
+        void mergeThumbs(ThumbItem thumbItem, int oldId)
         {
             if (thumbDir == null)
                 return;
 
-            string dirName;
-            if (thumbItem.GetType() == typeof(Emulator))
-                dirName = ThumbGroup.EMULATOR_DIR_NAME;
-            else if (thumbItem.GetType() == typeof(Game))
-                dirName = ThumbGroup.GAME_DIR_NAME;
-            else
-                return;
-
-            string currDir = string.Format(@"{0}\{1}\{2}", thumbDir, dirName, oldId);
+            string currDir = string.Format(@"{0}\{1}\{2}", thumbDir, thumbItem.ThumbFolder, oldId);
             if (!Directory.Exists(currDir))
                 return;
 

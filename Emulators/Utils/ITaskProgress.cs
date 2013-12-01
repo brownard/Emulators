@@ -5,12 +5,23 @@ using System.Text;
 
 namespace Emulators
 {
-    public delegate void BackgroundTaskProgress(int percent, string info);
-    public interface ITaskProgress
+    public interface IBackgroundTask
     {
-        event BackgroundTaskProgress OnTaskProgress;
+        event EventHandler<ITaskEventArgs> OnTaskProgress;
+        event EventHandler OnTaskCompleted;
         bool Start();
         void Stop();
-        bool IsComplete { get; }
+        string TaskName { get; }
+    }
+
+    public class ITaskEventArgs : EventArgs
+    {
+        public int Percent { get; private set; }
+        public string Info { get; private set; }
+        public ITaskEventArgs(int percent, string info)
+        {
+            Percent = percent;
+            Info = info;
+        }
     }
 }

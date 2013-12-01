@@ -77,7 +77,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.txt_Title = new System.Windows.Forms.TextBox();
-            this.chk_Visible = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.btnManual = new System.Windows.Forms.Button();
@@ -393,7 +392,6 @@
             this.panel2.Controls.Add(this.label4);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.txt_Title);
-            this.panel2.Controls.Add(this.chk_Visible);
             this.panel2.Controls.Add(this.label5);
             this.panel2.Controls.Add(this.label16);
             this.panel2.Controls.Add(this.btnManual);
@@ -491,7 +489,7 @@
             // videoButton
             // 
             this.videoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.videoButton.Location = new System.Drawing.Point(260, 360);
+            this.videoButton.Location = new System.Drawing.Point(366, 359);
             this.videoButton.Name = "videoButton";
             this.videoButton.Size = new System.Drawing.Size(29, 23);
             this.videoButton.TabIndex = 112;
@@ -514,7 +512,7 @@
             this.videoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.videoTextBox.Location = new System.Drawing.Point(67, 362);
             this.videoTextBox.Name = "videoTextBox";
-            this.videoTextBox.Size = new System.Drawing.Size(184, 20);
+            this.videoTextBox.Size = new System.Drawing.Size(294, 20);
             this.videoTextBox.TabIndex = 110;
             // 
             // profileGroupBox
@@ -600,7 +598,7 @@
             // 
             this.chk_Favourite.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.chk_Favourite.AutoSize = true;
-            this.chk_Favourite.Location = new System.Drawing.Point(99, 328);
+            this.chk_Favourite.Location = new System.Drawing.Point(9, 327);
             this.chk_Favourite.Name = "chk_Favourite";
             this.chk_Favourite.Size = new System.Drawing.Size(70, 17);
             this.chk_Favourite.TabIndex = 82;
@@ -635,17 +633,6 @@
             this.txt_Title.Size = new System.Drawing.Size(374, 20);
             this.txt_Title.TabIndex = 40;
             // 
-            // chk_Visible
-            // 
-            this.chk_Visible.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.chk_Visible.AutoSize = true;
-            this.chk_Visible.Location = new System.Drawing.Point(9, 328);
-            this.chk_Visible.Name = "chk_Visible";
-            this.chk_Visible.Size = new System.Drawing.Size(56, 17);
-            this.chk_Visible.TabIndex = 81;
-            this.chk_Visible.Text = "Visible";
-            this.chk_Visible.UseVisualStyleBackColor = true;
-            // 
             // label5
             // 
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -660,7 +647,7 @@
             // 
             this.label16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(180, 329);
+            this.label16.Location = new System.Drawing.Point(90, 328);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(42, 13);
             this.label16.TabIndex = 80;
@@ -692,9 +679,9 @@
             // 
             this.txt_Manual.AllowDrop = true;
             this.txt_Manual.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txt_Manual.Location = new System.Drawing.Point(229, 326);
+            this.txt_Manual.Location = new System.Drawing.Point(138, 326);
             this.txt_Manual.Name = "txt_Manual";
-            this.txt_Manual.Size = new System.Drawing.Size(132, 20);
+            this.txt_Manual.Size = new System.Drawing.Size(223, 20);
             this.txt_Manual.TabIndex = 78;
             // 
             // btnNewManual
@@ -1161,7 +1148,6 @@
         private System.Windows.Forms.TextBox txt_genre;
         private System.Windows.Forms.CheckBox chk_Favourite;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.CheckBox chk_Visible;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Button btnManual;

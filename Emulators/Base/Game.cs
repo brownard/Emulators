@@ -6,7 +6,7 @@ using System.Text;
 namespace Emulators
 {
     [DBTable("Games")]
-    public class Game : DBItem, IComparable<Game>
+    public class Game : ThumbItem, IComparable<Game>
     {
         public static List<Game> GetAll(bool? imported = null)
         {
@@ -43,7 +43,7 @@ namespace Emulators
         }
 
         [DBField]
-        public string Title
+        public override string Title
         {
             get { return title; }
             set
@@ -307,16 +307,6 @@ namespace Emulators
             }
         }
         
-        //public EmulatorProfile GetSelectedProfile()
-        //{
-        //    return DB.Instance.GetProfile(this);
-        //}
-
-        //public List<EmulatorProfile> GetProfiles()
-        //{
-        //    return DB.Instance.GetProfiles(this);
-        //}
-
         public bool IsMissingInfo()
         {
             if (this.Id == -2) return true;
@@ -383,12 +373,6 @@ namespace Emulators
             }
         }
 
-        public List<string> GoodmergeFiles
-        {
-            get;
-            set;
-        }
-
         public string SearchTitle { get; set; }
 
         internal void SaveInfoCheckedStatus()
@@ -426,6 +410,31 @@ namespace Emulators
             if (other == null)
                 return 1;
             return this.title.CompareTo(other.title);
+        }
+
+        public override string ThumbFolder
+        {
+            get { return ThumbGroup.GAME_DIR_NAME; }
+        }
+
+        public override bool HasGameArt
+        {
+            get { return true; }
+        }
+
+        public override double AspectRatio
+        {
+            get
+            {
+                if (parentEmulator != null)
+                    return parentEmulator.CaseAspect;
+                return base.AspectRatio;
+            }
+        }
+
+        public override ThumbItem DefaultThumbItem
+        {
+            get { return parentEmulator; }
         }
     }
 }

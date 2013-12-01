@@ -139,12 +139,17 @@ namespace Emulators.Import
             };
 
             List<ScraperResult> results = new List<ScraperResult>();
+            int priority = 0;
             foreach (Scraper scraper in lScrapers)
             {
                 if (!doWork())
                     return null;
-
-                results.AddRange(scraper.GetMatches(searchParams));
+                foreach (ScraperResult result in scraper.GetMatches(searchParams))
+                {
+                    result.Priority = priority;
+                    results.Add(result);
+                }
+                priority++;
             }
 
             searchPlatform = searchPlatform.ToLower();

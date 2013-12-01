@@ -44,9 +44,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.DirectInput.dll</HintPath>
     </Reference>
-    <Reference Include="RemotePlugins">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Team MediaPortal\MediaPortal\RemotePlugins.dll</HintPath>
-    </Reference>
     <Reference Include="SharpCompress.3.5, Version=0.8.2.0, Culture=neutral, PublicKeyToken=beaf6f427e128133, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>External\SharpCompress.3.5.dll</HintPath>
@@ -65,6 +62,7 @@
     <Compile Include="Base\GroupItemInfo.cs" />
     <Compile Include="Base\ListItemProperty.cs" />
     <Compile Include="Base\StartupState.cs" />
+    <Compile Include="Base\ThumbItem.cs" />
     <Compile Include="Database\DatabaseBackup.cs" />
     <Compile Include="Database\DatabaseCache.cs" />
     <Compile Include="Database\DatabaseUpgrader.cs" />
@@ -78,6 +76,7 @@
     <Compile Include="Database\NFOCreator.cs" />
     <Compile Include="Import\IDoWork.cs" />
     <Compile Include="Import\MameNameHandler.cs" />
+    <Compile Include="Import\NFOCreator.cs" />
     <Compile Include="Import\OfflineMameScraper.cs" />
     <Compile Include="Import\Scraper.cs" />
     <Compile Include="Import\ScraperResultsCache.cs" />
@@ -89,11 +88,9 @@
     <Compile Include="Base\RomGroup.cs" />
     <Compile Include="Base\ScraperGame.cs" />
     <Compile Include="Base\ScraperResult.cs" />
-    <Compile Include="Base\ColumnInfo.cs" />
     <Compile Include="CommunityServer\client.cs" />
     <Compile Include="Emulators2Settings.cs" />
     <Compile Include="Data\ComboBoxItem.cs" />
-    <Compile Include="Base\DBInterface.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="Base\EmulatorsException.cs" />
     <Compile Include="Launcher\ExecutorItem.cs" />

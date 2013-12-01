@@ -6,30 +6,29 @@ using System.Text;
 
 namespace Emulators
 {  
-    public class BackgroundTaskHandler<T> : ITaskProgress
+    public class BackgroundTaskHandler<T> : IBackgroundTask
     {
-        public event BackgroundTaskProgress OnTaskProgress;
+        public event EventHandler<ITaskEventArgs> OnTaskProgress;
+        public event EventHandler OnTaskCompleted;
+        public string TaskName { get; set; }
+
         public List<T> Items { get; set; }
         public Func<T, string> StatusDelegate { get; set; }
         public Action<T> ActionDelegate { get; set; }
-
-        volatile bool isComplete = false;
-        public bool IsComplete { get { return isComplete; } }
-
+        
         System.Threading.Thread worker = null;
         volatile bool doWork = false;
 
         public void ExecuteProgressHandler(int percent, string info)
         {
             if (OnTaskProgress != null)
-                OnTaskProgress(percent, info);
+                OnTaskProgress(this, new ITaskEventArgs(percent, info));
         }
 
         public bool Start()
         {
             if (doWork)
                 return true;
-            isComplete = false;
             doWork = true;
             worker = new System.Threading.Thread(startTask);
             worker.Start();
@@ -39,9 +38,10 @@ namespace Emulators
         public void Stop()
         {
             doWork = false;
-            if (worker != null && worker.IsAlive)
+            if (worker != null)
             {
-                worker.Join();
+                if (worker.IsAlive)
+                    worker.Join();
                 worker = null;
             }
         }
@@ -64,25 +64,21 @@ namespace Emulators
                     ActionDelegate(item);
                     current++;
                 });
-                isComplete = current == total;
             }
-            else
-            {
-                isComplete = true;
-            }
-            if (isComplete)
-                ExecuteProgressHandler(100, "Complete");
+
+            if (OnTaskCompleted != null)
+                OnTaskCompleted(this, EventArgs.Empty);
         }
     }
 
-    public class BackgroundTaskHandler : ITaskProgress
+    public class BackgroundTaskHandler : IBackgroundTask
     {
-        public event BackgroundTaskProgress OnTaskProgress;
+        public event EventHandler<ITaskEventArgs> OnTaskProgress;
+        public event EventHandler OnTaskCompleted;
+        public string TaskName { get; set; }
+
         public Func<string> StatusDelegate { get; set; }
         public Action ActionDelegate { get; set; }
-
-        volatile bool isComplete = false;
-        public bool IsComplete { get { return isComplete; } }
         System.Threading.Thread worker = null;
         volatile bool doWork = false;
 
@@ -90,7 +86,6 @@ namespace Emulators
         {
             if (doWork)
                 return true;
-            isComplete = false;
             doWork = true;
             worker = new System.Threading.Thread(startTask);
             worker.Start();
@@ -100,9 +95,10 @@ namespace Emulators
         public void Stop()
         {
             doWork = false;
-            if (worker != null && worker.IsAlive)
+            if (worker != null)
             {
-                worker.Join();
+                if (worker.IsAlive)
+                    worker.Join();
                 worker = null;
             }
         }
@@ -110,7 +106,7 @@ namespace Emulators
         public void ExecuteProgressHandler(string info, int percent)
         {
             if (OnTaskProgress != null)
-                OnTaskProgress(percent, info);
+                OnTaskProgress(this, new ITaskEventArgs(percent, info));
         }
 
         void startTask()
@@ -119,8 +115,8 @@ namespace Emulators
                 ExecuteProgressHandler(StatusDelegate(), 0);
             if (ActionDelegate != null)
                 ActionDelegate();
-            isComplete = true;
-            ExecuteProgressHandler("Complete", 100);
+            if (OnTaskCompleted != null)
+                OnTaskCompleted(this, EventArgs.Empty);
         }
     }
 }

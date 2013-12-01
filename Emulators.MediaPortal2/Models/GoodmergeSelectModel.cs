@@ -24,18 +24,21 @@ namespace Emulators.MediaPortal2
             Game game = selectedGame.Game;
             int matchIndex;
             List<string> files = Extractor.Instance.ViewFiles(game, out matchIndex);
-            for (int x = 0; x < files.Count; x++)
+            if (files != null)
             {
-                string file = files[x];
-                _menuItems.Add(new ListItem(Consts.KEY_NAME, file) 
+                for (int x = 0; x < files.Count; x++)
                 {
-                    Selected = x == matchIndex,
-                    Command = new MethodDelegateCommand(() => 
-                    { 
-                        game.CurrentDisc.LaunchFile = file; 
-                        game.CurrentDisc.Commit(); 
-                    }) 
-                });
+                    string file = files[x];
+                    _menuItems.Add(new ListItem(Consts.KEY_NAME, file)
+                    {
+                        Selected = x == matchIndex,
+                        Command = new MethodDelegateCommand(() =>
+                        {
+                            game.CurrentDisc.LaunchFile = file;
+                            game.CurrentDisc.Commit();
+                        })
+                    });
+                }
             }
         }
 

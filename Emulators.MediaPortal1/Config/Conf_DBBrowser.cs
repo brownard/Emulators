@@ -79,7 +79,6 @@ namespace Emulators
             txt_genre.Text = "";
             gradeUpDown.Value = 0;
             txt_Manual.Text = "";
-            chk_Visible.Checked = false;
             chk_Favourite.Checked = false;
             videoTextBox.Text = "";
             playCountLabel.Text = "";
@@ -142,12 +141,8 @@ namespace Emulators
             txt_yearmade.TextChanged += new EventHandler(onItemChanged);
             txt_Manual.TextChanged += new EventHandler(onItemChanged);
             gradeUpDown.ValueChanged += new EventHandler(onItemChanged);
-
-            chk_Visible.CheckedChanged += new EventHandler(onItemChanged);
             chk_Favourite.CheckedChanged += new EventHandler(onItemChanged);
-
             videoTextBox.TextChanged += new EventHandler(onItemChanged);
-
             profileComboBox.SelectedIndexChanged += new EventHandler(onItemChanged);
 
             pnlBoxFront.BackgroundImageChanged += new EventHandler(onThumbChanged);

@@ -9,7 +9,7 @@ namespace Emulators
     /// <summary>
     /// The underlying thumbs used by ThumbGroup. Setting Path will dispose of Image
     /// and reload it (when next referenced) using the new path. Setting Image will set
-    /// Path to "" (we don't know the path). Setting Path to "" or either Path or Image to null
+    /// Path to null (we don't know the path). Setting Path to "" or either Path or Image to null
     /// will dispose and remove all references to the Image. 
     /// </summary>
     public class Thumb : IDisposable
@@ -19,6 +19,9 @@ namespace Emulators
         {
             switch (thumbType)
             {
+                case ThumbType.Logo:
+                    friendlyName = "Logo";
+                    break;
                 case ThumbType.FrontCover:
                     friendlyName = "Front Cover";
                     break;
@@ -37,6 +40,8 @@ namespace Emulators
             }
         }
 
+        public bool NeedsUpdate { get; set; }
+
         string path;
         public string Path
         {
@@ -45,6 +50,7 @@ namespace Emulators
             {
                 clearThumb();
                 path = value;
+                NeedsUpdate = true;
             }
         }
 
@@ -61,6 +67,7 @@ namespace Emulators
             {
                 clearThumb(); //dispose of old image
                 path = null; //remove reference to old image
+                NeedsUpdate = true;
                 if (value == null)
                     return;
 

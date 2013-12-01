@@ -4,18 +4,64 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Emulators.Database
 {
-    class DatabaseUpgrader
+    public class DatabaseUpgrader : IBackgroundTask
     {
+        #region ITaskProgress
+        public event EventHandler<ITaskEventArgs> OnTaskProgress;
+        public event EventHandler OnTaskCompleted;
+        public string TaskName { get { return "Upgrading Database"; } }
+
+        Thread worker = null;
+        public bool Start()
+        {
+            if (worker != null)
+                return false;
+
+            worker = new Thread(() => 
+            { 
+                Upgrade();
+                if (OnTaskCompleted != null)
+                    OnTaskCompleted(this, EventArgs.Empty);
+            });
+            worker.Start();
+            return true;
+        }
+
+        public void Stop()
+        {
+            if (worker != null)
+            {
+                if (worker.IsAlive)
+                    worker.Join();
+                worker = null;
+            }
+        }
+
+        int totalItems;
+        int currentItem;
+        void setProgress(string message, params object[] args)
+        {
+            if (OnTaskProgress != null)
+            {
+                int perc = (currentItem * 100) / totalItems;
+                OnTaskProgress(this, new ITaskEventArgs(perc, string.Format(message, args)));
+            }
+        }
+
+        #endregion
+
         ISQLiteProvider sqlClient;
         CultureInfo culture = CultureInfo.InvariantCulture;
         public DatabaseUpgrader(ISQLiteProvider sqlClient)
         {
             this.sqlClient = sqlClient;
         }
-
+        
+        Dictionary<int, Emulator> emuLookup;
         public bool Upgrade()
         {
             if (!File.Exists(sqlClient.DatabasePath))
@@ -32,6 +78,8 @@ namespace Emulators.Database
                     return false;
                 }
 
+                if (OnTaskProgress != null)
+                    OnTaskProgress(this, new ITaskEventArgs(0, "Upgrading old database"));
                 try { upgradeToV1_7(dbVersion); }
                 catch(Exception ex)
                 {
@@ -39,42 +87,82 @@ namespace Emulators.Database
                     return false;
                 }
             }
-
+            
             Logger.LogInfo("Upgrading database to version 2");
-            List<Emulator> emulators = upgradeEmulators();          
-            foreach (Emulator emu in emulators)
+            SQLData emulatorData = sqlClient.Execute("select * from Emulators");
+            SQLData gameData = sqlClient.Execute("select * from Games");
+            totalItems = emulatorData.Rows.Count + gameData.Rows.Count + 1; //add 1 for PC
+            emuLookup = new Dictionary<int, Emulator>();
+            currentItem = 1;
+            upgradeEmulators(emulatorData);
+            List<Game> games = upgradeGames(gameData);
+
+            currentItem = 0;
+            DB.Instance.BeginTransaction();
+            foreach (Emulator emu in emuLookup.Values)
             {
-                List<Game> games = upgradeGames(emu);
-                bool isPc = emu.IsPc();
-                if (!isPc)
+                setProgress("{0}/{1} - Commiting items", currentItem + 1, totalItems);
+                currentItem++;
+                if (!emu.IsPc())
                 {
                     foreach (EmulatorProfile profile in emu.EmulatorProfiles)
                         profile.Id = null;
                 }
-                DB.Instance.BeginTransaction();
                 emu.Commit();
-                foreach (Game game in games)
-                {
-                    if (isPc)
-                    {
-                        foreach (EmulatorProfile profile in game.GameProfiles)
-                            profile.Id = null;
-                    }
-                    game.Commit();
-                }
-                DB.Instance.EndTransaction();
             }
+            foreach (Game game in games)
+            {
+                setProgress("{0}/{1} - Commiting items", currentItem + 1, totalItems);
+                currentItem++;
+                if (game.ParentEmulator.IsPc())
+                {
+                    foreach (EmulatorProfile profile in game.GameProfiles)
+                        profile.Id = null;
+                }
+                game.Commit();
+            }
+            DB.Instance.EndTransaction();
+
+            //foreach (Emulator emu in emulators)
+            //{
+            //    List<Game> games = upgradeGames(emu);
+            //    bool isPc = emu.IsPc();
+            //    if (!isPc)
+            //    {
+            //        foreach (EmulatorProfile profile in emu.EmulatorProfiles)
+            //            profile.Id = null;
+            //    }
+            //    DB.Instance.BeginTransaction();
+            //    emu.Commit();
+            //    foreach (Game game in games)
+            //    {
+            //        if (isPc)
+            //        {
+            //            foreach (EmulatorProfile profile in game.GameProfiles)
+            //                profile.Id = null;
+            //        }
+            //        game.Commit();
+            //    }
+            //    DB.Instance.EndTransaction();
+            //}
+
             sqlClient.Dispose();
             Logger.LogInfo("Upgrade complete");
             return true;
         }
 
-        List<Emulator> upgradeEmulators()
+        void upgradeEmulators(SQLData emulatorData)
         {
-            List<Emulator> emulators = new List<Emulator>();
-            SQLData emulatorData = sqlClient.Execute("select * from Emulators");
+            emuLookup[-1] = createPC();
+
+            int currentEmulator = 2;
+            int totalEmulators = emulatorData.Rows.Count + 1;
             foreach (SQLDataRow sqlRow in emulatorData.Rows)
             {
+                setProgress("{0}/{1} - Parsing Emulators", currentEmulator, totalEmulators);
+                currentEmulator++;
+                currentItem++;
+
                 Emulator emu = new Emulator();
                 emu.Id = int.Parse(sqlRow.fields[0]);
                 emu.Title = decode(sqlRow.fields[1]);
@@ -91,11 +179,7 @@ namespace Emulators.Database
                 int lAspect = int.Parse(sqlRow.fields[12]);
                 if (lAspect != 0)
                     emu.CaseAspect = lAspect / 100.00;
-                emulators.Add(emu);
-            }
 
-            foreach (Emulator emu in emulators)
-            {
                 upgradeProfiles(emu);
                 foreach (EmulatorProfile profile in emu.EmulatorProfiles)
                 {
@@ -105,17 +189,26 @@ namespace Emulators.Database
                         break;
                     }
                 }
+
+                emuLookup[(int)emu.Id] = emu;
             }
-            emulators.Add(createPC());
-            return emulators;
         }
 
-        List<Game> upgradeGames(Emulator parent)
+        List<Game> upgradeGames(SQLData gameData)
         {
+            int currentGame = 1;
+            int totalGames = gameData.Rows.Count;
             List<Game> games = new List<Game>();
-            SQLData gameData = sqlClient.Execute("select * from Games where parentemu=" + parent.Id);
             foreach (SQLDataRow sqlRow in gameData.Rows)
             {
+                setProgress("{0}/{1} - Parsing Games", currentGame, totalGames);
+                currentGame++;
+                currentItem++;
+
+                Emulator parent;
+                if (!emuLookup.TryGetValue(int.Parse(sqlRow.fields[2], culture), out parent))
+                    continue;
+
                 Game game = new Game();
                 game.ParentEmulator = parent;
                 game.Id = int.Parse(sqlRow.fields[0]);

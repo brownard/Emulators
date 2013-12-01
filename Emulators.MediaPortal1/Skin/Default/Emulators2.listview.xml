@@ -16,10 +16,25 @@ This file should contain the list view
       <align>center</align>
       <valign>middle</valign>
       <texture mask="videothumbmask.png">#Emulators2.CurrentItem.coverpath</texture>
-      <visible>facadeview.list+control.isvisible(50)+control.isvisible(1233)</visible>
+      <visible>facadeview.list+control.isvisible(50)+control.isvisible(1233)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
-
+    <control>
+      <description>Group Cover Art</description>
+      <type>image</type>
+      <id>60</id>
+      <posX>547</posX>
+      <posY>200</posY>
+      <width>383</width>
+      <height>260</height>
+      <keepaspectratio>yes</keepaspectratio>
+      <align>center</align>
+      <valign>middle</valign>
+      <texture mask="videothumbmask.png">#Emulators2.CurrentItem.coverpath</texture>
+      <visible>facadeview.list+control.isvisible(50)+control.isvisible(1233)+string.contains(#Emulators2.CurrentItem.isgame,no)+string.contains(#Emulators2.CurrentItem.isemulator,no)</visible>
+      <animation effect="fade" time="250" delay="0">WindowClose</animation>
+    </control>
+    
     <control>
       <id>0</id>
       <type>label</type>
@@ -32,7 +47,7 @@ This file should contain the list view
       <textcolor>ffFFFFFF</textcolor>
       <shadowAngle>45</shadowAngle>
       <shadowDistance>2</shadowDistance>
-      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes]</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
     <control>
@@ -53,7 +68,7 @@ This file should contain the list view
       <align>left</align>
       <imagesToDraw>10</imagesToDraw>
       <percentage>#Emulators2.CurrentItem.grade</percentage>
-      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes]</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
     <control>
@@ -66,7 +81,7 @@ This file should contain the list view
       <height>1</height>
       <texture>hbar1white.png</texture>
       <colordiffuse>60ffffff</colordiffuse>
-      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes]</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
     </control>
     <control>
       <description>Summary</description>
@@ -75,7 +90,7 @@ This file should contain the list view
       <posX>547</posX>
       <posY>470</posY>
       <width>390</width>
-      <height>125</height>
+      <height>132</height>
       <textcolor>ivory</textcolor>
       <font>font11</font>
       <label>#Emulators2.CurrentItem.description</label>
@@ -92,7 +107,7 @@ This file should contain the list view
       <font>font10</font>
       <align>left</align>
       <textcolor>ff6FAFE1</textcolor>
-      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes]</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
     </control>
     <control>
       <description>Developer</description>
@@ -106,7 +121,7 @@ This file should contain the list view
       <textcolor>ivory</textcolor>
       <shadowAngle>45</shadowAngle>
       <shadowDistance>3</shadowDistance>
-      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes]</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
     <control>
@@ -119,7 +134,7 @@ This file should contain the list view
       <font>font10</font>
       <align>left</align>
       <textcolor>ff6FAFE1</textcolor>
-      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes]</visible>
+      <visible>facadeview.list+control.isvisible(50)+[string.contains(#Emulators2.CurrentItem.isgame,yes)|string.contains(#Emulators2.CurrentItem.isemulator,yes)]</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
     <control>

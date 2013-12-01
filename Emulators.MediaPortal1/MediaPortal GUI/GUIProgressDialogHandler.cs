@@ -9,9 +9,11 @@ namespace Emulators.MediaPortal1
 {
     class GUIProgressDialogHandler : IDisposable
     {
-        ITaskProgress handler;
+        public event EventHandler OnCompleted;
+
+        IBackgroundTask handler;
         GUIDialogProgress dlgPrgrs = null;
-        public GUIProgressDialogHandler(ITaskProgress handler)
+        public GUIProgressDialogHandler(IBackgroundTask handler)
         {
             this.handler = handler;
         }
@@ -20,7 +22,8 @@ namespace Emulators.MediaPortal1
         {
             if (handler == null)
                 return;
-            handler.OnTaskProgress += new BackgroundTaskProgress(setProgress);
+            handler.OnTaskProgress += setProgress;
+            handler.OnTaskCompleted += handler_OnTaskCompleted;
             closeProgDialog();
             dlgPrgrs = (GUIDialogProgress)GUIWindowManager.GetWindow((int)GUIWindow.Window.WINDOW_DIALOG_PROGRESS);
             if (dlgPrgrs != null)
@@ -29,7 +32,7 @@ namespace Emulators.MediaPortal1
                 dlgPrgrs.DisplayProgressBar = true;
                 dlgPrgrs.ShowWaitCursor = false;
                 dlgPrgrs.DisableCancel(true);
-                dlgPrgrs.SetHeading("");
+                dlgPrgrs.SetHeading(string.IsNullOrEmpty(handler.TaskName) ? Options.Instance.GetStringOption("shownname") : handler.TaskName);
                 dlgPrgrs.SetLine(1, "");
                 dlgPrgrs.StartModal(GUIWindowManager.ActiveWindow);
             }
@@ -44,15 +47,20 @@ namespace Emulators.MediaPortal1
             }
         }
 
-        void setProgress(int percent, string info)
+        void handler_OnTaskCompleted(object sender, EventArgs e)
+        {
+            closeProgDialog();
+            if (OnCompleted != null)
+                OnCompleted(this, EventArgs.Empty);
+        }
+
+        void setProgress(object sender, ITaskEventArgs e)
         {
             if (dlgPrgrs != null)
             {
-                dlgPrgrs.SetPercentage(percent);
-                dlgPrgrs.SetLine(1, info);
+                dlgPrgrs.SetPercentage(e.Percent);
+                dlgPrgrs.SetLine(1, e.Info);
             }
-            if (handler.IsComplete)
-                closeProgDialog();
         }
 
         void closeProgDialog()

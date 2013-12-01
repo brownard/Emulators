@@ -1,29 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-
 <!-- myEmulators skin for StreamdMP fanart oriented by hulkhaugen -->
-
 <window>
-
-  <id>7942</id> 
-  <defaultcontrol>50</defaultcontrol> 
+  <id>7942</id>
+  <defaultcontrol>50</defaultcontrol>
   <allowoverlay>yes</allowoverlay>
   <define>#header.label:#Emulators2.plugintitle</define>
   <define>#header.hover:hover_Emulators2.png</define>
   <controls>
     <import>Emulators2.dummy.xml</import>
-    
     <!--::::::::::::::::::::::::
     :: FANART AND BACKGROUNDS ::
     :::::::::::::::::::::::::-->
-
     <control>
       <description>FanArt Background</description>
       <type>image</type>
       <id>0</id>
       <posX>0</posX>
       <posY>0</posY>
-      <width>1280</width>
-      <height>720</height>
+      <width>1920</width>
+      <height>1080</height>
       <texture>#Emulators2.CurrentItem.fanartpath</texture>
       <animation effect="fade" time="300">visible</animation>
       <animation effect="fade" time="300" delay="300">hidden</animation>
@@ -31,15 +26,14 @@
       <animation effect="fade" start="0" end="100" time="300" delay="350">WindowOpen</animation>
       <visible>control.isvisible(1230)</visible>
     </control>
-
     <control>
       <description>FanArt Background 2</description>
       <type>image</type>
       <id>0</id>
       <posX>0</posX>
       <posY>0</posY>
-      <width>1280</width>
-      <height>720</height>
+      <width>1920</width>
+      <height>1080</height>
       <texture>#Emulators2.CurrentItem.fanartpath2</texture>
       <animation effect="fade" time="300">visible</animation>
       <animation effect="fade" time="300" delay="300">hidden</animation>
@@ -47,26 +41,22 @@
       <animation effect="fade" start="0" end="100" time="300" delay="350">WindowOpen</animation>
       <visible>control.isvisible(1231)</visible>
     </control>
-
     <import>Emulators2.overlays.xml</import>
-
     <!--:::::::::::::::::::::::::::::
     :: TOP BAR :: TIME :: LOCATION ::
     ::::::::::::::::::::::::::::::-->
-
-    <import>common.time.xml</import>
-
-    <import>Emulators2.facade.xml</import>
     <import>Emulators2.listview.xml</import>
     <import>Emulators2.thumbsview.xml</import>
     <import>Emulators2.filmstripview.xml</import>
     <import>Emulators2.coverflowview.xml</import>
     <import>Emulators2.detailsview.xml</import>
-
+    <import>Emulators2.facade.xml</import>
+    <import>common.overlays2.xml</import>
+    <import>common.scrollingpopup.xml</import>
+    <import>common.time.xml</import>
     <!--::::::::::::::
     :: SIDE BUTTONS :: (Not visible)
     ::::::::::::::::::-->
-
     <control>
       <type>actiongroup</type>
       <description>action menu</description>
@@ -75,10 +65,10 @@
       <dimColor>00ffffff</dimColor>
       <control>
         <type>image</type>
-        <posX>1002</posX>
+        <posX>1503</posX>
         <posY>0</posY>
-        <width>278</width>
-        <height>720</height>
+        <width>417</width>
+        <height>1080</height>
         <texture>hiddenmenu_right.png</texture>
         <visible>control.isvisible(50)+!control.hasfocus(50)</visible>
         <animation effect="slide" time="100" start="300,0">visible</animation>
@@ -89,8 +79,8 @@
         <label>OPTIONS</label>
         <type>label</type>
         <font>mediastream12tc</font>
-        <posX>1040</posX>
-        <posY>226</posY>
+        <posX>1560</posX>
+        <posY>339</posY>
         <visible>control.isvisible(50)+!control.hasfocus(50)</visible>
         <animation effect="slide" time="100" start="300,0">visible</animation>
         <animation effect="slide" time="0" end="300,0">hidden</animation>
@@ -101,10 +91,10 @@
         <visible>control.isvisible(50)+!control.hasfocus(50)</visible>
         <animation effect="slide" time="100" start="300,0">visible</animation>
         <animation effect="slide" time="0" end="300,0">hidden</animation>
-        <posX>1040</posX>
-        <posY>250</posY>
-        <width>220</width>
-        <height>720</height>
+        <posX>1560</posX>
+        <posY>375</posY>
+        <width>330</width>
+        <height>1080</height>
         <layout>StackLayout</layout>
         <control>
           <description>View-As button</description>
@@ -141,23 +131,22 @@
           <onleft>50</onleft>
           <onup>11</onup>
           <ondown>10</ondown>
-        </control>       
+        </control>
       </control>
     </control>
-    
     <control>
       <description>Working Animation</description>
       <type>animation</type>
       <id>0</id>
-      <posX>1103</posX>
-      <posY>20</posY>
-      <width>157</width>
-      <height>24</height>
+      <posX>1335</posX>
+      <posY>22</posY>
+      <width>235</width>
+      <height>36</height>
       <textures>common.waiting.1.png;common.waiting.2.png;common.waiting.3.png;common.waiting.4.png;common.waiting.5.png;common.waiting.6.png;common.waiting.7.png;common.waiting.8.png;common.waiting.7.png;common.waiting.6.png;common.waiting.5.png;common.waiting.4.png;common.waiting.3.png;common.waiting.2.png</textures>
       <Duration>0:0:03</Duration>
       <visible>string.contains(#Emulators2.Importer.working,yes)</visible>
       <keepaspectratio>yes</keepaspectratio>
     </control>
-
   </controls>
 </window>
+<!--Checksum:5ba9c2f422c3d9acdf4981f38bd47c39-->

@@ -11,12 +11,14 @@ namespace Emulators
 {
     public partial class Conf_ProgressDialog : Form
     {
-        ITaskProgress handler;
+        IBackgroundTask handler;
 
-        public Conf_ProgressDialog(ITaskProgress handler)
+        public Conf_ProgressDialog(IBackgroundTask handler)
         {
             InitializeComponent();
             this.handler = handler;
+            if (!string.IsNullOrEmpty(handler.TaskName))
+                this.Text = handler.TaskName;
             statusLabel.Text = "";
         }
 
@@ -24,33 +26,44 @@ namespace Emulators
         {
             if (handler == null)
                 Close();
-            handler.OnTaskProgress += new BackgroundTaskProgress(updateStatusInfo);
+            handler.OnTaskProgress += updateStatusInfo;
+            handler.OnTaskCompleted += handler_OnTaskCompleted;
             if (!handler.Start())
                 Close();
         }
 
-        void updateStatusInfo(int perc, string status)
+        void handler_OnTaskCompleted(object sender, EventArgs e)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(delegate() 
+                BeginInvoke(new MethodInvoker(delegate()
+                {
+                    handler_OnTaskCompleted(sender, e);
+                }));
+                return;
+            }
+            Close();
+        }
+
+        void updateStatusInfo(object sender, ITaskEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(delegate()
                     {
-                        updateStatusInfo(perc, status); 
-                    }
-                    ));
+                        updateStatusInfo(sender, e);
+                    }));
                 return;
             }
 
+            int perc = e.Percent;
             if (perc < 0)
                 perc = 0;
             else if (perc > 100)
                 perc = 100;
             
-            statusLabel.Text = status;
+            statusLabel.Text = e.Info;
             progressBar.Value = perc;
-            
-            if (handler.IsComplete)
-                Close();
         }
 
         void Conf_ProgressDialog_FormClosing(object sender, FormClosingEventArgs e)

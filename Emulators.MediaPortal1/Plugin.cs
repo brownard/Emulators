@@ -46,12 +46,20 @@ namespace Emulators.MediaPortal1
         g_Player.StoppedHandler onVideoStopped = null;
         g_Player.EndedHandler onVideoEnded = null;
 
+        bool dbUpgradeNeeded;
+        string oldDbPath;
+        string newDbPath;
+
         public Plugin()
         {
+            oldDbPath = Config.GetFile(Config.Dir.Database, "Emulators2_v1.db3");
+            newDbPath = Config.GetFile(Config.Dir.Database, "Emulators2_v2.db3");
+            dbUpgradeNeeded = System.IO.File.Exists(oldDbPath) && !System.IO.File.Exists(newDbPath);
+
             string optionsPath = Config.GetFile(Config.Dir.Config, "Emulators_2.xml");
             string groupsPath = Config.GetFile(Config.Dir.Config, "Emulators2Groups.xml");
             string defaultThumbPath = Config.GetFolder(Config.Dir.Thumbs);
-            Emulators2Settings.Instance.Init(new MP1DataProvider(Config.GetFile(Config.Dir.Database, "Emulators2_v2.db3")), new MP1Logger(), optionsPath, groupsPath, defaultThumbPath);
+            Emulators2Settings.Instance.Init(new MP1DataProvider(newDbPath), new MP1Logger(), optionsPath, groupsPath, defaultThumbPath);
             GroupHandler.EmptySubGroupName = Translator.Instance.unknown;
         }
 
@@ -103,7 +111,11 @@ namespace Emulators.MediaPortal1
         {
             startup();
             Emulators2Settings.Instance.IsConfig = true;
-            //new DatabaseUpgrader(new MP1DataProvider(Config.GetFile(Config.Dir.Database, "Emulators2_v1.db3"))).Run();
+            if (dbUpgradeNeeded)
+            {
+                MP1Utils.ShowProgressDialog(new DatabaseUpgrader(new MP1DataProvider(oldDbPath)));
+                dbUpgradeNeeded = false;
+            }
             new Conf_Main().ShowDialog();
             Options.Instance.Save();
             Emulators2Settings.Instance.IsConfig = false;
@@ -150,16 +162,32 @@ namespace Emulators.MediaPortal1
 
         protected override void OnPageLoad()
         {
+            base.OnPageLoad();
+            if (dbUpgradeNeeded)
+            {
+                dbUpgradeNeeded = false;
+                GUIProgressDialogHandler guiDlg = new GUIProgressDialogHandler(new DatabaseUpgrader(new MP1DataProvider(oldDbPath)));
+                guiDlg.OnCompleted += (o, e) => { doLoad(); };
+                guiDlg.ShowDialog();
+            }
+            else
+            {
+                doLoad();
+            }
+        }
+
+        void doLoad()
+        {
             if (firstLoad)
             {
-                firstLoad = false;                
+                firstLoad = false;
                 GUIPropertyManager.SetProperty("#Emulators2.PreviewVideo.playing", "no");
                 //Image Handlers
                 backdrop = new ImageSwapper();
                 backdrop.ImageResource.Delay = Options.Instance.GetIntOption("fanartdelay");
                 backdrop.PropertyOne = "#Emulators2.CurrentItem.fanartpath";
                 backdrop.PropertyTwo = "#Emulators2.CurrentItem.fanartpath2";
-                
+
                 newGUIHandler = new GUIPresenter();
                 newGUIHandler.OnSortAscendingChanged += new GUIPresenter.SortAscendingChanged(newGUIHandler_OnSortAscendingChanged);
                 newGUIHandler.OnPreviewVideoStatusChanged += new GUIPresenter.PreviewVideoStatusChanged(newGUIHandler_OnPreviewVideoStatusChanged);
@@ -168,8 +196,7 @@ namespace Emulators.MediaPortal1
                 onVideoStopped = new g_Player.StoppedHandler(g_Player_PlayBackStopped);
                 onVideoEnded = new g_Player.EndedHandler(g_Player_PlayBackEnded);
             }
-
-            base.OnPageLoad();
+            
             DBItem startupItem = null;
             bool launch = false;
             getStartupSettings(ref startupItem, ref launch);

@@ -258,13 +258,10 @@ namespace Emulators.Database
 
         public void ExecuteTransaction<T>(IEnumerable<T> items, Action<T> sqlHandler)
         {
-            lock (syncRoot)
-            {
-                ExecuteWithoutLock("BEGIN");
-                foreach (T item in items)
-                    sqlHandler(item);
-                ExecuteWithoutLock("COMMIT");
-            }
+            BeginTransaction();
+            foreach (T item in items)
+                sqlHandler(item);
+            EndTransaction();
         }
 
         public double CurrentDBVersion
@@ -327,7 +324,7 @@ namespace Emulators.Database
             foreach (DBItem item in Get(typeof(T), criteria))
                 result.Add((T)item);
 
-            if (result.Count > 1 && (criteria == null || !criteria.IsOrdered) && result.Count > 0 && result[0] is IComparable<T>)
+            if (result.Count > 1 && (criteria == null || !criteria.IsOrdered) && result[0] is IComparable<T>)
                 result.Sort();
 
             return result;
@@ -352,10 +349,13 @@ namespace Emulators.Database
 
         public DBItem Get(Type tableType, int id)
         {
-            // if we have already pulled this record down, don't query the DB
-            DBItem cachedObj = cache.Get(tableType, id);
-            if (cachedObj != null)
-                return cachedObj;
+            lock (syncRoot)
+            {
+                // if we have already pulled this record down, don't query the DB
+                DBItem cachedObj = cache.Get(tableType, id);
+                if (cachedObj != null)
+                    return cachedObj;
+            }
 
             verifyTable(tableType);
 

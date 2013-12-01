@@ -54,6 +54,12 @@ namespace Emulators
         }
         string launchFile = null;
 
+        public List<string> GoodmergeFiles
+        {
+            get;
+            set;
+        }
+
         public string Filename
         {
             get { return filename; }

@@ -132,17 +132,21 @@ namespace Emulators
         }
         string goodmergeTags = null;
 
+        List<string> tags = null;
         public List<string> GetGoodmergeTags()
         {
-            List<string> tags = new List<string>();
-            if (!string.IsNullOrEmpty(GoodmergeTags))
+            if (tags == null)
             {
-                string[] sTags = GoodmergeTags.Split(';');
-                for(int x = 0; x < sTags.Length; x++)
+                tags = new List<string>();
+                if (!string.IsNullOrEmpty(goodmergeTags))
                 {
-                    string tag = sTags[x].Trim();
-                    if (tag.Length > 0)
-                        tags.Add(tag);
+                    string[] sTags = goodmergeTags.Split(';');
+                    for (int x = 0; x < sTags.Length; x++)
+                    {
+                        string tag = sTags[x].Trim();
+                        if (tag.Length > 0)
+                            tags.Add(tag);
+                    }
                 }
             }
             return tags;

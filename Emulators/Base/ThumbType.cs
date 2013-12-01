@@ -7,6 +7,7 @@ namespace Emulators
 {
     public enum ThumbType
     {
+        Logo,
         FrontCover,
         BackCover,
         TitleScreen,

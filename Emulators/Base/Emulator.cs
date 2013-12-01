@@ -14,7 +14,7 @@ namespace Emulators
     }
 
     [DBTable("Emulators")]
-    public class Emulator : DBItem, IComparable<Emulator>
+    public class Emulator : ThumbItem, IComparable<Emulator>
     {
         public static List<Emulator> GetAll(bool hidePcIfEmpty = false)
         {
@@ -65,7 +65,7 @@ namespace Emulators
         }
 
         [DBField]
-        public string Title 
+        public override string Title 
         {
             get { return title; }
             set
@@ -332,6 +332,11 @@ namespace Emulators
             if (other == null)
                 return 1;
             return this.position.CompareTo(other.position);
+        }
+
+        public override string ThumbFolder
+        {
+            get { return ThumbGroup.EMULATOR_DIR_NAME; }
         }
     }
 }

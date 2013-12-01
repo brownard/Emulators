@@ -141,5 +141,19 @@ namespace Emulators.MediaPortal1
                 dlg_error.DoModal(MediaPortal.GUI.Library.GUIWindowManager.ActiveWindow);
             }
         }
+
+        public static void ShowProgressDialog(IBackgroundTask handler)
+        {
+            if (Emulators2Settings.Instance.IsConfig)
+            {
+                using (Conf_ProgressDialog dialog = new Conf_ProgressDialog(handler))
+                    dialog.ShowDialog();
+            }
+            else
+            {
+                GUIProgressDialogHandler guiDlg = new GUIProgressDialogHandler(handler);
+                guiDlg.ShowDialog();
+            }
+        }
     }
 }

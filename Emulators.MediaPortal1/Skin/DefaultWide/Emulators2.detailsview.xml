@@ -28,8 +28,8 @@
         <type>button</type>
         <label>940</label>
         <hyperlink>84623</hyperlink>
-        <onright>7</onright>
-        <onleft>7</onleft>
+        <onright>51</onright>
+        <onleft>51</onleft>
         <onup>6</onup>
         <ondown>8</ondown>
         <visible>!control.isvisible(50)</visible>
@@ -42,19 +42,8 @@
         <onright>8</onright>
         <onleft>8</onleft>
         <onup>7</onup>
-        <ondown>9</ondown>
-        <visible>!control.isvisible(50)</visible>
-      </control>
-      <control>
-        <description>Goodmerge Button</description>
-        <type>button</type>
-        <id>9</id>
-        <onup>8</onup>
         <ondown>6</ondown>
-        <onright>51</onright>
-        <onleft>51</onleft>
-        <label>#Emulators2.Label.goodmerge</label>
-        <visible>!control.isvisible(50)+string.contains(#Emulators2.CurrentItem.goodmerge,yes)</visible>
+        <visible>!control.isvisible(50)</visible>
       </control>
     </control>
     <!--            :: Artwork ::            -->
@@ -71,7 +60,7 @@
       <align>center</align>
       <valign>middle</valign>
       <texture mask="videothumbmask.png">#Emulators2.CurrentItem.coverpath</texture>
-      <visible>!control.isvisible(50)+!control.hasfocus(8)+!control.hasfocus(9)+!control.hasfocus(51)</visible>
+      <visible>!control.isvisible(50)+!control.hasfocus(8)+[!control.hasfocus(7)|string.contains(#Emulators2.CurrentItem.goodmerge,no)]+!control.hasfocus(51)</visible>
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
 
@@ -500,7 +489,7 @@
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
     <control>
-      <description>Susepend MP Label</description>
+      <description>Suspend MP Label</description>
       <id>0</id>
       <type>label</type>
       <label>#Emulators2.Label.suspendmp</label>
@@ -513,7 +502,7 @@
       <animation effect="fade" time="250" delay="0">WindowClose</animation>
     </control>
     <control>
-      <description>Susepend MP</description>
+      <description>Suspend MP</description>
       <id>0</id>
       <type>label</type>
       <label>#Emulators2.CurrentItem.Profile.suspendmp</label>
@@ -602,7 +591,7 @@
     
     <!-- Goodmerge List -->
     <control>
-      <visible>!control.isvisible(50)+[control.hasfocus(9)|control.hasfocus(51)]</visible>
+      <visible>!control.isvisible(50)+string.contains(#Emulators2.CurrentItem.goodmerge,yes)+[control.hasfocus(7)|control.hasfocus(51)]</visible>
       <description>Goodmerge List</description>
       <type>listcontrol</type>
       <id>51</id>
@@ -610,8 +599,8 @@
       <posY>180</posY>
       <width>277</width>
       <height>400</height>
-      <onleft>9</onleft>
-      <onright>9</onright>
+      <onleft>7</onleft>
+      <onright>7</onright>
       <font>font11</font>
       <textXOff>-30</textXOff>
       <textXOff2>0</textXOff2>

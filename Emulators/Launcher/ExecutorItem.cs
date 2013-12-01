@@ -102,7 +102,7 @@ namespace Emulators
 
             if (MappedExitKeyData > 0)
             {
-                Logger.LogInfo("Initialising keyboard hook...");
+                Logger.LogInfo("Initialising keyboard hook, Process Id: {0}", process.Id);
                 keyHook = new KeyboardHook(process.Id, onMappedKey); //setup hook and attach to emu process
             }
 
@@ -241,7 +241,7 @@ namespace Emulators
                 else
                 {
                     //Set message to window close
-                    Msg = KeyboardHook.WM_QUIT;
+                    Msg = KeyboardHook.WM_CLOSE; //.WM_QUIT;
                     wParam = 0;
                 }
 

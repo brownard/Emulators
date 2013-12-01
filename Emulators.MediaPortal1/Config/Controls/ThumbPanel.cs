@@ -14,7 +14,7 @@ namespace Emulators
         public ThumbPanel()
         {
             InitializeComponent();
-            ThumbType = Emulators.ThumbType.FrontCover;
+            ThumbType = ThumbType.FrontCover;
 
             this.AllowDrop = true;
             this.BackgroundImageLayout = ImageLayout.Zoom;

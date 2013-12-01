@@ -14,6 +14,7 @@ namespace Emulators.Import
         public int SearchDistance { get; set; }
         public ScraperSearchParams SearchParams { get; set; }
         public Scraper DataProvider { get; set; }
+        public int Priority { get; set; }
 
         public string DisplayMember
         {
@@ -67,7 +68,7 @@ namespace Emulators.Import
 
             int comp = this.SearchDistance.CompareTo(other.SearchDistance);
             if (comp == 0)
-                comp = this.DataProvider.Priority.CompareTo(other.DataProvider.Priority);
+                comp = this.Priority.CompareTo(other.Priority);
             return comp;
         }
     }

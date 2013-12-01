@@ -14,7 +14,6 @@ namespace Emulators.Import
         {
             get { return true; }
         }
-        public virtual int Priority { get; set; }
         
         public override string ToString()
         {
