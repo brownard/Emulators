@@ -43,7 +43,12 @@ namespace Emulators
             catch { return false; }
             if (extension == ".jpg" || extension == ".png")
             {
-                if (filename == LOGO_NAME.ToLowerInvariant() || filename == BOX_FRONT_NAME.ToLowerInvariant())
+                if (filename == LOGO_NAME.ToLowerInvariant())
+                {
+                    thumbType = ThumbType.Logo;
+                    return true;
+                }
+                else if (filename == BOX_FRONT_NAME.ToLowerInvariant())
                 {
                     thumbType = ThumbType.FrontCover;
                     return true;
@@ -529,7 +534,9 @@ namespace Emulators
             if (currentPath != newPath)
             {
                 try 
-                { 
+                {
+                    if (!Directory.Exists(thumbPath))
+                        Directory.CreateDirectory(thumbPath);
                     File.Copy(currentPath, newPath, true);
                     return true;
                 }
@@ -546,6 +553,8 @@ namespace Emulators
             initImageEncoder();
             try
             {
+                if (!Directory.Exists(thumbPath))
+                    Directory.CreateDirectory(thumbPath);
                 if (aspectRatio > 0 || maxThumbDimension > 0)
                     image = ImageHandler.ResizeImage(image, aspectRatio, maxThumbDimension);
                 image.Save(newPath, jpegCodec, encoderParams);
@@ -592,6 +601,8 @@ namespace Emulators
             {
                 try
                 {
+                    if (!Directory.Exists(thumbPath))
+                        Directory.CreateDirectory(thumbPath);
                     System.IO.File.Copy(lPath, savePath, true);
                 }
                 catch (Exception ex)

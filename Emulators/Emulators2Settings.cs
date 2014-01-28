@@ -7,6 +7,8 @@ using Emulators.Database;
 
 namespace Emulators
 {
+
+
     public class Emulators2Settings : IDisposable
     {
         #region Wildcards
@@ -15,15 +17,14 @@ namespace Emulators
         public const string GAME_WILDCARD_NO_EXT = "%ROM_WITHOUT_EXT%";
         #endregion
         
-        public void Init(ISQLiteProvider sqlProvider, ILog logger, string optionsPath, string groupsPath, string defaultThumbDirectory)
+        public void Init(ISQLiteProvider sqlProvider, ILog logger, string optionsPath, string emptySubGroupName, string defaultThumbDirectory)
         {
             System.Net.ServicePointManager.DefaultConnectionLimit = 100;
             ILogger = logger;
+            RomGroup.EmptySubGroupName = emptySubGroupName;
             Options.OptionsPath = optionsPath;
             DB.Instance.DataProvider = sqlProvider;
             DB.Instance.Init();
-            GroupHandler.GroupsFile = groupsPath;
-            GroupHandler.Instance.Init();
             initThumbDir(defaultThumbDirectory);
         }
 

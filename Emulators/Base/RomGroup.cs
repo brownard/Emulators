@@ -7,280 +7,179 @@ using System.Xml;
 
 namespace Emulators
 {
-    public class RomGroup : DBItem
+    [DBTable("Groups")]
+    public class RomGroup : DBItem, IComparable<RomGroup>
     {
-        List<int> gameIds = new List<int>();
-        List<int> emuIds = new List<int>();
-        List<DBItem> groupItems = null;
-                
+        public static string EmptySubGroupName 
+        { 
+            get; 
+            set; 
+        }
+
+        public static List<RomGroup> GetAll()
+        {
+            List<RomGroup> groups = DB.Instance.GetAll<RomGroup>();
+            if (groups.Count < 1)
+            {
+                RomGroup group = new RomGroup("Favourites", "favourite=1", "LOWER(title), title");
+                group.Favourite = true;
+                groups.Add(group);
+
+                group = new RomGroup("Emulators");
+                group.GroupItemInfos.Add(GroupItemInfo.CreateEmulatorGroup(-2));
+                groups.Add(group);
+
+                group = new RomGroup("All Games", "LOWER(title), title");
+                groups.Add(group);
+
+                group = new RomGroup("Top Rated", null, "grade DESC, LOWER(title), title LIMIT 10")
+                {
+                    SortProperty = ListItemProperty.GRADE,
+                    SortDescending = true
+                };
+                groups.Add(group);
+
+                group = new RomGroup("Recently Played", "playcount > 0", "latestplay DESC LIMIT 10")
+                {
+                    SortProperty = ListItemProperty.LASTPLAYED,
+                    SortDescending = true
+                };
+                groups.Add(group);
+
+                group = new RomGroup("Developer");
+                group.GroupItemInfos.Add(GroupItemInfo.CreateDynamicGroup("Developer", null));
+                groups.Add(group);
+
+                group = new RomGroup("Year");
+                group.GroupItemInfos.Add(GroupItemInfo.CreateDynamicGroup("Year", "DESC"));
+                groups.Add(group);
+
+                group = new RomGroup("Genre");
+                group.GroupItemInfos.Add(GroupItemInfo.CreateDynamicGroup("Genre", null));
+                groups.Add(group);
+
+                DB.Instance.BeginTransaction();
+                for (int x = 0; x < groups.Count; x++)
+                {
+                    groups[x].Position = x;
+                    groups[x].Commit();
+                }
+                DB.Instance.EndTransaction();
+            }
+            return groups;
+        }
+
+        public RomGroup() { }
         public RomGroup(string title, string sql = null, string orderBy = null)
         {
             if (title == null)
                 title = "";
             Title = title;
-
             if (sql != null || orderBy != null)
-                groupItemInfos.Add(GroupItemInfo.CreateSQLGroup(sql, orderBy));
+                GroupItemInfos.Add(GroupItemInfo.CreateSQLGroup(sql, orderBy));
         }
-
-        public RomGroup(XmlNode groupNode)
-        {
-            initFromXml(groupNode);
-        }
-
-        #region Init
-
-        void initFromXml(XmlNode groupNode)
-        {
-            if (groupNode.Attributes == null)
-            {
-                Logger.LogError("No attributes found for group xml\r\n{0}", groupNode.InnerText);
-                return;
-            }
-
-            XmlAttribute title = groupNode.Attributes["title"];
-            if (title == null)
-            {
-                Logger.LogError("No title attribute found for group xml\r\n{0}", groupNode.InnerText);
-                return;
-            }
-
-            isReady = true;
-            Title = title.Value;
-
-            XmlAttribute fav = groupNode.Attributes["favourite"];
-            if (fav != null)
-            {
-                bool favourite;
-                if (bool.TryParse(fav.Value, out favourite))
-                {
-                    if (favourite)
-                    {
-                        layout = Options.Instance.GetIntOption("viewfavourites");
-                        Favourite = favourite;
-                    }
-                }
-                else
-                    Logger.LogError("Unable to parse favourite attribute '{0}' to boolean", fav.Value);
-            }
-
-            if (groupNode.Attributes["sort"] != null)
-                getSortProperty(groupNode.Attributes["sort"].Value);
-            if (groupNode.Attributes["desc"] != null)
-                bool.TryParse(groupNode.Attributes["desc"].Value, out sortDesc);
-
-            if (layout < 0 && groupNode.Attributes["layout"] != null)
-                if (!int.TryParse(groupNode.Attributes["layout"].Value, out layout))
-                    layout = -1;
-
-            foreach (XmlNode childNode in groupNode.ChildNodes)
-            {
-                addQuery(childNode);
-            }
-        }
-
-        void getSortProperty(string p)
-        {
-            if (string.IsNullOrEmpty(p))
-                return;
-            try
-            {
-                sortProperty = (ListItemProperty)Enum.Parse(typeof(ListItemProperty), p, true);
-            }
-            catch
-            {
-                Logger.LogError("Error parsing sort property for group '{0}'", Title);
-            }
-        }
-
-        void addQuery(XmlNode selectedNode)
-        {
-            if (selectedNode == null || selectedNode.Name != "item" || selectedNode.Attributes == null)
-                return;
-
-            XmlAttribute attr = selectedNode.Attributes["type"];
-            if (attr == null)
-                return;
-
-            int id;
-            switch (attr.Value)
-            {
-                case "SQL":
-                    string where = null;
-                    string orderBy = null;
-                    foreach (XmlNode childNode in selectedNode.ChildNodes)
-                    {
-                        if (!string.IsNullOrEmpty(childNode.InnerText))
-                        {
-                            if (childNode.Name == "where")
-                                where = childNode.InnerText;
-                            else if (childNode.Name == "orderby")
-                                orderBy = childNode.InnerText;
-                        }
-                    }
-                    if (where != null || orderBy != null)
-                        groupItemInfos.Add(GroupItemInfo.CreateSQLGroup(where, orderBy));
-                    break;
-                case "Dynamic":
-                    XmlAttribute column = selectedNode.Attributes["column"];
-                    if (column == null)
-                        break;
-                    XmlAttribute orderAttr = selectedNode.Attributes["order"];
-                    string order = null;
-                    if (orderAttr != null)
-                        order = orderAttr.Value;
-                    groupItemInfos.Add(GroupItemInfo.CreateDynamicGroup(column.Value, order));
-                    break;
-                case "Emulator":
-                    if (int.TryParse(selectedNode.InnerText, out id))
-                    {
-                        groupItemInfos.Add(GroupItemInfo.CreateEmulatorGroup(id));
-                        if (id > -2 && !emuIds.Contains(id))
-                            emuIds.Add(id);
-                    }
-                    break;
-                case "Game":
-                    if (int.TryParse(selectedNode.InnerText, out id))
-                    {
-                        groupItemInfos.Add(GroupItemInfo.CreateGameGroup(id));
-                        if (id > -2 && !gameIds.Contains(id))
-                            gameIds.Add(id);
-                    }
-                    break;
-            }
-        }
-
-        void getItems()
-        {
-            groupItems = new List<DBItem>();
-            Dictionary<int?, Emulator> emus = DB.Instance.Get<Emulator>(new ListCriteria(emuIds)).ToDictionary(item => item.Id);
-            Dictionary<int?, Game> games = DB.Instance.Get<Game>(new ListCriteria(gameIds)).ToDictionary(item => item.Id);
-            foreach (GroupItemInfo info in groupItemInfos)
-            {
-                switch (info.ItemType)
-                {
-                    case GroupItemType.SQL:
-                        foreach (Game game in DB.Instance.Get<Game>(new SimpleCriteria(info.SQL, info.Order)))
-                            groupItems.Add(game);
-                        break;
-                    case GroupItemType.DYNAMIC:
-                        groupItems.AddRange(GetSubGroups(info));
-                        break;
-                    case GroupItemType.EMULATOR:
-                        if (info.Id == -2)
-                            groupItems.AddRange(Emulator.GetAll(true));
-                        else if (emus.ContainsKey(info.Id))
-                            groupItems.Add(emus[info.Id]);
-                        break;
-                    case GroupItemType.GAME:
-                        if (info.Id == -2)
-                            groupItems.AddRange(Game.GetAll());
-                        else if (games.ContainsKey(info.Id))
-                            groupItems.Add(games[info.Id]);
-                        break;
-                }
-            }
-        }
-
-        public List<DBItem> GetSubGroups(GroupItemInfo info)
-        {
-            List<DBItem> groups = new List<DBItem>();
-
-            if (string.IsNullOrEmpty(info.Column))
-            {
-                Logger.LogError("No column specified for dynamic group");
-                return groups;
-            }
-            if (info.Column == "Genre")
-            {
-                List<string> genres = DB.Instance.GetAllValues(DBField.GetField(typeof(Game), "Genre")).ToList();
-                genres.Sort();
-                foreach (string genre in genres)
-                {
-                    groups.Add(new RomGroup(genre, string.Format(@"'|' || Genre || '|' LIKE '%|{0}|%'", genre)));
-                }
-                return groups;
-            }
-
-            string order = string.IsNullOrEmpty(info.Order) ? "" : info.Order;
-            string sql = string.Format("SELECT DISTINCT {0} FROM {1} ORDER BY {0} {2}", info.Column, DB.GetTableName(typeof(Game)), order).Trim();
-            Logger.LogDebug("Created sql for dynamic group '{0}' - {1}", Title, sql);
-
-            SQLData results = DB.Instance.Execute(sql);
-            foreach (SQLDataRow row in results.Rows)
-            {
-                try
-                {
-                    RomGroup newGroup = new RomGroup(row.fields[0] == "" ? GroupHandler.EmptySubGroupName : row.fields[0], string.Format("{0}='{1}'", info.Column, row.fields[0]), "title");
-                    newGroup.SortProperty = SortProperty;
-                    groups.Add(newGroup);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError("Error adding subgroup - {0}\r\n{1}", ex.Message, ex.StackTrace);
-                }
-            }
-
-            return groups;
-        }
-
-        #endregion
 
         #region Public Properties
 
-        bool isReady = false;
-        public bool IsReady
-        {
-            get { return isReady; }
-        }
-
         string title = "";
+        [DBField]
         public string Title 
         { 
             get { return title; } 
-            set { title = value; } 
+            set 
+            { 
+                title = value;
+                CommitNeeded = true;
+            } 
         }
 
-        public bool Favourite { get; set; }
+        int position = 0;
+        [DBField]
+        public int Position
+        {
+            get { return position; }
+            set
+            {
+                position = value;
+                CommitNeeded = true;
+            }
+        }
+
+        bool favourite = false;
+        [DBField]
+        public bool Favourite 
+        {
+            get { return favourite; }
+            set
+            {
+                favourite = value;
+                CommitNeeded = true;
+            }
+        }
 
         int layout = -1;
+        [DBField]
         public int Layout 
         { 
             get { return layout; } 
-            set { layout = value; } 
+            set 
+            { 
+                layout = value;
+                CommitNeeded = true;
+            } 
         }
 
         ListItemProperty sortProperty = ListItemProperty.DEFAULT;
+        [DBField]
         public ListItemProperty SortProperty
         {
             get { return sortProperty; }
-            set { sortProperty = value; }
+            set
+            {
+                sortProperty = value;
+                CommitNeeded = true;
+            }
         }
 
         bool sortDesc = false;
+        [DBField]
         public bool SortDescending 
         { 
             get { return sortDesc; } 
-            set { sortDesc = value; } 
+            set 
+            { 
+                sortDesc = value;
+                CommitNeeded = true;
+            } 
         }
 
-        List<GroupItemInfo> groupItemInfos = new List<GroupItemInfo>();
-        public List<GroupItemInfo> GroupItemInfos
+        DBRelationList<GroupItemInfo> groupItemInfos = null;
+        [DBRelation(AutoRetrieve = true)]
+        public DBRelationList<GroupItemInfo> GroupItemInfos
         {
-            get { return groupItemInfos; }
+            get 
+            {
+                if (groupItemInfos == null)
+                    groupItemInfos = new DBRelationList<GroupItemInfo>(this);
+                return groupItemInfos;
+            }
         }
 
+        List<DBItem> groupItems = null;
         public List<DBItem> GroupItems
         {
             get
             {
                 if (groupItems == null)
-                    getItems();
+                {
+                    groupItems = new List<DBItem>();
+                    foreach (GroupItemInfo info in GroupItemInfos)
+                        groupItems.AddRange(info.GetItems(sortProperty));
+                }
                 return groupItems;
             }
         }
 
-        static System.Text.RegularExpressions.Regex orderByRegEx = new System.Text.RegularExpressions.Regex(@"\bORDER BY\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         bool checkedThumbs = false;
         ThumbGroup thumbs = null;
         public ThumbGroup ThumbGroup
@@ -292,17 +191,17 @@ namespace Emulators
                 checkedThumbs = true;
 
                 ThumbItem thumbItem = null;
+                List<GroupItemInfo> thumbInfos = GroupItemInfos.Where(g => g.ItemType != GroupItemType.DYNAMIC).ToList();
                 Random r = new Random();
-                int index = r.Next(groupItemInfos.Count);
                 int tries = 0;
-                while (tries < groupItemInfos.Count)
+                while (thumbItem == null && tries < thumbInfos.Count)
                 {
-                    if (index == groupItemInfos.Count)
-                        index = 0;
-                    tries++;
-                    thumbItem = GroupHandler.Instance.GetRandomThumbItem(groupItemInfos[index]);
-                    if (thumbItem != null)
-                        break;
+                    GroupItemInfo info = thumbInfos[r.Next(thumbInfos.Count)];
+                    List<DBItem> infoItems = info.GetItems(sortProperty);
+                    if (infoItems.Count > 0)
+                        thumbItem = (ThumbItem)infoItems[new Random().Next(infoItems.Count)];
+                    else
+                        tries++;
                 }
 
                 if (thumbItem != null)
@@ -331,84 +230,11 @@ namespace Emulators
             RefreshThumbs();
         }
 
-        public XmlElement GetXML(XmlDocument doc)
-        {
-            XmlElement group = doc.CreateElement("Group");
-            XmlAttribute attr = doc.CreateAttribute("title");
-            attr.Value = Title;
-            group.Attributes.Append(attr);
-
-            if (Favourite)
-            {
-                attr = doc.CreateAttribute("favourite");
-                attr.Value = "true";
-                group.Attributes.Append(attr);
-            }
-
-            if (SortProperty != ListItemProperty.NONE)
-            {
-                attr = doc.CreateAttribute("sort");
-                attr.Value = SortProperty.ToString();
-                group.Attributes.Append(attr);
-            }
-
-            attr = doc.CreateAttribute("desc");
-            attr.Value = SortDescending.ToString();
-            group.Attributes.Append(attr);
-
-            attr = doc.CreateAttribute("layout");
-            attr.Value = layout.ToString();
-            group.Attributes.Append(attr);
-
-            foreach (GroupItemInfo info in groupItemInfos)
-            {
-                XmlElement item = doc.CreateElement("item");
-                XmlAttribute typeAttr = doc.CreateAttribute("type");
-                item.Attributes.Append(typeAttr);
-
-                switch (info.ItemType)
-                {
-                    case GroupItemType.SQL:
-                        typeAttr.Value = "SQL";
-                        if (!string.IsNullOrEmpty(info.SQL))
-                        {
-                            XmlElement whereNode = doc.CreateElement("where");
-                            whereNode.AppendChild(doc.CreateCDataSection(info.SQL));
-                            item.AppendChild(whereNode);
-                        }
-                        if (!string.IsNullOrEmpty(info.Order))
-                        {
-                            XmlElement orderNode = doc.CreateElement("orderby");
-                            orderNode.AppendChild(doc.CreateCDataSection(info.Order));
-                            item.AppendChild(orderNode);
-                        }
-                        break;
-                    case GroupItemType.DYNAMIC:
-                        typeAttr.Value = "Dynamic";
-                        XmlAttribute columnAttr = doc.CreateAttribute("column");
-                        columnAttr.Value = info.Column;
-                        item.Attributes.Append(columnAttr);
-                        if (!string.IsNullOrEmpty(info.Order))
-                        {
-                            XmlAttribute orderAttr = doc.CreateAttribute("order");
-                            orderAttr.Value = info.Order;
-                            item.Attributes.Append(orderAttr);
-                        }
-                        break;
-                    case GroupItemType.EMULATOR:
-                        typeAttr.Value = "Emulator";
-                        item.AppendChild(doc.CreateTextNode(info.Id.ToString()));
-                        break;
-                    case GroupItemType.GAME:
-                        typeAttr.Value = "Game";
-                        item.AppendChild(doc.CreateTextNode(info.Id.ToString()));
-                        break;
-                }
-                group.AppendChild(item);
-            }
-            return group;
-        }
-
         #endregion
+
+        public int CompareTo(RomGroup other)
+        {
+            return this.position.CompareTo(other.position);
+        }
     }    
 }

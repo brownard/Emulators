@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace Emulators.Import
 {
-    class NFOCreator
+    public class NFOCreator
     {
         public static void CreateLocalInfo(Game game)
         {
@@ -15,6 +15,8 @@ namespace Emulators.Import
             using (ThumbGroup thumbGroup = new ThumbGroup(game))
             {
                 string thumbPath;
+                if (thumbGroup.HasLocalThumb(ThumbType.Logo, out thumbPath))
+                    thumbPaths.Add(thumbPath);
                 if (thumbGroup.HasLocalThumb(ThumbType.FrontCover, out thumbPath))
                     thumbPaths.Add(thumbPath);
                 if (thumbGroup.HasLocalThumb(ThumbType.BackCover, out thumbPath))

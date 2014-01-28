@@ -121,7 +121,7 @@ namespace Emulators
                         newNode.Nodes.Add("Loading...");
                         break;
                     case GroupItemType.EMULATOR:
-                        if (item.Id == -2)
+                        if (item.ItemId == -2)
                         {
                             newNode.Text = "All Emulators";
                             newNode.Nodes.Add("Loading...");
@@ -129,14 +129,14 @@ namespace Emulators
                         else
                         {
                             Emulator emu;
-                            if (allEmulators.TryGetValue(item.Id, out emu))
+                            if (allEmulators.TryGetValue(item.ItemId, out emu))
                                 newNode.Text = emu.Title;
                             else
                                 continue;
                         }
                         break;
                     case GroupItemType.GAME:
-                        if (item.Id == -2)
+                        if (item.ItemId == -2)
                         {
                             newNode.Text = "All Games";
                             newNode.Nodes.Add("Loading...");
@@ -144,7 +144,7 @@ namespace Emulators
                         else
                         {
                             Game game;
-                            if (allGames.TryGetValue(item.Id, out game))
+                            if (allGames.TryGetValue(item.ItemId, out game))
                                 newNode.Text = game.Title;
                             else
                                 continue;
@@ -180,7 +180,7 @@ namespace Emulators
             if (!groupsLoaded)
             {
                 groupsLoaded = true;
-                allGroups = GroupHandler.Instance.LoadGroups();
+                allGroups = RomGroup.GetAll();
                 groupsListView.Items.Clear();
 
                 foreach (RomGroup group in allGroups)
@@ -215,11 +215,16 @@ namespace Emulators
                 selectedGroup.Layout = layoutDropdownItems[layoutComboBox.Text];
 
             selectedGroup.GroupItemInfos.Clear();
+            int position = 0;
             foreach (TreeNode node in groupItemsTreeView.Nodes)
             {
                 GroupItemInfo info = node.Tag as GroupItemInfo;
                 if (info != null)
+                {
+                    info.Position = position;
+                    position++;
                     selectedGroup.GroupItemInfos.Add(info);
+                }
             }
         }
 
@@ -329,7 +334,7 @@ namespace Emulators
                 if (info == null)
                     continue;
                 TreeNode newNode = new TreeNode(item.Text) { Tag = info };
-                if (info.Id == -2)
+                if (info.ItemId == -2)
                     newNode.Nodes.Add("Loading...");
                 groupItemsTreeView.Nodes.Add(newNode);
             }
@@ -475,22 +480,22 @@ namespace Emulators
             switch (info.ItemType)
             {
                 case GroupItemType.SQL:
-                    foreach (Game game in DB.Instance.Get<Game>(new SimpleCriteria(info.SQL, info.Order)))
+                    foreach (Game game in info.GetItems(ListItemProperty.TITLE))
                         selectedNode.Nodes.Add(new TreeNode(game.Title) { BackColor = Color.DarkGray });
                     break;
                 case GroupItemType.DYNAMIC:
-                    foreach (RomGroup group in selectedGroup.GetSubGroups(info))
+                    foreach (RomGroup group in info.GetItems(ListItemProperty.TITLE))
                         selectedNode.Nodes.Add(new TreeNode(group.Title) { BackColor = Color.DarkGray });
                     break;
                 case GroupItemType.EMULATOR:
-                    if (info.Id == -2)
+                    if (info.ItemId == -2)
                     {
                         foreach (Emulator emu in Emulator.GetAll(true))
                             selectedNode.Nodes.Add(new TreeNode(emu.Title) { BackColor = Color.LightGray });
                     }
                     break;
                 case GroupItemType.GAME:
-                    if (info.Id == -2)
+                    if (info.ItemId == -2)
                     {
                         foreach (Game game in Game.GetAll())
                             selectedNode.Nodes.Add(new TreeNode(game.Title) { BackColor = Color.LightGray });
@@ -599,15 +604,22 @@ namespace Emulators
             updateSelectedGroupItem();
             updateSelectedGroup();
             List<RomGroup> groups = new List<RomGroup>();
+            int position = 0;
             foreach (ListViewItem item in groupsListView.Items)
             {
                 RomGroup group = item.Tag as RomGroup;
                 if (group != null)
+                {
+                    group.Position = position;
+                    position++;
                     groups.Add(group);
+                }
             }
 
-            GroupHandler.Instance.SaveGroups(groups);
-
+            DB.Instance.BeginTransaction();
+            foreach (RomGroup group in allGroups)
+                group.Commit();
+            DB.Instance.EndTransaction();
             base.ClosePanel();
         }
     }

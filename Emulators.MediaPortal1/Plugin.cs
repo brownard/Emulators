@@ -17,7 +17,7 @@ namespace Emulators.MediaPortal1
     {
         public static readonly int WINDOW_ID = 7942;
 
-        GUIPresenter newGUIHandler = null;
+        GUIPresenter guiHandler = null;
         bool firstLoad = true;
         ImageSwapper backdrop = null;
 
@@ -40,7 +40,6 @@ namespace Emulators.MediaPortal1
         [SkinControlAttribute(11)] protected GUISortButtonControl buttonSort = null;
         [SkinControlAttribute(12)] protected GUIButtonControl buttonViews = null;
         [SkinControlAttribute(13)] protected GUIButtonControl buttonImport = null;
-
         [SkinControlAttribute(6)] protected GUIButtonControl details_play = null;
 
         g_Player.StoppedHandler onVideoStopped = null;
@@ -59,8 +58,7 @@ namespace Emulators.MediaPortal1
             string optionsPath = Config.GetFile(Config.Dir.Config, "Emulators_2.xml");
             string groupsPath = Config.GetFile(Config.Dir.Config, "Emulators2Groups.xml");
             string defaultThumbPath = Config.GetFolder(Config.Dir.Thumbs);
-            Emulators2Settings.Instance.Init(new MP1DataProvider(newDbPath), new MP1Logger(), optionsPath, groupsPath, defaultThumbPath);
-            GroupHandler.EmptySubGroupName = Translator.Instance.unknown;
+            Emulators2Settings.Instance.Init(new MP1DataProvider(newDbPath), new MP1Logger(), optionsPath, Translator.Instance.unknown, defaultThumbPath);
         }
 
         public string PluginName()
@@ -109,7 +107,6 @@ namespace Emulators.MediaPortal1
         //Show Configuration
         public void ShowPlugin()
         {
-            startup();
             Emulators2Settings.Instance.IsConfig = true;
             if (dbUpgradeNeeded)
             {
@@ -124,22 +121,16 @@ namespace Emulators.MediaPortal1
         //Show Plugin
         public override bool Init()
         {
-            startup();
             Logger.LogDebug("Init()");
             Translator.Instance.TranslateSkin();
             return Load(GUIGraphicsContext.Skin + "\\" + MP1Utils.SKIN_FILE);
         }
 
-        void startup()
-        {
-            
-        }
-
         public override void DeInit()
         {
             Logger.LogDebug("DeInit()");
-            if (newGUIHandler != null)
-                newGUIHandler.Dispose();
+            if (guiHandler != null)
+                guiHandler.Dispose();
             LaunchHandler.Instance.Dispose();
             Options.Instance.Save();
             DB.Instance.Dispose();
@@ -188,9 +179,9 @@ namespace Emulators.MediaPortal1
                 backdrop.PropertyOne = "#Emulators2.CurrentItem.fanartpath";
                 backdrop.PropertyTwo = "#Emulators2.CurrentItem.fanartpath2";
 
-                newGUIHandler = new GUIPresenter();
-                newGUIHandler.OnSortAscendingChanged += new GUIPresenter.SortAscendingChanged(newGUIHandler_OnSortAscendingChanged);
-                newGUIHandler.OnPreviewVideoStatusChanged += new GUIPresenter.PreviewVideoStatusChanged(newGUIHandler_OnPreviewVideoStatusChanged);
+                guiHandler = new GUIPresenter();
+                guiHandler.OnSortAscendingChanged += new GUIPresenter.SortAscendingChanged(newGUIHandler_OnSortAscendingChanged);
+                guiHandler.OnPreviewVideoStatusChanged += new GUIPresenter.PreviewVideoStatusChanged(newGUIHandler_OnPreviewVideoStatusChanged);
                 GUIPropertyManager.SetProperty("#Emulators2.plugintitle", Options.Instance.GetStringOption("shownname"));
 
                 onVideoStopped = new g_Player.StoppedHandler(g_Player_PlayBackStopped);
@@ -203,8 +194,8 @@ namespace Emulators.MediaPortal1
 
             if (buttonSort != null)
             {
-                buttonSort.IsAscending = newGUIHandler.SortAscending;
-                buttonSort.SortChanged += new SortEventHandler(newGUIHandler.OnSort);
+                buttonSort.IsAscending = guiHandler.SortAscending;
+                buttonSort.SortChanged += new SortEventHandler(guiHandler.OnSort);
             }
 
             if (Options.Instance.GetBoolOption("showfanart"))
@@ -225,7 +216,7 @@ namespace Emulators.MediaPortal1
             g_Player.PlayBackStopped += onVideoStopped;
             g_Player.PlayBackEnded += onVideoEnded;
 
-            newGUIHandler.Load(facade, backdrop, startupItem, launch, showVideoPreviewControl, goodmergeList, details_play);
+            guiHandler.Load(facade, backdrop, startupItem, launch, showVideoPreviewControl, goodmergeList, details_play);
         }
 
         string previewVidFilename = null;
@@ -300,16 +291,16 @@ namespace Emulators.MediaPortal1
                 switch (actionType)
                 {
                     case Action.ActionType.ACTION_SELECT_ITEM:
-                        newGUIHandler.ItemSelected();
+                        guiHandler.ItemSelected();
                         break;
                     case Action.ActionType.ACTION_NEXT_ITEM:
-                        newGUIHandler.LaunchDocument();
+                        guiHandler.LaunchDocument();
                         break;
                 }
             }
             else if (control == goodmergeList)
             {
-                newGUIHandler.GoodMergeClicked(actionType);
+                guiHandler.GoodMergeClicked(actionType);
             }
             //Layout button
             else if (buttonLayout != null && controlId == buttonLayout.GetID)
@@ -318,29 +309,29 @@ namespace Emulators.MediaPortal1
                 if (view < 0)
                     return;
 
-                newGUIHandler.setLayout(view, true);
+                guiHandler.setLayout(view, true);
             }
             //Most played button
             else if (buttonSort == control)
             {
-                ListItemProperty sortProperty = MenuPresenter.ShowSortDialog(GetID, newGUIHandler.SortEnabled);
-                if (sortProperty != ListItemProperty.NONE && sortProperty != newGUIHandler.SortProperty)
+                ListItemProperty sortProperty = MenuPresenter.ShowSortDialog(GetID, guiHandler.SortEnabled);
+                if (sortProperty != ListItemProperty.NONE && sortProperty != guiHandler.SortProperty)
                 {
-                    newGUIHandler.SortProperty = sortProperty;
-                    newGUIHandler.Sort();
+                    guiHandler.SortProperty = sortProperty;
+                    guiHandler.Sort();
                 }
             }
             else if (buttonViews == control)
             {
-                newGUIHandler.SwitchView();
+                guiHandler.SwitchView();
             }
             else if (details_play == control)
             {
-                newGUIHandler.LaunchGame();
+                guiHandler.LaunchGame();
             }
             else if (buttonImport == control)
             {
-                newGUIHandler.RestartImporter();
+                guiHandler.RestartImporter();
             }
         }
 
@@ -349,17 +340,17 @@ namespace Emulators.MediaPortal1
             //To allow Esc to go back one level instead of exiting
             if (action.wID == MediaPortal.GUI.Library.Action.ActionType.ACTION_PREVIOUS_MENU)
             {
-                if (newGUIHandler.GoBack()) //if true back handled by plugin
+                if (guiHandler.GoBack()) //if true back handled by plugin
                     return;
             }
             else if (action.wID == Action.ActionType.ACTION_PAUSE)
             {
-                if (newGUIHandler.ToggleDetails())
+                if (guiHandler.ToggleDetails())
                     return;
             }
             else if (action.wID == Action.ActionType.ACTION_PLAY)
             {
-                if (newGUIHandler.LaunchGame(true))
+                if (guiHandler.LaunchGame(true))
                     return;
             }
             base.OnAction(action); //else exit
@@ -368,12 +359,12 @@ namespace Emulators.MediaPortal1
         protected override void OnShowContextMenu()
         {
             base.OnShowContextMenu();
-            newGUIHandler.ShowContextMenu();
+            guiHandler.ShowContextMenu();
         }
 
         protected override void OnPageDestroy(int new_windowId)
         {
-            newGUIHandler.OnPageDestroy();
+            guiHandler.OnPageDestroy();
             GUIGraphicsContext.ShowBackground = true;
             g_Player.PlayBackStopped -= onVideoStopped;
             g_Player.PlayBackEnded -= onVideoEnded;
@@ -411,16 +402,13 @@ namespace Emulators.MediaPortal1
                             startupItem = DB.Instance.Get<Emulator>(id);
                         break;
                     case "rom":
-                        //int id;
                         if (int.TryParse(m.Groups[2].Value, out id))
-                        {
                             startupItem = DB.Instance.Get<Game>(id);
-                        }
                         break;
                     case "group":
-                        RomGroup group;
-                        if (GroupHandler.Instance.GroupNames.TryGetValue(m.Groups[2].Value.ToLower(), out group))
-                            startupItem = group;
+                        List<DBItem> groups = DB.Instance.Get(typeof(RomGroup), new BaseCriteria(DBField.GetField(typeof(RomGroup), "Title"), "=", m.Groups[2].Value));
+                        if (groups.Count > 0)
+                            startupItem = groups[0];
                         break;
                     case "launch":
                         bool tryLaunch;

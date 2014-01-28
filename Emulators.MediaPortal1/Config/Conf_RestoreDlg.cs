@@ -64,8 +64,9 @@ namespace Emulators
         private void Conf_RestoreDlg_Load(object sender, EventArgs e)
         {
             dbBackup = new DatabaseBackup();
-            dbBackup.OnBackupProgress += new BackupProgressHandler(dbBackup_OnBackupProgress);
-            dbBackup.OnBackupError += new BackupDataErrorHandler(dbBackup_OnBackupDataError);
+            dbBackup.BackupProgress += dbBackup_OnBackupProgress;
+            dbBackup.BackupError += dbBackup_OnBackupDataError;
+            dbBackup.Completed += dbBackup_Completed;
             if (backup)
             {
                 dbBackup.BackupThumbs = backupThumbs;
@@ -88,44 +89,46 @@ namespace Emulators
             worker.Start();
         }
 
-        void dbBackup_OnBackupDataError(DataErrorType errorType, string message)
+        void dbBackup_Completed(object sender, EventArgs e)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new MethodInvoker(delegate() { dbBackup_OnBackupDataError(errorType, message); }));
+                BeginInvoke(new MethodInvoker(delegate() { dbBackup_Completed(sender, e); }));
+                return;
+            }
+            label1.Text = "Complete";
+            DialogResult = System.Windows.Forms.DialogResult.OK;
+            closeForm();
+        }
+
+        void dbBackup_OnBackupDataError(object sender, BackupErrorEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(delegate() { dbBackup_OnBackupDataError(sender, e); }));
+                return;
+            }
+            MessageBox.Show(string.Format("Error: {0}", e.Message), "Error", MessageBoxButtons.OK);
+            closeForm();
+        }
+
+        void dbBackup_OnBackupProgress(object sender, BackupProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new MethodInvoker(delegate() { dbBackup_OnBackupProgress(sender, e); }));
                 return;
             }
 
-            MessageBox.Show(string.Format("Error: {0}", message), "Error", MessageBoxButtons.OK);
+            progressBar1.Value = e.Percent;
+            label1.Text = string.Format("{0} / {1} - {2}", e.Current, e.Total, e.Message);
+        }
+
+        void closeForm()
+        {
             if (worker != null && worker.IsAlive)
                 worker.Join();
             Close();
-        }
-
-        void dbBackup_OnBackupProgress(int perc, int currentItem, int totalItems, string message, params object[] args)
-        {
-            if (InvokeRequired)
-            {
-                BeginInvoke(new MethodInvoker(delegate() { dbBackup_OnBackupProgress(perc, currentItem, totalItems, message, args); }));
-                return;
-            }
-
-            progressBar1.Value = perc;
-
-            if (perc == 100 && currentItem == 0 && totalItems == 0)
-            {
-                label1.Text = "Complete";
-                if (worker != null && worker.IsAlive)
-                    worker.Join();
-
-                DialogResult = System.Windows.Forms.DialogResult.OK;
-                Close();
-            }
-            else
-            {
-                message = string.Format(message, args);
-                label1.Text = string.Format("{0} / {1} - {2}", currentItem, totalItems, message);
-            }
         }
     }
 

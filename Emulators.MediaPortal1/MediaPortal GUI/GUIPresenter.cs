@@ -118,7 +118,6 @@ namespace Emulators.MediaPortal1
             }
             else
             {
-                GroupHandler.Instance.ResetThumbCache();
                 resetStartupItem(startupItem);
                 this.launchStartupItem = launch;
                 SortProperty = ListItemProperty.DEFAULT; //set skin property
@@ -219,7 +218,7 @@ namespace Emulators.MediaPortal1
             }
             else if (startupState == StartupState.GROUPS)
             {
-                foreach (RomGroup group in GroupHandler.Instance.Groups)
+                foreach (RomGroup group in RomGroup.GetAll())
                 {
                     group.RefreshThumbs();
                     items.Add(group);
@@ -692,6 +691,7 @@ namespace Emulators.MediaPortal1
                     }
                 }
                 else
+                {
                     switch (startupState)
                     {
                         case StartupState.EMULATORS:
@@ -707,6 +707,7 @@ namespace Emulators.MediaPortal1
                             groupsLayout = view;
                             break;
                     }
+                }
             }
             else
             {
@@ -736,7 +737,6 @@ namespace Emulators.MediaPortal1
             if (facade == null)
                 return;
 
-            GroupHandler.Instance.ResetThumbCache();
             clearGUIProperties();
             int index = pageLoad ? facadeIndex : facade.SelectedListItemIndex;
             itemSelected(lastItem, index, lastitemIndex, true, pageLoad, false);
@@ -951,7 +951,7 @@ namespace Emulators.MediaPortal1
             else if (facade.Focus)
             {
                 ExtendedGUIListItem item = facade.SelectedListItem as ExtendedGUIListItem;
-                if (item != null)
+                if (item != null && item.AssociatedGame != null)
                 {
                     gameSelected(item, true);
                     return true;

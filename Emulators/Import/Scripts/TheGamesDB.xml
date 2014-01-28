@@ -3,20 +3,21 @@
     <name>thegamesdb.net</name>
     <author>Brownard</author>
     <description>Grabs game data from thegamesdb.net</description>
-    <id>99999996</id>
+    <id>1</id>
     <version major="1" minor="0" point="0"/>
-    <published month="2" day="9" year="2012"/>
-    <type>MovieDetailsFetcher|MovieCoverFetcher</type>
+    <published month="12" day="1" year="2014"/>
+    <type>GameDetailsFetcher|GameCoverFetcher|GameScreenFetcher|GameFanartFetcher</type>
     <language>en</language>
   </details>
 
+  <!--
+  Searches for possible matches.
+  Available params:
+      search.platform
+      search.title
+  -->
   <action name="search">
-
-    <set name="rx_yearmade">
-      <![CDATA[(\d\d\d\d)]]>
-    </set>
-
-
+    <!--Used to convert plugin platform to TheGamesDB platform-->
     <set name="platformLookup">
       <![CDATA[
       |3DO,3DO|
@@ -61,60 +62,65 @@
       |Super Nintendo (SNES),SNES|
       |TurboGrafx 16,TurboGrafx-16|
       ]]>
-    </set>
-
+    </set>    
     <set name="rxSearchPlatform"><![CDATA[[|]([^,\n]*),${search.platform}[|]]]></set>
+    <!--Get corresponding TheGamesDB platform-->
     <parse name="newSearchPlatform" input="${platformLookup}" regex="${rxSearchPlatform}" />
-    
-    <!-- Retrieve results using Title ${search.system:safe} -->
-    <retrieve name="search_page" url="http://thegamesdb.net/api/GetGamesList.php?name=${search.title:safe}&amp;platform=${newSearchPlatform[0][0]}" encoding="UTF-8"/>
 
-    <!-- Search result page is used. -->
+    <!--Year Regex-->
+    <set name="rx_yearmade">
+      <![CDATA[(\d\d\d\d)]]>
+    </set>
+    
+    <!--Retrieve results using Title and Platform-->
+    <retrieve name="search_page" url="http://thegamesdb.net/api/GetGamesList.php?name=${search.title:safe}&amp;platform=${newSearchPlatform[0][0]}" encoding="UTF-8"/>
+    <!--Loop over results-->
     <parse name="game_details" input="${search_page}" xpath="//Game" />
     <loop name="curr_details" on="game_details">
+      <!--Id-->
       <set name="game[${count}].site_id" value="${game_details[${count}].id}"/>
+      <!--Title-->
       <set name="game[${count}].title" value="${game_details[${count}].GameTitle:htmldecode}"/>
-
+      <!--Year-->
       <parse name="yearmade" input="${game_details[${count}].ReleaseDate}" regex="${rx_yearmade}"/>
       <set name="game[${count}].yearmade" value="${yearmade[0][0]}"/>
-      
+      <!--Platform-->
       <set name="game[${count}].system" value="${game_details[${count}].Platform}"/>
-
+      <!--Convert to Plugin platform if necessary-->
       <set name="rxPlatformLookup"><![CDATA[[|]${game_details[${count}].Platform},([^|]*)[|]]]></set>
       <parse name="newPlatform" input="${platformLookup}" regex="${rxPlatformLookup}" />
       <if test="${newPlatform[0][0]}!=">
         <set name="game[${count}].system" value="${newPlatform[0][0]}"/>
       </if>
-      
+      <!--Details Url-->
       <set name="game[${count}].details_url" value="http://thegamesdb.net/api/GetGame.php?id=${game_details[${count}].id}"/>
     </loop>
   </action>
 
-  <action name="get_details">
-
-    
+  <!--Retrieves details for previously returned search result-->
+  <action name="get_details">    
+    <!--Get details page-->
     <retrieve name="details_page" url="http://thegamesdb.net/api/GetGame.php?id=${game.site_id}" encoding="UTF-8"/>
-
+    <!--Title-->
     <parse name="title" input="${details_page}" xpath="//GameTitle"/>
     <set name="game.title" value="${title[0]}"/>
-
+    <!--Company-->
     <parse name="company" input="${details_page}" xpath="//Developer"/>
     <set name="game.company" value="${company[0]:htmldecode}"/>
-
+    <!--Year-->
     <parse name="releasedate" input="${details_page}" xpath="//ReleaseDate"/>
     <set name="rx_yearmade">
       <![CDATA[(\d\d\d\d)]]>
     </set>
-    <parse name="yearmade" input="${releasedate[0]}" regex="${rx_yearmade}"/>
-    
+    <parse name="yearmade" input="${releasedate[0]}" regex="${rx_yearmade}"/>    
     <set name="game.yearmade" value="${yearmade[0][0]}"/>
-
+    <!--Description-->
     <parse name="description" input="${details_page}" xpath="//Overview"/>
     <set name="game.description" value="${description[0]:htmldecode}"/>
-
+    <!--Rating-->
     <parse name="grade" input="${details_page}" xpath="//Rating"/>
     <set name="game.grade" value="${grade[0]}"/>
-
+    <!--Genres-->
     <parse name="genre_block" input="${details_page}" xpath="//genre"/>
     <set name="game.genre" value=""/>
     <loop name="currGenre" on="genre_block">

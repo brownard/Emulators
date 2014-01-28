@@ -73,7 +73,6 @@
     <Compile Include="Database\DBTableAttribute.cs" />
     <Compile Include="Database\ICriteria.cs" />
     <Compile Include="Database\ISQLProvider.cs" />
-    <Compile Include="Database\NFOCreator.cs" />
     <Compile Include="Import\IDoWork.cs" />
     <Compile Include="Import\MameNameHandler.cs" />
     <Compile Include="Import\NFOCreator.cs" />

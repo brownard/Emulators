@@ -19,7 +19,7 @@ namespace Emulators.Database
         public event DatabaseChangedHandler OnItemAdded;
         public event DatabaseChangedHandler OnItemDeleted;
 
-        const double DB_VERSION = 1.7;
+        public const double DB_VERSION = 2.0;
 
         #region Singleton
 
@@ -897,7 +897,7 @@ namespace Emulators.Database
                     if (resultSet.Rows.Count == 0)
                     {
                         resultSet = sqlClient.Execute("create table " + tableAttr.TableName + " (id INTEGER primary key )");
-                       Logger.LogDebug("Created " + tableAttr.TableName + " table.");
+                        Logger.LogDebug("Created " + tableAttr.TableName + " table.");
                     }
 
                     // grab existing table info from the DB

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,38 @@ using System.Xml;
 
 namespace Emulators.Database
 {
-    public delegate void BackupDataErrorHandler(DataErrorType errorType, string message);
-    public delegate void BackupProgressHandler(int perc, int currentItem, int totalItems, string message, params object[] args);
+    #region EventArgs
+
+    public class BackupErrorEventArgs : EventArgs
+    {
+        public BackupErrorEventArgs(DataErrorType errorType, string message)
+        {
+            ErrorType = errorType;
+            Message = message;
+        }
+
+        public DataErrorType ErrorType { get; protected set; }
+        public string Message { get; protected set; }
+    }
+
+    public class BackupProgressEventArgs : EventArgs
+    {
+        public BackupProgressEventArgs(int percent, int current, int total, string message)
+        {
+            Percent = percent;
+            Current = current;
+            Total = total;
+            Message = message;
+        }
+
+        public int Percent { get; protected set; }
+        public int Current { get; protected set; }
+        public int Total { get; protected set; }
+        public string Message { get; protected set; }
+    }
+
+    #endregion
+
     public enum DataErrorType
     {
         LoadFile,
@@ -30,8 +61,24 @@ namespace Emulators.Database
     /// </summary>
     public class DatabaseBackup
     {
-        public event BackupDataErrorHandler OnBackupError; //error event
-        public event BackupProgressHandler OnBackupProgress; //progress event
+        public event EventHandler<BackupErrorEventArgs> BackupError; //error event
+        protected virtual void OnBackupError(BackupErrorEventArgs e)
+        {
+            if (BackupError != null)
+                BackupError(this, e);
+        }
+        public event EventHandler<BackupProgressEventArgs> BackupProgress; //progress event
+        protected virtual void OnBackupProgress(BackupProgressEventArgs e)
+        {
+            if (BackupProgress != null)
+                BackupProgress(this, e);
+        }
+        public event EventHandler Completed;
+        protected virtual void OnCompleted()
+        {
+            if (Completed != null)
+                Completed(this, EventArgs.Empty); 
+        }
 
         bool backupThumbs = true;
         public bool BackupThumbs
@@ -59,15 +106,6 @@ namespace Emulators.Database
         }
         public bool CleanRestore { get; set; }
 
-        //this is checked after an 'invalid data' event is raised
-        //to determine whether to just skip current item or stop restore completely
-        bool? shouldContinue = null;
-        public bool? ShouldContinue
-        {
-            get { return shouldContinue; }
-            set { shouldContinue = value; }
-        }
-
         #region Backup
         /// <summary>
         /// Backup the database to the specified save path
@@ -85,8 +123,7 @@ namespace Emulators.Database
             catch
             {
                 //error creating save path
-                if (OnBackupError != null)
-                    OnBackupError(DataErrorType.SaveFile, string.Format("Unable to create specified save path '{0}'.", savePath));
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.SaveFile, string.Format("Unable to create specified save path '{0}'.", savePath)));
                 return;
             }
             
@@ -99,8 +136,7 @@ namespace Emulators.Database
                     catch (Exception ex)
                     {
                         Logger.LogError("Unable to create backup thumb directory '{0}' - {1}", backupDirectory, ex.Message);
-                        if (OnBackupError != null)
-                            OnBackupError(DataErrorType.SaveFile, string.Format("Unable to create backup thumb directory '{0}'.", backupDirectory));
+                        OnBackupError(new BackupErrorEventArgs(DataErrorType.SaveFile, string.Format("Unable to create backup thumb directory '{0}'.", backupDirectory)));
                         return;
                     }
                 }
@@ -117,7 +153,7 @@ namespace Emulators.Database
             //add db version info
             XmlNode dbVersion = doc.CreateElement("version");
             XmlAttribute attr = doc.CreateAttribute("value");
-            attr.Value = DB.Instance.CurrentDBVersion.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            attr.Value = DB.DB_VERSION.ToString(new CultureInfo("en-US", false));
             dbVersion.Attributes.Append(attr);
             docNode.AppendChild(dbVersion);
 
@@ -126,16 +162,14 @@ namespace Emulators.Database
                 createNodes(docNode, Emulator.GetAll(), backupDirectory, 0); //add emu nodes
                 createNodes(docNode, Game.GetAll(), backupDirectory, 50); //add game nodes
             }
-            if (OnBackupProgress != null)
-                OnBackupProgress(100, 2, 2, "Saving...");
+            OnBackupProgress(new BackupProgressEventArgs(100, 2, 2, "Saving..."));
             try { doc.Save(savePath); }
             catch (Exception ex) //error saving doc
             {
-                if (OnBackupError != null)
-                    OnBackupError(DataErrorType.SaveFile, ex.Message);
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.SaveFile, ex.Message));
+                return;
             }
-            if (OnBackupProgress != null)
-                OnBackupProgress(100, 0, 0, "");
+            OnCompleted();
         }
 
         /// <summary>
@@ -157,18 +191,14 @@ namespace Emulators.Database
             string info = string.Format("Saving {0}...", typeName);
             double perc = startPerc;
             double increment = 50.0 / total;
-            if (OnBackupProgress != null)
-                OnBackupProgress(startPerc, 0, total, info);
+            OnBackupProgress(new BackupProgressEventArgs(startPerc, 0, total, info));
 
             ReadOnlyCollection<DBField> fieldList = DBField.GetFieldList(typeof(T));
             //loop through results
             for (int x = 0; x < total; x++)
             {
-                if (OnBackupProgress != null)
-                {
-                    OnBackupProgress((int)perc, x + 1, total, info);
-                    perc += increment;
-                }
+                OnBackupProgress(new BackupProgressEventArgs((int)perc, x + 1, total, info));
+                perc += increment;
                 addNode(parent, items[x], thumbDirectory);
             }
         }
@@ -289,16 +319,11 @@ namespace Emulators.Database
         /// Restore the database from the specified xml file using the specified merge settings
         /// </summary>
         /// <param name="xmlPath">The path to the xml file containing backup data</param>
-        /// <param name="emuMergeType">The merge setting to apply if an emulator with the same name already exists</param>
-        /// <param name="profileMergeType">The merge setting to apply if a profile with the same name and belonging to the same emulator already exists</param>
-        /// <param name="gameMergeType">The merge setting to apply if a game with the same path already exists</param>
-        /// <param name="clean">Whether to perform a clean restore by deleting all existing db data/thumbs</param>
         public void Restore(string xmlPath)
         {
             if (!File.Exists(xmlPath)) //error locating specified file
             {
-                if (OnBackupError != null)
-                    OnBackupError(DataErrorType.LoadFile, "Unable to locate specified backup file.");
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.LoadFile, "Unable to locate specified backup file."));
                 return;
             }
 
@@ -312,31 +337,27 @@ namespace Emulators.Database
             {
                 //error creating xml
                 Logger.LogError("Error loading specified backup - {0}", ex.Message);
-                if (OnBackupError != null)
-                    OnBackupError(DataErrorType.LoadFile, ex.Message);
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.LoadFile, ex.Message));
                 return;
             }
 
-            //XmlNodeList versions = doc.GetElementsByTagName("version");
-            //double version;
-            //if (versions.Count < 1 || versions[0].Attributes["value"] == null || !double.TryParse(versions[0].Attributes["value"].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out version))
-            //{
-            //    if (OnBackupDataError != null)
-            //        OnBackupDataError(DataErrorType.InvalidVersion, "No version info found for backup");
-            //    return;
-            //}
-            //if (version < 2.0)
-            //{
-            //    if (OnBackupDataError != null)
-            //        OnBackupDataError(DataErrorType.InvalidVersion, "Backups from database versions lower than 2.0 are not supported");
-            //    return;
-            //}
-            //else if (version > DB.Instance.CurrentDBVersion)
-            //{
-            //    if (OnBackupDataError != null)
-            //        OnBackupDataError(DataErrorType.InvalidVersion, "This backup is from a newer version of Emulators 2 and is not supported");
-            //    return;
-            //}
+            XmlNodeList versions = doc.GetElementsByTagName("version");
+            double version;
+            if (versions.Count < 1 || versions[0].Attributes["value"] == null || !double.TryParse(versions[0].Attributes["value"].Value, System.Globalization.NumberStyles.Any, new CultureInfo("en-US", false), out version))
+            {
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.InvalidVersion, "No version info found for backup"));
+                return;
+            }
+            if (version < 2.0)
+            {
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.InvalidVersion, "Backups from database versions lower than 2.0 are not supported"));
+                return;
+            }
+            else if (version > DB.DB_VERSION)
+            {
+                OnBackupError(new BackupErrorEventArgs(DataErrorType.InvalidVersion, "This backup is from a newer version of Emulators 2 and is not supported"));
+                return;
+            }
 
             if (restoreThumbs)
             {
@@ -349,19 +370,19 @@ namespace Emulators.Database
             }
 
             restoreItems = new DatabaseCache();
-            List<DBItem> emulators = getItems(doc.GetElementsByTagName(typeof(Emulator).FullName));
-            List<DBItem> games = getItems(doc.GetElementsByTagName(typeof(Game).FullName));
-            int total = emulators.Count + games.Count;
-            int current = 1;
             updatedEmulators = new Dictionary<int, Emulator>();
             lock (DB.Instance.SyncRoot)
             {
                 if (CleanRestore)
                 {
                     Logger.LogInfo("Clean restore - deleting all existing data");
+                    OnBackupProgress(new BackupProgressEventArgs(0, 0, 0, "Cleaning Database"));
+                    List<Emulator> existingItems = Emulator.GetAll();
                     DB.Instance.BeginTransaction();
-                    foreach (Emulator emu in DB.Instance.GetAll(typeof(Emulator)))
+                    foreach (Emulator emu in existingItems)
+                    {
                         emu.Delete();
+                    }
                     DB.Instance.EndTransaction();
                     dbEmulators = new Dictionary<string, Emulator>();
                     dbGames = new Dictionary<string, Game>();
@@ -371,28 +392,31 @@ namespace Emulators.Database
                     dbEmulators = getEmulatorNames();
                     dbGames = getGamePaths();
                 }
+
+                List<DBItem> emulators = getItems(doc.GetElementsByTagName(typeof(Emulator).FullName), true);
+                List<DBItem> games = getItems(doc.GetElementsByTagName(typeof(Game).FullName), true);
+                int total = emulators.Count + games.Count;
+                int current = 1;
+
                 DB.Instance.BeginTransaction();
                 foreach (Emulator emu in emulators)
                 {
-                    if (OnBackupProgress != null)
-                        OnBackupProgress((int)(((double)current / total) * 100), current, total, "Restoring " + emu.Title);
+                    OnBackupProgress(new BackupProgressEventArgs((current * 100) / total, current, total, "Restoring " + emu.Title));
                     current++;
                     updateEmulator(emu);
                 }
                 foreach (Game game in games)
                 {
-                    if (OnBackupProgress != null)
-                        OnBackupProgress((int)(((double)current / total) * 100), current, total, "Restoring " + game.Title);
+                    OnBackupProgress(new BackupProgressEventArgs((current * 100) / total, current, total, "Restoring " + game.Title));
                     current++;
                     updateGame(game);
                 }
                 DB.Instance.EndTransaction();
             }
-            if (OnBackupProgress != null)
-                OnBackupProgress(100, 0, 0, "");
+            OnCompleted();
         }
 
-        List<DBItem> getItems(XmlNodeList xmlItems)
+        List<DBItem> getItems(XmlNodeList xmlItems, bool reportProgress)
         {
             List<DBItem> items = new List<DBItem>();
             if (xmlItems.Count < 1)
@@ -406,8 +430,14 @@ namespace Emulators.Database
                 return items;
             }
 
+            int totalItems = xmlItems.Count;
+            int currentItem = 1;
             foreach (XmlNode xmlItem in xmlItems)
             {
+                if (reportProgress)
+                    OnBackupProgress(new BackupProgressEventArgs(0, currentItem, totalItems, "Parsing " + itemType.Name));
+                currentItem++;
+
                 DBItem dbItem = (DBItem)itemType.GetConstructor(System.Type.EmptyTypes).Invoke(null);
                 List<XmlNode> propertyNodes = new List<XmlNode>();
                 XmlNode relationsNode = null;
@@ -467,7 +497,7 @@ namespace Emulators.Database
             if (relationInfo != null)
             {
                 IRelationList relationList = relationInfo.GetRelationList(owner);
-                List<DBItem> relations = getItems(relationNode.ChildNodes);
+                List<DBItem> relations = getItems(relationNode.ChildNodes, false);
                 foreach (DBItem item in relations)
                 {
                     relationList.AddDBItem(item);
