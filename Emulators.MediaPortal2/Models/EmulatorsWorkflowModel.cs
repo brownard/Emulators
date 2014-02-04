@@ -25,7 +25,7 @@ namespace Emulators.MediaPortal2
             string groupsPath = Path.Combine(dataPath, "Emulators2Groups.xml");
             string defaultThumbs = @"C:\ProgramData\Team MediaPortal\MediaPortal\thumbs";
 
-            Emulators2Settings.Instance.Init(new SQLProvider(databasePath), new MP2Logger(), optionsPath, groupsPath, defaultThumbs);
+            EmulatorsSettings.Instance.Init(new SQLProvider(databasePath), new MP2Logger(), optionsPath, groupsPath, defaultThumbs);
 
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
             _focusedItemProperty = new WProperty(typeof(ItemViewModel), null);

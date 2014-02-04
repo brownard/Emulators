@@ -10,6 +10,12 @@ using Cornerstone.ScraperEngine;
 
 namespace Emulators.Import
 {
+    public enum ScriptSource
+    {
+        Resource,
+        File
+    }
+
     /// <summary>
     /// A wrapper for a specified script, provides
     /// methods to search and download info.
@@ -18,17 +24,23 @@ namespace Emulators.Import
     {
         #region Ctor
 
-        public ScriptScraper(string script)
+        public ScriptScraper(string script, ScriptSource source)
         {
             if (string.IsNullOrEmpty(script))
                 return;
 
             //try and load a valid scraper
-            Stream scriptStream;
+            Stream scriptStream = null;
             try
             {
-                Assembly asm = Assembly.GetExecutingAssembly();
-                scriptStream = asm.GetManifestResourceStream(script);
+                if (source == ScriptSource.File)
+                {
+                    scriptStream = File.OpenRead(script);
+                }
+                else if (source == ScriptSource.Resource)
+                {
+                    scriptStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(script);
+                }                
             }
             catch (Exception ex)
             {
@@ -53,6 +65,10 @@ namespace Emulators.Import
             }
             name = scraper.Name;
             idString = scraper.ID.ToString();
+            retrievesDetails = scraper.ScriptType.Contains("GameDetailsFetcher");
+            retrievesCovers = scraper.ScriptType.Contains("GameCoverFetcher");
+            retrievesScreens = scraper.ScriptType.Contains("GameScreenFetcher");
+            retrievesFanart = scraper.ScriptType.Contains("GameFanartFetcher");
             isReady = true;
         }
 
@@ -79,6 +95,18 @@ namespace Emulators.Import
         {
             get { return name; }
         }
+
+        bool retrievesDetails;
+        public override bool RetrievesDetails { get { return retrievesDetails; } }
+
+        bool retrievesCovers;
+        public override bool RetrievesCovers { get { return retrievesCovers; } }
+
+        bool retrievesScreens;
+        public override bool RetrievesScreens { get { return retrievesScreens; } }
+
+        bool retrievesFanart;
+        public override bool RetrievesFanart { get { return retrievesFanart; } }
 
         public override List<ScraperResult> GetMatches(ScraperSearchParams searchParams)
         {

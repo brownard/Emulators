@@ -68,7 +68,7 @@ namespace Emulators
                 return;
             }
 
-            bool isConfig = Emulators2Settings.Instance.IsConfig;
+            bool isConfig = EmulatorsSettings.Instance.IsConfig;
             BackgroundTaskHandler handler = new BackgroundTaskHandler();
             handler.ActionDelegate = () =>
             {
@@ -143,7 +143,7 @@ namespace Emulators
         {
             ExecutorItem launcher = new ExecutorItem(isPc);
             launcher.Arguments = profile.Arguments;
-            launcher.Suspend = !Emulators2Settings.Instance.IsConfig && profile.SuspendMP == true;
+            launcher.Suspend = !EmulatorsSettings.Instance.IsConfig && profile.SuspendMP == true;
             if (launcher.Suspend && profile.DelayResume && profile.ResumeDelay > 0)
                 launcher.ResumeDelay = profile.ResumeDelay;
 

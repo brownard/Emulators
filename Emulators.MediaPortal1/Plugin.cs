@@ -54,11 +54,7 @@ namespace Emulators.MediaPortal1
             oldDbPath = Config.GetFile(Config.Dir.Database, "Emulators2_v1.db3");
             newDbPath = Config.GetFile(Config.Dir.Database, "Emulators2_v2.db3");
             dbUpgradeNeeded = System.IO.File.Exists(oldDbPath) && !System.IO.File.Exists(newDbPath);
-
-            string optionsPath = Config.GetFile(Config.Dir.Config, "Emulators_2.xml");
-            string groupsPath = Config.GetFile(Config.Dir.Config, "Emulators2Groups.xml");
-            string defaultThumbPath = Config.GetFolder(Config.Dir.Thumbs);
-            Emulators2Settings.Instance.Init(new MP1DataProvider(newDbPath), new MP1Logger(), optionsPath, Translator.Instance.unknown, defaultThumbPath);
+            EmulatorsSettings.Instance.Init(new MP1Settings());
         }
 
         public string PluginName()
@@ -107,7 +103,7 @@ namespace Emulators.MediaPortal1
         //Show Configuration
         public void ShowPlugin()
         {
-            Emulators2Settings.Instance.IsConfig = true;
+            EmulatorsSettings.Instance.IsConfig = true;
             if (dbUpgradeNeeded)
             {
                 MP1Utils.ShowProgressDialog(new DatabaseUpgrader(new MP1DataProvider(oldDbPath)));
@@ -115,7 +111,7 @@ namespace Emulators.MediaPortal1
             }
             new Conf_Main().ShowDialog();
             Options.Instance.Save();
-            Emulators2Settings.Instance.IsConfig = false;
+            EmulatorsSettings.Instance.IsConfig = false;
         }
 
         //Show Plugin

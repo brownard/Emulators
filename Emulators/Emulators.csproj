@@ -15,7 +15,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
   </PropertyGroup>
@@ -29,6 +29,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,6 +41,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.DirectX.DirectInput, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\DirectX for Managed Code\1.0.2902.0\Microsoft.DirectX.DirectInput.dll</HintPath>
@@ -88,7 +90,7 @@
     <Compile Include="Base\ScraperGame.cs" />
     <Compile Include="Base\ScraperResult.cs" />
     <Compile Include="CommunityServer\client.cs" />
-    <Compile Include="Emulators2Settings.cs" />
+    <Compile Include="EmulatorsSettings.cs" />
     <Compile Include="Data\ComboBoxItem.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="Base\EmulatorsException.cs" />
@@ -156,28 +158,28 @@
     <EmbeddedResource Include="Docs\FAQ.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Import\Scripts\Mobygames.xml">
+    <None Include="Import\Scripts\Mobygames.xml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Import\Scripts\MameDB.xml">
+    <None Include="Import\Scripts\MameDB.xml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
     <EmbeddedResource Include="Data\EmuSettings.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Data\mamelist.txt" />
     <Content Include="External\SharpCompress.3.5.dll" />
-    <EmbeddedResource Include="Import\Scripts\TheGamesDB.xml">
+    <None Include="Import\Scripts\TheGamesDB.xml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Import\Scripts\GameFAQs.xml">
+    </None>
+    <None Include="Import\Scripts\GameFAQs.xml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
     <EmbeddedResource Include="Data\Emulators2Groups.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -187,11 +189,10 @@
     <Content Include="Docs\ChangeLog.txt" />
     <Content Include="External\hasher.dll" />
     <None Include="Properties\DataSources\RomMatch.datasource" />
-    <EmbeddedResource Include="Import\Scripts\Maws.xml">
+    <None Include="Import\Scripts\Maws.xml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">
       <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>

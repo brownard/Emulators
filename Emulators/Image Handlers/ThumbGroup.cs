@@ -113,7 +113,7 @@ namespace Emulators
             lock (parent.SyncRoot)
             {
                 if (parent.Id != null)
-                    thumbPath = string.Format(@"{0}\{1}\{2}\{3}\", Emulators2Settings.Instance.ThumbDirectory, THUMB_DIR_NAME, thumbFolder, parent.Id);
+                    thumbPath = string.Format(@"{0}\{1}\{2}\{3}\", EmulatorsSettings.Instance.ThumbDirectory, THUMB_DIR_NAME, thumbFolder, parent.Id);
             }
 
             //init Thumbs

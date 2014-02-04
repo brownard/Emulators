@@ -781,7 +781,7 @@ namespace Emulators
                     updateEmulator();
                     updateProfile();
                     newEmu.Commit();
-                    Emulators2Settings.Instance.Importer.Restart();
+                    EmulatorsSettings.Instance.Importer.Restart();
                     using (ThumbGroup thumbGroup = new ThumbGroup(newEmu))
                     {
                         if (wzd.Logo != null)

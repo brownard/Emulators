@@ -192,20 +192,20 @@ namespace Emulators
 
         static string replaceWildcards(string args, string romPath, bool useQuotes)
         {
-            args = args.Replace(Emulators2Settings.ROM_DIRECTORY_WILDCARD, System.IO.Path.GetDirectoryName(romPath));
+            args = args.Replace(EmulatorsSettings.ROM_DIRECTORY_WILDCARD, System.IO.Path.GetDirectoryName(romPath));
 
             string fmt = useQuotes ? "\"{0}\"" : "{0}";
             bool foundWildcard = false;
-            if (args.Contains(Emulators2Settings.GAME_WILDCARD))
+            if (args.Contains(EmulatorsSettings.GAME_WILDCARD))
             {
                 foundWildcard = true;
-                args = args.Replace(Emulators2Settings.GAME_WILDCARD, string.Format(fmt, romPath));
+                args = args.Replace(EmulatorsSettings.GAME_WILDCARD, string.Format(fmt, romPath));
             }
-            if (args.Contains(Emulators2Settings.GAME_WILDCARD_NO_EXT))
+            if (args.Contains(EmulatorsSettings.GAME_WILDCARD_NO_EXT))
             {
                 foundWildcard = true;
                 string filename = System.IO.Path.GetFileNameWithoutExtension(romPath);
-                args = args.Replace(Emulators2Settings.GAME_WILDCARD_NO_EXT, string.Format(fmt, filename));
+                args = args.Replace(EmulatorsSettings.GAME_WILDCARD_NO_EXT, string.Format(fmt, filename));
             }
             if (!foundWildcard)
             {
@@ -218,7 +218,7 @@ namespace Emulators
 
         static string removeWildcards(string args)
         {
-            return args.Replace(Emulators2Settings.GAME_WILDCARD, "").Replace(Emulators2Settings.GAME_WILDCARD_NO_EXT, "").Replace(Emulators2Settings.ROM_DIRECTORY_WILDCARD, "").Trim();
+            return args.Replace(EmulatorsSettings.GAME_WILDCARD, "").Replace(EmulatorsSettings.GAME_WILDCARD_NO_EXT, "").Replace(EmulatorsSettings.ROM_DIRECTORY_WILDCARD, "").Trim();
         }
 
         //Fired when a key press is detected by the keyboard hook

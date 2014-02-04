@@ -3,10 +3,10 @@
     <name>mobygames.com</name>
     <author>BadMrFrosty</author>
     <description>Grabs game data from mobygames.com</description>
-    <id>99999999</id>
+    <id>2</id>
     <version major="1" minor="0" point="0"/>
-    <published month="8" day="8" year="2009"/>
-    <type>MovieDetailsFetcher|MovieCoverFetcher</type>
+    <published month="2" day="3" year="2014"/>
+    <type>GameDetailsFetcher|GameCoverFetcher|GameScreenFetcher</type>
     <language>en</language>
   </details>
 

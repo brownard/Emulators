@@ -7,9 +7,17 @@ using Emulators.Database;
 
 namespace Emulators
 {
+    public interface ISettingsProvider
+    {
+        ISQLiteProvider DataProvider { get; }
+        ILog Logger { get; }
+        string OptionsPath { get; }
+        string DataPath { get; }
+        string DefaultThumbDirectory { get; }
+        string EmptySubGroupName { get; }
+    }
 
-
-    public class Emulators2Settings : IDisposable
+    public class EmulatorsSettings : IDisposable
     {
         #region Wildcards
         public const string ROM_DIRECTORY_WILDCARD = "%ROMDIRECTORY%";
@@ -17,15 +25,14 @@ namespace Emulators
         public const string GAME_WILDCARD_NO_EXT = "%ROM_WITHOUT_EXT%";
         #endregion
         
-        public void Init(ISQLiteProvider sqlProvider, ILog logger, string optionsPath, string emptySubGroupName, string defaultThumbDirectory)
+        public void Init(ISettingsProvider settings)
         {
             System.Net.ServicePointManager.DefaultConnectionLimit = 100;
-            ILogger = logger;
-            RomGroup.EmptySubGroupName = emptySubGroupName;
-            Options.OptionsPath = optionsPath;
-            DB.Instance.DataProvider = sqlProvider;
+            Settings = settings;
+            RomGroup.EmptySubGroupName = settings.EmptySubGroupName;
+            DB.Instance.DataProvider = settings.DataProvider;
             DB.Instance.Init();
-            initThumbDir(defaultThumbDirectory);
+            initThumbDir(settings.DefaultThumbDirectory);
         }
 
         void initThumbDir(string defaultThumbDirectory)
@@ -47,10 +54,15 @@ namespace Emulators
             ThumbDirectory = location;            
         }
 
-        public ILog ILogger
+        public ISettingsProvider Settings
         {
             get;
             private set;
+        }
+
+        public ILog Logger
+        {
+            get { return Settings.Logger; }
         }
 
         bool isConfig = false;
@@ -67,15 +79,15 @@ namespace Emulators
         }
 
         static object instanceLock = new object();
-        static Emulators2Settings instance = null;
-        public static Emulators2Settings Instance
+        static EmulatorsSettings instance = null;
+        public static EmulatorsSettings Instance
         {
             get
             {
                 if (instance == null)
                     lock (instanceLock)
                         if (instance == null)
-                            instance = new Emulators2Settings();
+                            instance = new EmulatorsSettings();
                 return instance;
             }
         }

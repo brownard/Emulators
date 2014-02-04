@@ -394,7 +394,7 @@ namespace Emulators
 
         public override void BeforeDelete()
         {
-            Emulators2Settings.Instance.Importer.Remove(Id);
+            EmulatorsSettings.Instance.Importer.Remove(Id);
             DeleteThumbs();
             DB.Instance.BeginTransaction();
             foreach (GameDisc disc in Discs)

@@ -29,7 +29,7 @@ namespace Emulators
                 group.GroupItemInfos.Add(GroupItemInfo.CreateEmulatorGroup(-2));
                 groups.Add(group);
 
-                group = new RomGroup("All Games", "LOWER(title), title");
+                group = new RomGroup("All Games", null, "LOWER(title), title");
                 groups.Add(group);
 
                 group = new RomGroup("Top Rated", null, "grade DESC, LOWER(title), title LIMIT 10")

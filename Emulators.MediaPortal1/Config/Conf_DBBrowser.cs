@@ -583,7 +583,7 @@ namespace Emulators
 
         void sendToImporter(IEnumerable<Game> games)
         {
-            Importer importer = Emulators2Settings.Instance.Importer;
+            Importer importer = EmulatorsSettings.Instance.Importer;
             BackgroundTaskHandler handler = new BackgroundTaskHandler();
             handler.StatusDelegate = () => { return "sending to Importer..."; };
             handler.ActionDelegate = () =>
@@ -613,7 +613,7 @@ namespace Emulators
             savePCSettings = false;
             saveDiscs = false;
 
-            Importer importer = Emulators2Settings.Instance.Importer;
+            Importer importer = EmulatorsSettings.Instance.Importer;
             List<Game> games = new List<Game>();
             foreach (ListViewItem item in dBListView.SelectedItems)
                 games.Add((Game)item.Tag);

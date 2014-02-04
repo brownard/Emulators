@@ -9,12 +9,13 @@ namespace Emulators.Import
     {
         public abstract string IdString { get; }
         public abstract string Name { get; }
+        public abstract bool RetrievesDetails { get; }
+        public abstract bool RetrievesCovers { get; }
+        public abstract bool RetrievesScreens { get; }
+        public abstract bool RetrievesFanart { get; }
 
-        public virtual bool IsReady
-        {
-            get { return true; }
-        }
-        
+        public virtual bool IsReady { get { return true; } }
+
         public override string ToString()
         {
             return Name;

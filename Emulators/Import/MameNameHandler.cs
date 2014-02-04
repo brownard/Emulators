@@ -23,25 +23,33 @@ namespace Emulators.Import
             }
         }
         
-        const string RESOURCE_NAME = "Emulators.Data.mamelist.txt";
+        const string MAME_LIST_NAME = "mamelist.txt";
         Dictionary<string, string> nameLookup;
         
         public MameNameHandler()
         {
             nameLookup = new Dictionary<string, string>();
-            using (StreamReader reader = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream(RESOURCE_NAME)))
+            try
             {
-                reader.ReadLine();
-                string item;
-                while ((item = reader.ReadLine()) != null)
+                FileInfo mameList = new FileInfo(Path.Combine(EmulatorsSettings.Instance.Settings.DataPath, MAME_LIST_NAME));
+                using (StreamReader reader = new StreamReader(mameList.OpenRead()))
                 {
-                    int index = item.IndexOf(" ");
-                    if (index > 0)
+                    reader.ReadLine();
+                    string item;
+                    while ((item = reader.ReadLine()) != null)
                     {
-                        string name = item.Substring(index + 1).Trim(' ', '"');
-                        nameLookup[item.Remove(index)] = name;
+                        int index = item.IndexOf(" ");
+                        if (index > 0)
+                        {
+                            string name = item.Substring(index + 1).Trim(' ', '"');
+                            nameLookup[item.Remove(index)] = name;
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Error reading {0} - {1}", MAME_LIST_NAME, ex.Message);
             }
         }
 

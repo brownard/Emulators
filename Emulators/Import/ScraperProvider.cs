@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Emulators.Import
 {
@@ -18,21 +19,32 @@ namespace Emulators.Import
                 if (allScrapers == null)
                 {
                     allScrapers = new List<Scraper>();
-                    OfflineMameScraper mameScraper = new OfflineMameScraper();
-                    if (mameScraper.IsReady)
-                        allScrapers.Add(new OfflineMameScraper());
+                    //OfflineMameScraper mameScraper = new OfflineMameScraper();
+                    //if (mameScraper.IsReady)
+                    //    allScrapers.Add(new OfflineMameScraper());
 
-                    foreach (string resource in System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames())
+                    string scriptDirectory = Path.Combine(EmulatorsSettings.Instance.Settings.DataPath, "Scripts");
+                    foreach (string script in Directory.EnumerateFiles(scriptDirectory, "*.xml"))
                     {
-                        if (!resource.StartsWith("Emulators.Import.Scripts.") || !resource.EndsWith(".xml"))
-                            continue;
-
-                        ScriptScraper script = new ScriptScraper(resource);
-                        if (script.IsReady)
-                            allScrapers.Add(script);
+                        ScriptScraper scriptScraper = new ScriptScraper(script, ScriptSource.File);
+                        if (scriptScraper.IsReady)
+                            allScrapers.Add(scriptScraper);
                         else
-                            Logger.LogDebug("Failed to parse scraper script {0}", resource);
+                            Logger.LogDebug("Failed to parse scraper script '{0}'", script);
                     }
+                    Logger.LogInfo("Loaded {0} scrapers", allScrapers.Count);
+
+                    //foreach (string resource in System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames())
+                    //{
+                    //    if (!resource.StartsWith("Emulators.Import.Scripts.") || !resource.EndsWith(".xml"))
+                    //        continue;
+
+                    //    ScriptScraper script = new ScriptScraper(resource, ScriptSource.Resource);
+                    //    if (script.IsReady)
+                    //        allScrapers.Add(script);
+                    //    else
+                    //        Logger.LogDebug("Failed to parse scraper script {0}", resource);
+                    //}
                 }
             }
         }

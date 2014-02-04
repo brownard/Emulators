@@ -45,7 +45,7 @@ namespace Emulators
             importGridView.RowsAdded += importGridView_RowsAdded;
             comboBoxChangedHandler = new EventHandler(resultsComboBox_SelectedIndexChanged);
             
-            importer = Emulators2Settings.Instance.Importer;
+            importer = EmulatorsSettings.Instance.Importer;
             importer.ProgressChanged += importer_Progress;
             importer.ImportStatusChanged += importer_ImportStatusChanged;
             importer.RomStatusChanged += importer_RomStatusChanged;

@@ -3,10 +3,10 @@
     <name>mamedb.com</name>
     <author>Brownard</author>
     <description>Grabs game data from mamedb.com</description>
-    <id>10</id>
+    <id>4</id>
     <version major="1" minor="0" point="0"/>
-    <published month="13" day="6" year="2013"/>
-    <type>MovieDetailsFetcher|MovieCoverFetcher</type>
+    <published month="2" day="3" year="2014"/>
+    <type>GameDetailsFetcher|GameCoverFetcher|GameScreenFetcher</type>
     <language>en</language>
   </details>
 

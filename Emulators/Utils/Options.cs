@@ -15,7 +15,6 @@ namespace Emulators
 
     public class Options
     {
-        public static string OptionsPath { get; set; }
         //sync root for thread safety
         object optionSync = new object();
 
@@ -486,7 +485,7 @@ namespace Emulators
             try
             {
                 XmlDocument doc = new XmlDocument();
-                doc.Load(OptionsPath); //get the xml file
+                doc.Load(EmulatorsSettings.Instance.Settings.OptionsPath); //get the xml file
 
                 XmlNodeList nodes = doc.GetElementsByTagName("option"); //select option node
 
@@ -535,7 +534,7 @@ namespace Emulators
 
                 createIgnoreNodes(topnode, doc);
 
-                doc.Save(OptionsPath);
+                doc.Save(EmulatorsSettings.Instance.Settings.OptionsPath);
             }
         }
 

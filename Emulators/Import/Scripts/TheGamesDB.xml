@@ -5,7 +5,7 @@
     <description>Grabs game data from thegamesdb.net</description>
     <id>1</id>
     <version major="1" minor="0" point="0"/>
-    <published month="12" day="1" year="2014"/>
+    <published month="2" day="3" year="2014"/>
     <type>GameDetailsFetcher|GameCoverFetcher|GameScreenFetcher|GameFanartFetcher</type>
     <language>en</language>
   </details>

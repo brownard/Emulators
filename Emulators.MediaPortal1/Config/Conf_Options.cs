@@ -247,21 +247,22 @@ namespace Emulators
             fanartScraperComboBox.Items.Add("Use search result");
             fanartScraperComboBox.SelectedIndex = 0;
 
-            foreach (Scraper script in ScraperProvider.GetScrapers(true))
+            foreach (Scraper scraper in ScraperProvider.GetScrapers(true))
             {
-                scraperListBox.Items.Add(script, !ignoredScripts.Contains(script.IdString));
-                coversScraperComboBox.Items.Add(script);
-                screensScraperComboBox.Items.Add(script);
-                int index = fanartScraperComboBox.Items.Add(script);
-                if (script.IdString == options.GetStringOption("coversscraperid"))
+                bool scraperEnabled = !ignoredScripts.Contains(scraper.IdString);
+                scraperListBox.Items.Add(scraper, scraperEnabled);
+                coversScraperComboBox.Items.Add(scraper);
+                screensScraperComboBox.Items.Add(scraper);
+                int index = fanartScraperComboBox.Items.Add(scraper);
+                if (scraper.IdString == options.GetStringOption("coversscraperid"))
                     coversScraperComboBox.SelectedIndex = index;
-                if (script.IdString == options.GetStringOption("screensscraperid"))
+                if (scraper.IdString == options.GetStringOption("screensscraperid"))
                     screensScraperComboBox.SelectedIndex = index;
-                if (script.IdString == options.GetStringOption("fanartscraperid"))
+                if (scraper.IdString == options.GetStringOption("fanartscraperid"))
                     fanartScraperComboBox.SelectedIndex = index;
             }
         }
-
+                
         public override void SavePanel()
         {
             Options options = Options.Instance;

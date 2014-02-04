@@ -122,7 +122,7 @@ namespace Emulators.MediaPortal1
             message = string.Format(message, args);
             string heading = Options.Instance.GetStringOption("shownname");
 
-            if (Emulators2Settings.Instance.IsConfig)
+            if (EmulatorsSettings.Instance.IsConfig)
             {
                 MessageBox.Show(message, heading, MessageBoxButtons.OK);
                 return;
@@ -144,7 +144,7 @@ namespace Emulators.MediaPortal1
 
         public static void ShowProgressDialog(IBackgroundTask handler)
         {
-            if (Emulators2Settings.Instance.IsConfig)
+            if (EmulatorsSettings.Instance.IsConfig)
             {
                 using (Conf_ProgressDialog dialog = new Conf_ProgressDialog(handler))
                     dialog.ShowDialog();

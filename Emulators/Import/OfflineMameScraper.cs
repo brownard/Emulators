@@ -10,12 +10,32 @@ namespace Emulators.Import
     {
         public override string IdString
         {
-            get { return "1"; }
+            get { return "-1"; }
         }
 
         public override string Name
         {
             get { return "Mame Offline Scraper"; }
+        }
+
+        public override bool RetrievesDetails
+        {
+            get { return true; }
+        }
+
+        public override bool RetrievesCovers
+        {
+            get { return false; }
+        }
+
+        public override bool RetrievesScreens
+        {
+            get { return false; }
+        }
+
+        public override bool RetrievesFanart
+        {
+            get { return false; }
         }
 
         bool isInit = false;

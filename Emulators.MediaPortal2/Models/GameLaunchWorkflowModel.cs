@@ -104,7 +104,7 @@ namespace Emulators.MediaPortal2
         {
             ExecutorItem launcher = new ExecutorItem(isPc);
             launcher.Arguments = profile.Arguments;
-            launcher.Suspend = !Emulators2Settings.Instance.IsConfig && profile.SuspendMP == true;
+            launcher.Suspend = !EmulatorsSettings.Instance.IsConfig && profile.SuspendMP == true;
             if (launcher.Suspend && profile.DelayResume && profile.ResumeDelay > 0)
                 launcher.ResumeDelay = profile.ResumeDelay;
 
