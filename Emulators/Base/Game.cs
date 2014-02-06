@@ -1,4 +1,5 @@
 using Emulators.Database;
+using Emulators.Import;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,10 +16,9 @@ namespace Emulators
             return DB.Instance.GetAll<Game>();
         }
 
-        public Game() { }
+        internal Game() { }
         public Game(Emulator parentEmu, string path, string launchFile = null)
         {
-            Title = titleFromPath(path);
             parentEmulator = parentEmu;
             if (parentEmulator.IsPc())
             {
@@ -26,20 +26,16 @@ namespace Emulators
                 GameProfiles.Populated = true;
             }
             Discs.Add(new GameDisc(path, launchFile));
-            Discs.Populated = true;            
+            Discs.Populated = true;
+            Title = GetDefaultTitle();         
         }
 
-        private string titleFromPath(string path)
+        public string GetDefaultTitle()
         {
-            string s = "";
-            int index = path.LastIndexOf(".");
-            if (index > -1)
-                s = path.Remove(index);
-
-            if (s.Length > 0)
-                s = s.Substring(s.LastIndexOf("\\") + 1);
-
-            return s;
+            string title = System.IO.Path.GetFileNameWithoutExtension(CurrentDisc.Path);
+            if (parentEmulator != null && parentEmulator.Platform == "Arcade")
+                title = MameNameHandler.Instance.GetName(title);
+            return title;
         }
 
         [DBField]
@@ -290,7 +286,7 @@ namespace Emulators
         /// </summary>
         public void Reset()
         {
-            this.Title = titleFromPath(CurrentDisc.Path);
+            this.Title = GetDefaultTitle();
             this.Grade = 0;
             this.Year = 0;
             this.Description = "";

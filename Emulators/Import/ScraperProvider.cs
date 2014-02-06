@@ -24,7 +24,7 @@ namespace Emulators.Import
                     //    allScrapers.Add(new OfflineMameScraper());
 
                     string scriptDirectory = Path.Combine(EmulatorsSettings.Instance.Settings.DataPath, "Scripts");
-                    foreach (string script in Directory.EnumerateFiles(scriptDirectory, "*.xml"))
+                    foreach (string script in Directory.GetFiles(scriptDirectory, "*.xml"))
                     {
                         ScriptScraper scriptScraper = new ScriptScraper(script, ScriptSource.File);
                         if (scriptScraper.IsReady)

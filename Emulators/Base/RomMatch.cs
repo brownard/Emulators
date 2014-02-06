@@ -18,11 +18,9 @@ namespace Emulators
                 this.game = game;
                 id = game.Id.Value;
                 Path = game.CurrentDisc.Path;
-                Filename = System.IO.Path.GetFileNameWithoutExtension(Path);
+                Filename = game.CurrentDisc.Filename;
                 searchTitle = string.IsNullOrEmpty(game.SearchTitle) ? game.Title : game.SearchTitle;
-                IsDefaultSearchTerm = Filename == searchTitle;
-                if (IsDefaultSearchTerm && game.ParentEmulator.Platform == "Arcade")
-                    searchTitle = MameNameHandler.Instance.GetName(searchTitle);
+                IsDefaultSearchTerm = game.GetDefaultTitle() == searchTitle;
             }
             PossibleGameDetails = new List<ScraperResult>();
             ResetDisplayInfo();

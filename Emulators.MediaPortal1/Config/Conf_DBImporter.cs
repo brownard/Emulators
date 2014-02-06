@@ -174,7 +174,7 @@ namespace Emulators
                 try
                 {
                     //Make sure we only execute on main thread
-                    Invoke(new MethodInvoker(delegate()
+                    BeginInvoke(new MethodInvoker(delegate()
                     {
                         importer_Progress(sender, e);
                     }
@@ -206,7 +206,7 @@ namespace Emulators
                 try
                 {
                     //Make sure we only execute on main thread
-                    Invoke(new MethodInvoker(delegate()
+                    BeginInvoke(new MethodInvoker(delegate()
                     {
                         importer_ImportStatusChanged(sender, e);
                     }
@@ -250,7 +250,7 @@ namespace Emulators
                 try
                 {
                     //Make sure we only execute on main thread
-                    Invoke(new MethodInvoker(delegate()
+                    BeginInvoke(new MethodInvoker(delegate()
                     {
                         importer_RomStatusChanged(sender, e);
                     }
