@@ -44,7 +44,7 @@ namespace Emulators
             dr = tb.NewRow(); dr[0] = "31"; dr[1] = "Apple II"; tb.Rows.Add(dr);
             dr = tb.NewRow(); dr[0] = "51"; dr[1] = "Apple IIgs"; tb.Rows.Add(dr);
             
-            dr = tb.NewRow(); dr[0] = "-1"; dr[1] = "Arcade"; tb.Rows.Add(dr);
+            dr = tb.NewRow(); dr[0] = "143"; dr[1] = "Arcade"; tb.Rows.Add(dr);
 
             dr = tb.NewRow(); dr[0] = "28"; dr[1] = "Atari 2600"; tb.Rows.Add(dr);
             dr = tb.NewRow(); dr[0] = "33"; dr[1] = "Atari 5200"; tb.Rows.Add(dr);
