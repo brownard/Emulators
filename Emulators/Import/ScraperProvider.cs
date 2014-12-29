@@ -229,58 +229,58 @@ namespace Emulators.Import
             ScraperResultsCache resultsCache = new ScraperResultsCache(result.Title, result.SearchParams);
             resultsCache.Add(defaultScraper, result);
 
-            string image1, image2;
             List<Scraper> searchScrapers = getSearchScrapers(coversScraper, defaultScraper);
-            if (!searchForImages(searchScrapers, resultsCache, ThumbSearchType.Covers, out image1, out image2))
+            if (!searchForImages(searchScrapers, resultsCache, ThumbSearchType.Covers, scraperGame))
                 return null; //doWork is false
-            scraperGame.BoxFrontUrl = image1;
-            scraperGame.BoxBackUrl = image2;
 
             searchScrapers = getSearchScrapers(screensScraper, defaultScraper);
-            if (!searchForImages(searchScrapers, resultsCache, ThumbSearchType.Screens, out image1, out image2))
+            if (!searchForImages(searchScrapers, resultsCache, ThumbSearchType.Screens, scraperGame))
                 return null;
-            scraperGame.TitleScreenUrl = image1;
-            scraperGame.InGameUrl = image2;
 
             searchScrapers = getSearchScrapers(fanartScraper, defaultScraper);
-            searchForImages(searchScrapers, resultsCache, ThumbSearchType.Fanart, out image1, out image2);
-            scraperGame.FanartUrl = image1;
+            searchForImages(searchScrapers, resultsCache, ThumbSearchType.Fanart, scraperGame);
 
             return scraperGame;
         }
 
-        bool searchForImages(List<Scraper> lScrapers, ScraperResultsCache resultsCache, ThumbSearchType searchType, out string image1, out string image2)
+        bool searchForImages(List<Scraper> lScrapers, ScraperResultsCache resultsCache, ThumbSearchType searchType, ScraperGame scraperGame)
         {
-            image1 = null; 
-            image2 = null;
             foreach (Scraper scraper in lScrapers)
             {
-                string l1, l2;
                 ScraperResult result = resultsCache.GetResult(scraper);
                 if (!doWork())
                     return false;
-                if (result != null)
-                {
-                    if (searchType == ThumbSearchType.Fanart)
-                    {
-                        scraper.GetFanartUrls(result, out image1);
-                    }
-                    else
-                    {
-                        if (searchType == ThumbSearchType.Covers)
-                            scraper.GetCoverUrls(result, out l1, out l2);
-                        else
-                            scraper.GetScreenUrls(result, out l1, out l2);
-                        if (image1 == null)
-                            image1 = l1;
-                        if (image2 == null)
-                            image2 = l2;
-                    }
+                if (result == null)
+                    continue;
 
-                    if (image1 != null && (image2 != null || searchType == ThumbSearchType.Fanart))
+                if (searchType == ThumbSearchType.Fanart)
+                {
+                    scraper.GetFanartUrls(result, true);
+                    if (result.FanartUrl != null)
+                    {
+                        scraperGame.FanartUrl = result.FanartUrl;
                         break;
-                    if (!doWork())
-                        return false;
+                    }
+                }
+                else if (searchType == ThumbSearchType.Covers)
+                {
+                    scraper.GetCoverUrls(result, true);
+                    if (scraperGame.BoxFrontUrl == null && result.BoxFrontUrl != null)
+                        scraperGame.BoxFrontUrl = result.BoxFrontUrl;
+                    if (scraperGame.BoxBackUrl == null && result.BoxBackUrl != null)
+                        scraperGame.BoxBackUrl = result.BoxBackUrl;
+                    if (scraperGame.BoxFrontUrl != null && scraperGame.BoxBackUrl != null)
+                        break;
+                }
+                else if (searchType == ThumbSearchType.Screens)
+                {
+                    scraper.GetScreenUrls(result, true);
+                    if (scraperGame.TitleScreenUrl == null && result.TitleScreenUrl != null)
+                        scraperGame.TitleScreenUrl = result.TitleScreenUrl;
+                    if (scraperGame.InGameUrl == null && result.InGameUrl != null)
+                        scraperGame.InGameUrl = result.InGameUrl;
+                    if (scraperGame.TitleScreenUrl != null && scraperGame.InGameUrl != null)
+                        break;
                 }
             }
             return true;

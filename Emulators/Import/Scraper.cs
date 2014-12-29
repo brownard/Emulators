@@ -42,23 +42,18 @@ namespace Emulators.Import
             return null;
         }
 
-        public virtual List<string> GetCoverUrls(ScraperResult result, out string coverFront, out string coverBack)
+        public virtual List<string> GetCoverUrls(ScraperResult result, bool autoMatch)
         {
-            coverFront = null;
-            coverBack = null;
             return new List<string>();
         }
 
-        public virtual List<string> GetScreenUrls(ScraperResult result, out string titleScreen, out string inGame)
+        public virtual List<string> GetScreenUrls(ScraperResult result, bool autoMatch)
         {
-            titleScreen = null;
-            inGame = null;
             return new List<string>();
         }
 
-        public virtual List<string> GetFanartUrls(ScraperResult result, out string fanart)
+        public virtual List<string> GetFanartUrls(ScraperResult result, bool autoMatch)
         {
-            fanart = null;
             return new List<string>();
         }
     }

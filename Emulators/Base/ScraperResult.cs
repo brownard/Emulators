@@ -11,6 +11,12 @@ namespace Emulators.Import
         public string Title { get; set; }
         public string System { get; set; }
         public string Year { get; set; }
+        public string BoxFrontUrl { get; set; }
+        public string BoxBackUrl { get; set; }
+        public string TitleScreenUrl { get; set; }
+        public string InGameUrl { get; set; }
+        public string FanartUrl { get; set; }
+
         public int SearchDistance { get; set; }
         public ScraperSearchParams SearchParams { get; set; }
         public Scraper DataProvider { get; set; }

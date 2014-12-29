@@ -190,61 +190,70 @@ namespace Emulators.Import
             return new ScraperGame(cleanString(title), cleanString(company), cleanString(yearmade), cleanString(grade), cleanString(description), genre);
         }
 
-        public override List<string> GetCoverUrls(ScraperResult result, out string coverFront, out string coverBack)
+        public override List<string> GetCoverUrls(ScraperResult result, bool autoMatch)
         {
-            coverFront = null;
-            coverBack = null;
             Dictionary<string, string> imageResults = scraper.Execute("get_cover_art", getDetailsParams(result.SiteId));
             if (imageResults == null)
                 return new List<string>();
 
             string baseUrl; 
             imageResults.TryGetValue("game.baseurl", out baseUrl);
-
-            if (imageResults.TryGetValue("game.cover.front", out coverFront) && !string.IsNullOrEmpty(coverFront))
-                coverFront = expandUrl(coverFront, baseUrl);
-            if (imageResults.TryGetValue("game.cover.back", out coverBack) && !string.IsNullOrEmpty(coverBack))
-                coverBack = expandUrl(coverBack, baseUrl);
-
             List<string> urls = getImageUrls(imageResults, baseUrl);
-            matchUrlToImageType(urls, ref coverFront, "front", ref coverBack, "back");
+
+            if (autoMatch)
+            {
+                string coverFront;
+                string coverBack;
+                if (imageResults.TryGetValue("game.cover.front", out coverFront) && !string.IsNullOrEmpty(coverFront))
+                    coverFront = expandUrl(coverFront, baseUrl);
+                if (imageResults.TryGetValue("game.cover.back", out coverBack) && !string.IsNullOrEmpty(coverBack))
+                    coverBack = expandUrl(coverBack, baseUrl);
+
+                matchUrlToImageType(urls, ref coverFront, "front", ref coverBack, "back");
+                result.BoxFrontUrl = coverFront;
+                result.BoxBackUrl = coverBack;
+            }
             return urls;
         }
 
-        public override List<string> GetScreenUrls(ScraperResult result, out string titleScreen, out string inGame)
+        public override List<string> GetScreenUrls(ScraperResult result, bool autoMatch)
         {
-            titleScreen = null;
-            inGame = null;
             Dictionary<string, string> imageResults = scraper.Execute("get_screenshots", getDetailsParams(result.SiteId));
             if (imageResults == null)
                 return new List<string>();
 
             string baseUrl;
             imageResults.TryGetValue("game.baseurl", out baseUrl);
-
-            if (imageResults.TryGetValue("game.screen.title", out titleScreen) && !string.IsNullOrEmpty(titleScreen))
-                titleScreen = expandUrl(titleScreen, baseUrl);
-            if (imageResults.TryGetValue("game.screen.ingame", out inGame) && !string.IsNullOrEmpty(inGame))
-                inGame = expandUrl(inGame, baseUrl);
-
             List<string> urls = getImageUrls(imageResults, baseUrl);
-            matchUrlToImageType(urls, ref titleScreen, "title", ref inGame, null);
+
+            if (autoMatch)
+            {
+                string titleScreen;
+                string inGame;
+                if (imageResults.TryGetValue("game.screen.title", out titleScreen) && !string.IsNullOrEmpty(titleScreen))
+                    titleScreen = expandUrl(titleScreen, baseUrl);
+                if (imageResults.TryGetValue("game.screen.ingame", out inGame) && !string.IsNullOrEmpty(inGame))
+                    inGame = expandUrl(inGame, baseUrl);
+
+                matchUrlToImageType(urls, ref titleScreen, "title", ref inGame, null);
+                result.TitleScreenUrl = titleScreen;
+                result.InGameUrl = inGame;
+            }
             return urls;
         }
 
-        public override List<string> GetFanartUrls(ScraperResult result, out string fanart)
+        public override List<string> GetFanartUrls(ScraperResult result, bool autoMatch)
         {
-            fanart = null;
             Dictionary<string, string> imageResults = scraper.Execute("get_fanart", getDetailsParams(result.SiteId));
             if (imageResults == null)
                 return new List<string>();
 
             string baseUrl;
             imageResults.TryGetValue("game.baseurl", out baseUrl);
-            List<string> results = getImageUrls(imageResults, baseUrl);
-            if (results.Count > 0)
-                fanart = results[0];
-            return results;
+            List<string> urls = getImageUrls(imageResults, baseUrl);
+            if (autoMatch && urls.Count > 0)
+                result.FanartUrl = urls[0];
+            return urls;
         }
 
         List<string> getImageUrls(Dictionary<string, string> results, string baseUrl)
@@ -265,35 +274,38 @@ namespace Emulators.Import
         {
             bool found1 = !string.IsNullOrEmpty(image1);
             bool found2 = !string.IsNullOrEmpty(image2);
+            if (found1 && found2)
+                return;
+
             bool checkTag1 = !string.IsNullOrEmpty(imageTag1);
             bool checkTag2 = !string.IsNullOrEmpty(imageTag2);
 
-            if(!found1 || !found2)
-                for (int x = 0; x < urls.Count; x++)
+            for (int x = 0; x < urls.Count; x++)
+            {
+                string url = urls[x].ToLower();
+                if (checkTag1 && !found1 && url.Contains(imageTag1))
                 {
-                    string url = urls[x].ToLower();
-                    if (checkTag1 && !found1 && url.Contains(imageTag1))
-                    {
-                        image1 = urls[x];
-                        found1 = true;
-                    }
-                    else if (checkTag2 && !found2 && url.Contains(imageTag2))
-                    {
-                        image2 = urls[x];
-                        found2 = true;
-                    }
-                    else if (image1 == null)
-                    {
-                        image1 = urls[x];
-                    }
-                    else if (image2 == null)
-                    {
-                        image2 = urls[x];
-                    }
-
-                    if (found1 && found2)
+                    image1 = urls[x];
+                    if (found2)
                         break;
+                    found1 = true;
                 }
+                else if (checkTag2 && !found2 && url.Contains(imageTag2))
+                {
+                    image2 = urls[x];
+                    if (found1)
+                        break;
+                    found2 = true;
+                }
+                else if (image1 == null)
+                {
+                    image1 = urls[x];
+                }
+                else if (image2 == null)
+                {
+                    image2 = urls[x];
+                }
+            }
         }
 
         Dictionary<string, string> getDetailsParams(string siteId)

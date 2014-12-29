@@ -177,11 +177,10 @@ namespace Emulators
                     //get thumb url's
                     if (romMatch != null)
                     {
-                        string dummy1, dummy2;
                         Scraper scraper = romMatch.GameDetails.DataProvider;
-                        covers = scraper.GetCoverUrls(romMatch.GameDetails, out dummy1, out dummy2);
-                        screens = scraper.GetScreenUrls(romMatch.GameDetails, out dummy1, out dummy2);
-                        fanarts = scraper.GetFanartUrls(romMatch.GameDetails, out dummy1);
+                        covers = scraper.GetCoverUrls(romMatch.GameDetails, false);
+                        screens = scraper.GetScreenUrls(romMatch.GameDetails, false);
+                        fanarts = scraper.GetFanartUrls(romMatch.GameDetails, false);
                     }
                     else
                         new EmulatorScraper().GetThumbs(platformId, out covers, out screens);
