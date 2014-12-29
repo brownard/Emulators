@@ -16,7 +16,7 @@ namespace Emulators
             return DB.Instance.GetAll<Game>();
         }
 
-        internal Game() { }
+        public Game() { }
         public Game(Emulator parentEmu, string path, string launchFile = null)
         {
             parentEmulator = parentEmu;
