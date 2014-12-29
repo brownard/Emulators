@@ -1,0 +1,13 @@
+[Bb]in/
+[Oo]bj/
+
+[Rr]elease/
+
+*.suo
+*.user
+
+[Pp]ackages/
+nuget.exe
+
+Thumbs.db
+Desktop.ini
