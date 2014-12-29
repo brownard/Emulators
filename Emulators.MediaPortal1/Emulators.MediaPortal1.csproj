@@ -32,20 +32,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Common.Utils">
-      <HintPath>$(ProgramFiles)\Team MediaPortal\MediaPortal\Common.Utils.dll</HintPath>
+    <Reference Include="Common.Utils, Version=1.4.100.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Common.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="Core">
-      <HintPath>$(ProgramFiles)\Team MediaPortal\MediaPortal\Core.dll</HintPath>
+    <Reference Include="Core, Version=1.4.100.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Core.dll</HintPath>
     </Reference>
-    <Reference Include="Databases">
-      <HintPath>$(ProgramFiles)\Team MediaPortal\MediaPortal\Databases.dll</HintPath>
+    <Reference Include="Databases, Version=1.4.100.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Databases.dll</HintPath>
     </Reference>
-    <Reference Include="Dialogs">
-      <HintPath>$(ProgramFiles)\Team MediaPortal\MediaPortal\plugins\Windows\Dialogs.dll</HintPath>
+    <Reference Include="Dialogs, Version=1.4.100.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Dialogs.dll</HintPath>
     </Reference>
-    <Reference Include="RemotePlugins">
-      <HintPath>$(ProgramFiles)\Team MediaPortal\MediaPortal\RemotePlugins.dll</HintPath>
+    <Reference Include="RemotePlugins, Version=1.6.100.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\RemotePlugins.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,8 +60,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Utils">
-      <HintPath>$(ProgramFiles)\Team MediaPortal\MediaPortal\Utils.dll</HintPath>
+    <Reference Include="Utils, Version=1.4.100.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\Utils.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
