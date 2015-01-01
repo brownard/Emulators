@@ -6,16 +6,15 @@ using System.Text;
 
 namespace Emulators
 {
-    public enum EmulatorType
-    {
-        Standard,
-        PcGame,
-        ManyEmulators
-    }
-
     [DBTable("Emulators")]
     public class Emulator : ThumbItem, IComparable<Emulator>
     {
+        #region Get Emulators
+
+        /// <summary>
+        /// Retrieves all emulators from the database.
+        /// </summary>
+        /// <param name="hidePcIfEmpty">Whether to not return the PC emulator if no PC games have been configured</param>
         public static List<Emulator> GetAll(bool hidePcIfEmpty = false)
         {
             List<Emulator> result = DB.Instance.GetAll<Emulator>();
@@ -28,44 +27,52 @@ namespace Emulators
             return result;
         }
 
+        /// <summary>
+        /// Returns the PC games emulator
+        /// </summary>
+        public static Emulator GetPC()
+        {
+            return DB.Instance.Get<Emulator>(-1);
+        }
+
+        #endregion
+
+        #region Ctor
+
+        /// <summary>
+        /// Creates a new, blank emulator
+        /// </summary>
+        public static Emulator CreateNewEmulator()
+        {
+            Emulator emu = new Emulator() { Title = "New Emulator" };
+            emu.EmulatorProfiles.Add(new EmulatorProfile(true));
+            return emu;
+        }
+
+        /// <summary>
+        /// Creates a new PC emulator. Called on DB init if a PC emulator doesn't currently exist
+        /// </summary>
+        internal static Emulator CreateNewPCEmulator()
+        {
+            return new Emulator()
+            {
+                Id = -1,
+                Title = "PC",
+                Platform = "Windows"
+            };
+        }
+
         public Emulator() { }
-        public Emulator(EmulatorType specialRole)
-        {
-            switch (specialRole)
-            {
-                case EmulatorType.Standard:
-                    Title = "New Emulator";
-                    EmulatorProfiles.Add(new EmulatorProfile(true));
-                    break;
-                case EmulatorType.PcGame:
-                    Id = -1;
-                    Title = "PC";
-                    Platform = "Windows";
-                    break;
-                case EmulatorType.ManyEmulators:
-                    Id = -2;
-                    break;
-            }
-        }
 
-        EmulatorProfile defaultProfile = null;
-        [DBField]
-        public EmulatorProfile DefaultProfile
-        {
-            get
-            {
-                if (defaultProfile == null && EmulatorProfiles.Count > 0)
-                    defaultProfile = EmulatorProfiles[0];
-                return defaultProfile;
-            }
-            set
-            {
-                defaultProfile = value;
-            }
-        }
+        #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// The display name of the emulator
+        /// </summary>
         [DBField]
-        public override string Title 
+        public string Title
         {
             get { return title; }
             set
@@ -76,6 +83,9 @@ namespace Emulators
         }
         string title = "";
 
+        /// <summary>
+        /// The platform/console that this emulator emulates
+        /// </summary>
         [DBField]
         public string Platform
         {
@@ -88,6 +98,9 @@ namespace Emulators
         }
         string platform = "";
 
+        /// <summary>
+        /// Th developer/company that created the emulated console
+        /// </summary>
         [DBField]
         public string Developer
         {
@@ -100,6 +113,9 @@ namespace Emulators
         }
         string developer = "";
 
+        /// <summary>
+        /// The year that the console was released
+        /// </summary>
         [DBField]
         public int Year
         {
@@ -112,6 +128,9 @@ namespace Emulators
         }
         int year = 0;
 
+        /// <summary>
+        /// Description of the console
+        /// </summary>
         [DBField]
         public string Description
         {
@@ -124,6 +143,9 @@ namespace Emulators
         }
         string description = "";
 
+        /// <summary>
+        /// The user rating of the console
+        /// </summary>
         [DBField]
         public int Grade
         {
@@ -136,6 +158,9 @@ namespace Emulators
         }
         int grade = 0;
 
+        /// <summary>
+        /// The list position of the emulator
+        /// </summary>
         [DBField]
         public int Position
         {
@@ -148,6 +173,9 @@ namespace Emulators
         }
         int position = 0;
 
+        /// <summary>
+        /// Path to the directory containing the roms
+        /// </summary>
         [DBField]
         public string PathToRoms
         {
@@ -160,8 +188,11 @@ namespace Emulators
         }
         string pathToRoms = "";
 
+        /// <summary>
+        /// The file filter used when searching the rom directory
+        /// </summary>
         [DBField]
-        public string Filter	
+        public string Filter
         {
             get { return filter; }
             set
@@ -172,6 +203,9 @@ namespace Emulators
         }
         string filter = "";
 
+        /// <summary>
+        /// The last view used to display the roms
+        /// </summary>
         [DBField]
         public int View
         {
@@ -184,6 +218,9 @@ namespace Emulators
         }
         int view = 0;
 
+        /// <summary>
+        /// The aspect ratio of the console's game case. Used to resize cover art to a consistent size
+        /// </summary>
         [DBField]
         public double CaseAspect
         {
@@ -196,6 +233,9 @@ namespace Emulators
         }
         double caseAspect = 0;
 
+        /// <summary>
+        /// Path to an associated video file
+        /// </summary>
         [DBField]
         public string VideoPreview
         {
@@ -210,7 +250,15 @@ namespace Emulators
             }
         }
         string videoPreview = "";
-        
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Sets the case aspect from a decimal as a string
+        /// </summary>
+        /// <param name="aspect"></param>
         public void SetCaseAspect(string aspect)
         {
             int index = aspect.TrimStart().IndexOf(" ");
@@ -222,14 +270,21 @@ namespace Emulators
                 CaseAspect = caseAspect;
         }
 
+        /// <summary>
+        /// Saves the emulator's list position. Currently just does a full commit.
+        /// </summary>
+        public void SavePosition()
+        {
+            Commit();
+        }
+
+        /// <summary>
+        /// Whether this emulator plays PC games
+        /// </summary>
+        /// <returns></returns>
         public bool IsPc()
         {
             return Id == -1;
-        }
-
-        public bool IsManyEmulators()
-        {
-            return Id == -2;
         }
 
         public override string ToString()
@@ -237,7 +292,34 @@ namespace Emulators
             return Title;
         }
 
+        #endregion
+
+        #region Profiles
+
+        EmulatorProfile defaultProfile = null;
+        /// <summary>
+        /// The default profile to use for all games that haven't specified a specific profile
+        /// </summary>
+        [DBField]
+        public EmulatorProfile DefaultProfile
+        {
+            get
+            {
+                //default to the first profile if default profile not set
+                if (defaultProfile == null && EmulatorProfiles.Count > 0)
+                    defaultProfile = EmulatorProfiles[0];
+                return defaultProfile;
+            }
+            set
+            {
+                defaultProfile = value;
+            }
+        }
+
         DBRelationList<EmulatorProfile> profiles = null;
+        /// <summary>
+        /// All configured profiles for this emulator
+        /// </summary>
         [DBRelation(AutoRetrieve = true)]
         public DBRelationList<EmulatorProfile> EmulatorProfiles
         {
@@ -249,84 +331,119 @@ namespace Emulators
             }
         }
 
+        #endregion
+
+        #region Games
+
         object gamesSync = new object();
-        bool gamesModified = true;
         List<Game> dbGames = null;
-        List<Game> games = null;
-        public List<Game> Games
+        ReadOnlyCollection<Game> games = null;
+        /// <summary>
+        /// Lazily retrieves the games associated with this emulator
+        /// </summary>
+        public ReadOnlyCollection<Game> Games
         {
             get
             {
+                //see if we can avoid getting a lock
+                ReadOnlyCollection<Game> lGames = games;
+                if (lGames != null)
+                    return lGames;
+
                 lock (gamesSync)
                 {
-                    if (gamesModified)
+                    if (games == null)
                     {
                         if (dbGames == null)
                         {
+                            //inital init of backing list
                             DB.Instance.OnItemAdded += onGameAdded;
                             DB.Instance.OnItemDeleted += onGameDeleted;
                             BaseCriteria emuCriteria = new BaseCriteria(DBField.GetField(typeof(Game), "ParentEmulator"), "=", Id);
                             dbGames = DB.Instance.Get<Game>(emuCriteria);
                         }
-                        games = new List<Game>(dbGames);
-                        gamesModified = false;
+                        //create a seperate, raad only collection that won't be modified on database changes
+                        games = new List<Game>(dbGames).AsReadOnly();
                     }
                     return games;
                 }
             }
         }
 
+        /// <summary>
+        /// FIred when an item has been added to the database
+        /// </summary>
         void onGameAdded(DBItem changedItem)
         {
             Game changedGame = changedItem as Game;
+            //see if item is a game and belongs to this emulator
             if (changedGame != null && changedGame.ParentEmulator == this)
             {
                 lock (gamesSync)
                 {
                     if (!dbGames.Contains(changedGame))
                     {
+                        //update backing list and invalidate front list
                         dbGames.Add(changedGame);
-                        gamesModified = true;
+                        games = null;
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// FIred when an item has been deleted from the database
+        /// </summary>
         void onGameDeleted(DBItem changedItem)
         {
             Game changedGame = changedItem as Game;
+            //see if item is a game and belongs to this emulator
             if (changedGame != null && changedGame.ParentEmulator == this)
             {
                 lock (gamesSync)
                 {
+                    //update backing list and invalidate front list
                     dbGames.Remove(changedGame);
-                    gamesModified = true;
+                    games = null;
                 }
             }
         }
 
+        #endregion
+
+        #region DBItem Overrides
+
         public override void BeforeDelete()
         {
+            //delete associated thumbs
             DeleteThumbs();
             DB.Instance.BeginTransaction();
+            //delete all games
             foreach (Game game in Games)
                 game.Delete();
+            //delete all profiles
             foreach (EmulatorProfile profile in EmulatorProfiles)
                 profile.Delete();
             DB.Instance.EndTransaction();
             base.BeforeDelete();
         }
 
-        public static Emulator GetPC()
+        #endregion
+
+        #region ThumbItem Overrides
+
+        public override string ThumbFolder
         {
-            return DB.Instance.Get<Emulator>(-1);
-        }
-        
-        public void SavePosition()
-        {
-            Commit();
+            get { return ThumbGroup.EMULATOR_DIR_NAME; }
         }
 
+        #endregion
+
+        #region IComparable
+
+        /// <summary>
+        /// Compares the list positions
+        /// </summary>
         public int CompareTo(Emulator other)
         {
             if (other == null)
@@ -334,9 +451,6 @@ namespace Emulators
             return this.position.CompareTo(other.position);
         }
 
-        public override string ThumbFolder
-        {
-            get { return ThumbGroup.EMULATOR_DIR_NAME; }
-        }
+        #endregion
     }
 }

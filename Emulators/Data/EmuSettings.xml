@@ -49,6 +49,13 @@
       <UseQuotes>false</UseQuotes>
     </Emulator>
   </Platform>
+
+  <Platform name="Nintendo Wii" caseaspect="0.71">
+    <Emulator name="Dolphin" exe="dolphin.exe">
+      <Filters>*.iso;*.elf;*.dol;*.gcm;*.wbfs;*.ciso;*.gcz;*.wad</Filters>
+      <Arguments>-b -e</Arguments>
+    </Emulator>
+  </Platform>
   
   <Platform name="PlayStation" caseaspect="1.14">
     <Emulator name="ePSXe" exe="epsxe.exe">

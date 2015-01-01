@@ -85,7 +85,7 @@ namespace Emulators
         string arguments = null;
 
         [DBField]
-        public bool? UseQuotes
+        public bool UseQuotes
         {
             get { return useQuotes; }
             set
@@ -94,10 +94,10 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
-        bool? useQuotes = false;
+        bool useQuotes = true;
 
         [DBField]
-        public bool? SuspendMP
+        public bool SuspendMP
         {
             get { return suspendMP; }
             set
@@ -106,7 +106,7 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
-        bool? suspendMP = false;
+        bool suspendMP = false;
 
         [DBField]
         public bool EnableGoodmerge

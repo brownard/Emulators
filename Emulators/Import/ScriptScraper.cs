@@ -10,111 +10,112 @@ using Cornerstone.ScraperEngine;
 
 namespace Emulators.Import
 {
-    public enum ScriptSource
-    {
-        Resource,
-        File
-    }
-
     /// <summary>
     /// A wrapper for a specified script, provides
     /// methods to search and download info.
     /// </summary>
     public class ScriptScraper : Scraper
     {
+        #region Variables
+        
+        const string FRONT_IMAGE_TAG = "front";
+        const string BACK_IMAGE_TAG = "back";
+        const string TITLE_IMAGE_TAG = "title";
+
+        ScriptableScraper scraper;
+        string name;
+        string idString = "-1";
+        bool retrievesDetails;
+        bool retrievesCovers;
+        bool retrievesScreens;
+        bool retrievesFanart;
+
+        #endregion
+
         #region Ctor
 
-        public ScriptScraper(string script, ScriptSource source)
+        public static ScriptScraper TryCreate(string path, bool fromAssembly)
         {
-            if (string.IsNullOrEmpty(script))
-                return;
+            if (string.IsNullOrEmpty(path))
+                return null;
 
-            //try and load a valid scraper
-            Stream scriptStream = null;
+            string scriptTxt = null;
             try
             {
-                if (source == ScriptSource.File)
-                {
-                    scriptStream = File.OpenRead(script);
-                }
-                else if (source == ScriptSource.Resource)
-                {
-                    scriptStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(script);
-                }                
+                Stream scriptStream;
+                if(fromAssembly)
+                    scriptStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
+                else
+                    scriptStream = File.OpenRead(path);
+
+                using (StreamReader sr = new StreamReader(scriptStream))
+                    scriptTxt = sr.ReadToEnd();
             }
             catch (Exception ex)
             {
-                scriptStream = null;
-                Logger.LogError("Error loading script {0} - {1}", script, ex.Message);
+                Logger.LogError("ScriptScraper: Error loading script from '{0}' - {1}", path, ex.Message);
+                return null;
             }
 
-            if (scriptStream == null)
-                return;
-            string scriptTxt = "";
-            using (StreamReader sr = new StreamReader(scriptStream))
-            {
-                scriptTxt = sr.ReadToEnd();
-            }
-
-            scraper = new ScriptableScraper(scriptTxt, false);
+            if (string.IsNullOrEmpty(scriptTxt))
+                return null;
+            ScriptableScraper scraper = new ScriptableScraper(scriptTxt, false);
             if (!scraper.LoadSuccessful)
             {
-                Logger.LogError("Import_Scraper - Error loading script {0}", script);
-                scraper = null;
-                return; //problem with scraper
+                Logger.LogError("ScriptScraper: Error loading script from '{0}'", path);
+                return null;
             }
+            return new ScriptScraper(scraper);
+        }
+
+        public ScriptScraper(ScriptableScraper scriptableScraper)
+        {
+            scraper = scriptableScraper;
             name = scraper.Name;
             idString = scraper.ID.ToString();
             retrievesDetails = scraper.ScriptType.Contains("GameDetailsFetcher");
             retrievesCovers = scraper.ScriptType.Contains("GameCoverFetcher");
             retrievesScreens = scraper.ScriptType.Contains("GameScreenFetcher");
             retrievesFanart = scraper.ScriptType.Contains("GameFanartFetcher");
-            isReady = true;
         }
 
         #endregion
 
-        ScriptableScraper scraper = null;
-        bool isReady = false;
-        /// <summary>
-        /// Is true if specified script was loaded successfully
-        /// </summary>
-        public override bool IsReady
-        {
-            get { return isReady; }
-        }
+        #region Properties
 
-        string idString = "-1";
         public override string IdString
         {
             get { return idString; }
         }
 
-        string name = "";
         public override string Name
         {
             get { return name; }
         }
 
-        bool retrievesDetails;
-        public override bool RetrievesDetails { get { return retrievesDetails; } }
-
-        bool retrievesCovers;
-        public override bool RetrievesCovers { get { return retrievesCovers; } }
-
-        bool retrievesScreens;
-        public override bool RetrievesScreens { get { return retrievesScreens; } }
-
-        bool retrievesFanart;
-        public override bool RetrievesFanart { get { return retrievesFanart; } }
-
-        public override List<ScraperResult> GetMatches(ScraperSearchParams searchParams)
-        {
-            return getMatches(searchParams);
+        public override bool RetrievesDetails 
+        { 
+            get { return retrievesDetails; } 
         }
 
-        //execute scraper search using specified param's, return results
-        List<ScraperResult> getMatches(ScraperSearchParams searchParams)
+        public override bool RetrievesCovers 
+        { 
+            get { return retrievesCovers; } 
+        }
+
+        public override bool RetrievesScreens 
+        { 
+            get { return retrievesScreens; } 
+        }
+
+        public override bool RetrievesFanart 
+        { 
+            get { return retrievesFanart; } 
+        }
+
+        #endregion
+
+        public override List<ScraperResult> GetMatches(ScraperSearchParams searchParams)
         {
             Dictionary<string, string> paramList = new Dictionary<string, string>();
             if (searchParams.Term != null)
@@ -131,34 +132,31 @@ namespace Emulators.Import
             if (scraperResults == null)
                 return results;
 
-            int count = 0;
+            int count = 0; 
+            string siteId;
             //loop and build results
-            while (scraperResults.ContainsKey("game[" + count + "].site_id"))
+            while (scraperResults.TryGetValue("game[" + count + "].site_id", out siteId))
             {
-                string siteId, 
-                    title,
-                    yearmade, 
-                    system, 
-                    scoreStr,
-                    prefix = "game[" + count + "].";
+                string prefix = "game[" + count + "].";
 
-                if (!scraperResults.TryGetValue(prefix + "site_id", out siteId))
-                    continue;
+                string system;
                 if (scraperResults.TryGetValue(prefix + "system", out system))
                     system = cleanString(system);
+
+                string title;
                 if (scraperResults.TryGetValue(prefix + "title", out title))
                     title = cleanString(title);
-                if (scraperResults.TryGetValue(prefix + "yearmade", out yearmade))
-                    yearmade = cleanString(yearmade);
 
+                string year;
+                if (scraperResults.TryGetValue(prefix + "yearmade", out year))
+                    year = cleanString(year);
+
+                string scoreStr;
                 int score;
                 if (!scraperResults.TryGetValue(prefix + "score", out scoreStr) || !int.TryParse(scoreStr, out score))
                     score = FuzzyStringComparer.Score(searchParams.Term, ScraperProvider.RemoveSpecialChars(title));
 
-                results.Add(new ScraperResult(siteId, title, system, yearmade, this, searchParams) 
-                { 
-                    SearchDistance = score
-                });
+                results.Add(new ScraperResult(siteId, title, system, year, this, searchParams) { SearchDistance = score });
                 count++;
             }
 
@@ -190,7 +188,7 @@ namespace Emulators.Import
             return new ScraperGame(cleanString(title), cleanString(company), cleanString(yearmade), cleanString(grade), cleanString(description), genre);
         }
 
-        public override List<string> GetCoverUrls(ScraperResult result, bool autoMatch)
+        public override List<string> GetCoverUrls(ScraperResult result)
         {
             Dictionary<string, string> imageResults = scraper.Execute("get_cover_art", getDetailsParams(result.SiteId));
             if (imageResults == null)
@@ -198,25 +196,51 @@ namespace Emulators.Import
 
             string baseUrl; 
             imageResults.TryGetValue("game.baseurl", out baseUrl);
-            List<string> urls = getImageUrls(imageResults, baseUrl);
-
-            if (autoMatch)
-            {
-                string coverFront;
-                string coverBack;
-                if (imageResults.TryGetValue("game.cover.front", out coverFront) && !string.IsNullOrEmpty(coverFront))
-                    coverFront = expandUrl(coverFront, baseUrl);
-                if (imageResults.TryGetValue("game.cover.back", out coverBack) && !string.IsNullOrEmpty(coverBack))
-                    coverBack = expandUrl(coverBack, baseUrl);
-
-                matchUrlToImageType(urls, ref coverFront, "front", ref coverBack, "back");
-                result.BoxFrontUrl = coverFront;
-                result.BoxBackUrl = coverBack;
-            }
-            return urls;
+            return getImageUrls(imageResults, baseUrl);
         }
 
-        public override List<string> GetScreenUrls(ScraperResult result, bool autoMatch)
+        public override bool PopulateCovers(ScraperResult result, ScraperGame scraperGame)
+        {
+            Dictionary<string, string> imageResults = scraper.Execute("get_cover_art", getDetailsParams(result.SiteId));
+            if (imageResults == null)
+                return base.PopulateCovers(result, scraperGame);
+
+            string baseUrl;
+            imageResults.TryGetValue("game.baseurl", out baseUrl);
+
+            bool hasFront = !string.IsNullOrEmpty(scraperGame.BoxFrontUrl);
+            bool hasBack = !string.IsNullOrEmpty(scraperGame.BoxBackUrl);
+
+            if (!hasFront)
+            {
+                string coverFront;
+                if (imageResults.TryGetValue("game.cover.front", out coverFront) && !string.IsNullOrEmpty(coverFront))
+                {
+                    scraperGame.BoxFrontUrl = expandUrl(coverFront, baseUrl);
+                    hasFront = true;
+                }
+            }
+
+            if (!hasBack)
+            {
+                string coverBack;
+                if (string.IsNullOrEmpty(scraperGame.BoxBackUrl) && imageResults.TryGetValue("game.cover.back", out coverBack) && !string.IsNullOrEmpty(coverBack))
+                {
+                    scraperGame.BoxBackUrl = expandUrl(coverBack, baseUrl);
+                    hasBack = true;
+                }
+            }
+
+            if (!hasFront || !hasBack)
+            {
+                List<string> urls = getImageUrls(imageResults, baseUrl);
+                matchUrlToImageType(urls, scraperGame, ThumbSearchType.Covers);
+            }
+
+            return base.PopulateCovers(result, scraperGame);
+        }
+
+        public override List<string> GetScreenUrls(ScraperResult result)
         {
             Dictionary<string, string> imageResults = scraper.Execute("get_screenshots", getDetailsParams(result.SiteId));
             if (imageResults == null)
@@ -224,25 +248,51 @@ namespace Emulators.Import
 
             string baseUrl;
             imageResults.TryGetValue("game.baseurl", out baseUrl);
-            List<string> urls = getImageUrls(imageResults, baseUrl);
-
-            if (autoMatch)
-            {
-                string titleScreen;
-                string inGame;
-                if (imageResults.TryGetValue("game.screen.title", out titleScreen) && !string.IsNullOrEmpty(titleScreen))
-                    titleScreen = expandUrl(titleScreen, baseUrl);
-                if (imageResults.TryGetValue("game.screen.ingame", out inGame) && !string.IsNullOrEmpty(inGame))
-                    inGame = expandUrl(inGame, baseUrl);
-
-                matchUrlToImageType(urls, ref titleScreen, "title", ref inGame, null);
-                result.TitleScreenUrl = titleScreen;
-                result.InGameUrl = inGame;
-            }
-            return urls;
+            return getImageUrls(imageResults, baseUrl);
         }
 
-        public override List<string> GetFanartUrls(ScraperResult result, bool autoMatch)
+        public override bool PopulateScreens(ScraperResult result, ScraperGame scraperGame)
+        {
+            Dictionary<string, string> imageResults = scraper.Execute("get_screenshots", getDetailsParams(result.SiteId));
+            if (imageResults == null)
+                return base.PopulateScreens(result, scraperGame);
+
+            string baseUrl;
+            imageResults.TryGetValue("game.baseurl", out baseUrl);
+
+            bool hasFront = !string.IsNullOrEmpty(scraperGame.TitleScreenUrl);
+            bool hasBack = !string.IsNullOrEmpty(scraperGame.InGameUrl);
+
+            if (!hasFront)
+            {
+                string titleScreen;
+                if (imageResults.TryGetValue("game.screen.title", out titleScreen) && !string.IsNullOrEmpty(titleScreen))
+                {
+                    titleScreen = expandUrl(titleScreen, baseUrl);
+                    hasFront = true;
+                }
+            }
+
+            if (!hasBack)
+            {
+                string inGame;
+                if (imageResults.TryGetValue("game.screen.ingame", out inGame) && !string.IsNullOrEmpty(inGame))
+                {
+                    inGame = expandUrl(inGame, baseUrl);
+                    hasBack = true;
+                }
+            }
+
+            if (!hasFront || !hasBack)
+            {
+                List<string> urls = getImageUrls(imageResults, baseUrl);
+                matchUrlToImageType(urls, scraperGame, ThumbSearchType.Screens);
+            }
+
+            return base.PopulateScreens(result, scraperGame);
+        }
+
+        public override List<string> GetFanartUrls(ScraperResult result)
         {
             Dictionary<string, string> imageResults = scraper.Execute("get_fanart", getDetailsParams(result.SiteId));
             if (imageResults == null)
@@ -250,10 +300,20 @@ namespace Emulators.Import
 
             string baseUrl;
             imageResults.TryGetValue("game.baseurl", out baseUrl);
-            List<string> urls = getImageUrls(imageResults, baseUrl);
-            if (autoMatch && urls.Count > 0)
-                result.FanartUrl = urls[0];
-            return urls;
+            return getImageUrls(imageResults, baseUrl);
+        }
+
+        public override bool PopulateFanart(ScraperResult result, ScraperGame scraperGame)
+        {
+            bool isPopulated = base.PopulateFanart(result, scraperGame);
+            if (isPopulated)
+                return true;
+
+            List<string> urls = GetFanartUrls(result);
+            if (urls.Count > 0 && !string.IsNullOrEmpty(urls[0]))
+                scraperGame.FanartUrl = urls[0];
+
+            return base.PopulateFanart(result, scraperGame);
         }
 
         List<string> getImageUrls(Dictionary<string, string> results, string baseUrl)
@@ -270,41 +330,64 @@ namespace Emulators.Import
             return urls;
         }
 
-        void matchUrlToImageType(List<string> urls, ref string image1, string imageTag1, ref string image2, string imageTag2)
+        void matchUrlToImageType(List<string> urls, ScraperGame scraperGame, ThumbSearchType thumbType)
         {
+            string image1, image2;
+            string[] tags;
+            if (thumbType == ThumbSearchType.Covers)
+            {
+                image1 = scraperGame.BoxFrontUrl;
+                image2 = scraperGame.BoxBackUrl;
+                tags = new string[] { FRONT_IMAGE_TAG, BACK_IMAGE_TAG };
+            }
+            else
+            {
+                image1 = scraperGame.TitleScreenUrl;
+                image2 = scraperGame.InGameUrl;
+                tags = new string[] { TITLE_IMAGE_TAG, null };
+            }
+
             bool found1 = !string.IsNullOrEmpty(image1);
             bool found2 = !string.IsNullOrEmpty(image2);
-            if (found1 && found2)
-                return;
 
-            bool checkTag1 = !string.IsNullOrEmpty(imageTag1);
-            bool checkTag2 = !string.IsNullOrEmpty(imageTag2);
+            bool checkTag1 = !string.IsNullOrEmpty(tags[0]);
+            bool checkTag2 = !string.IsNullOrEmpty(tags[1]);
 
             for (int x = 0; x < urls.Count; x++)
             {
                 string url = urls[x].ToLower();
-                if (checkTag1 && !found1 && url.Contains(imageTag1))
+                if (checkTag1 && !found1 && url.Contains(tags[0]))
                 {
                     image1 = urls[x];
-                    if (found2)
-                        break;
                     found1 = true;
                 }
-                else if (checkTag2 && !found2 && url.Contains(imageTag2))
+                else if (checkTag2 && !found2 && url.Contains(tags[1]))
                 {
                     image2 = urls[x];
-                    if (found1)
-                        break;
                     found2 = true;
                 }
-                else if (image1 == null)
+                else if (string.IsNullOrEmpty(image1))
                 {
                     image1 = urls[x];
                 }
-                else if (image2 == null)
+                else if (string.IsNullOrEmpty(image2))
                 {
                     image2 = urls[x];
                 }
+
+                if (found1 && found2)
+                    break;
+            }
+
+            if (thumbType == ThumbSearchType.Covers)
+            {
+                scraperGame.BoxFrontUrl = image1;
+                scraperGame.BoxBackUrl = image2;
+            }
+            else
+            {
+                scraperGame.TitleScreenUrl = image1;
+                scraperGame.InGameUrl = image2;
             }
         }
 

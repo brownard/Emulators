@@ -10,7 +10,7 @@ namespace Emulators
         public static List<ComboBoxItem> GetEmuComboBoxItems()
         {
             List<ComboBoxItem> items = new List<ComboBoxItem>();
-            items.Add(new ComboBoxItem(new Emulator(EmulatorType.ManyEmulators) { Title = "All Systems" }));
+            items.Add(new ComboBoxItem(null) { Name = "All Systems", ID = -2 });
             foreach (Emulator emu in Emulator.GetAll(true))
                 items.Add(new ComboBoxItem(emu));
 

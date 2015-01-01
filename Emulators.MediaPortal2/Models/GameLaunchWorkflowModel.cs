@@ -104,7 +104,7 @@ namespace Emulators.MediaPortal2
         {
             ExecutorItem launcher = new ExecutorItem(isPc);
             launcher.Arguments = profile.Arguments;
-            launcher.Suspend = !EmulatorsSettings.Instance.IsConfig && profile.SuspendMP == true;
+            launcher.Suspend = !EmulatorsSettings.Instance.IsConfig && profile.SuspendMP;
             if (launcher.Suspend && profile.DelayResume && profile.ResumeDelay > 0)
                 launcher.ResumeDelay = profile.ResumeDelay;
 
@@ -123,7 +123,7 @@ namespace Emulators.MediaPortal2
                 launcher.RomPath = path;
                 launcher.Mount = profile.MountImages; // && DaemonTools.IsImageFile(Path.GetExtension(path));
                 launcher.ShouldReplaceWildcards = !launcher.Mount;
-                launcher.UseQuotes = profile.UseQuotes == true;
+                launcher.UseQuotes = profile.UseQuotes;
                 launcher.CheckController = profile.CheckController;
                 bool mapKey;
                 if (profile.StopEmulationOnKey.HasValue)

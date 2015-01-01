@@ -59,134 +59,8 @@ namespace Emulators.Database
                 sqlClient.Init();
 
                 if (Get<Emulator>(-1) == null)
-                {
-                    Emulator pc = new Emulator(EmulatorType.PcGame);
-                    pc.Commit();
-                }
+                    Emulator.CreateNewPCEmulator().Commit();
             }
-            //lock (syncRoot)
-            //{
-
-            //    if (isInit)
-            //        return;
-
-            //    if (string.IsNullOrEmpty(sqlClient.DatabasePath))
-            //    {
-            //        Logger.LogError("No database path has been specified");
-            //        return;
-            //    }
-
-            //    //string dbFile = Config.GetFile(Config.Dir.Database, DB_FILE_NAME);
-            //    bool exists = File.Exists(sqlClient.DatabasePath);
-            //    sqlClient.Init();
-            //    sqlClient.Execute(Emulator.DBTableString);
-            //    sqlClient.Execute(EmulatorProfile.DBTableString);
-            //    sqlClient.Execute(Game.DBTableString);
-            //    sqlClient.Execute(GameDisc.DBTableString);
-            //    sqlClient.Execute("CREATE TABLE IF NOT EXISTS Info(" +
-            //            "name varchar(50)," +
-            //            "value varchar(100)," +
-            //            "PRIMARY KEY(name)" +
-            //        ")");
-
-            //    isInit = true;
-
-            //    SQLData result = sqlClient.Execute("SELECT value FROM Info WHERE name='version'");
-            //    if (result.Rows.Count == 0)
-            //    {
-            //        if (exists)
-            //        {
-            //            sqlClient.Execute("INSERT INTO Info VALUES('version','1.7')");
-            //            isInit = false;
-            //            sqlClient.Dispose();
-            //            Init();
-            //        }
-            //        else
-            //            UpdateDBVersion();
-            //        return;
-            //    }
-
-            //    double currentVersion = double.Parse(result.Rows[0].fields[0], System.Globalization.CultureInfo.InvariantCulture);
-            //    if (currentVersion == DB_VERSION)
-            //        return;
-
-            //    if (!backupDBFile())
-            //    {
-            //        isInit = false;
-            //        return;
-            //    }
-
-            //    if (updateDatabase(currentVersion))
-            //    {
-            //        UpdateDBVersion();
-            //        return;
-            //    }
-
-            //    isInit = false;
-            //    sqlClient.Dispose();
-            //    Logger.LogInfo("Deleting incompatible database (backup has been created)");
-            //    try
-            //    {
-            //        File.Delete(sqlClient.DatabasePath);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Logger.LogError("Failed to delete database file, try deleting {0} manually - {1}", sqlClient.DatabasePath, ex.Message);
-            //        return;
-            //    }
-            //    Init();
-            //}
-        }
-
-        bool updateDatabase(double currentVersion)
-        {
-            if (currentVersion > DB_VERSION)
-            {
-                Logger.LogError("Database is from a newer version of the plugin and cannot be used");
-                return false;
-            }
-
-            Logger.LogInfo("Updating database from v{0} to v{1}", currentVersion, DB_VERSION);
-            if (currentVersion < 1.3)
-            {
-                Logger.LogError("Database is from a pre-beta version and cannot be upgraded");
-                return false;
-            }
-            
-            if (new DB_Updater().Update())
-            {
-                return true;
-            }
-            else
-            {
-                Logger.LogError("Database update failed");
-            }
-            return false;
-        }
-
-        bool backupDBFile()
-        {
-            FileInfo dbFile = new FileInfo(sqlClient.DatabasePath);
-            if (!dbFile.Exists)
-                return true;
-
-            Logger.LogInfo("Backing up current database");
-            string backupFolder = Path.Combine(dbFile.DirectoryName, string.Format("Emulators2_backup_{0}", DateTime.Now.ToString("yyyy_MM_dd_HHmm")));
-            string backupPath = Path.Combine(backupFolder, dbFile.Name);
-            try
-            {
-                DirectoryInfo dir = new DirectoryInfo(backupFolder);
-                if (!dir.Exists)
-                    dir.Create();
-                dbFile.CopyTo(backupPath, true);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("Failed to create backup of database at {0} - {1}, {2}\n{3}", backupPath, ex, ex.Message, ex.StackTrace);
-                return false;
-            }
-            Logger.LogInfo("Successfully created backup of database at {0}", backupPath);
-            return true;
         }
 
         readonly object syncRoot = new object();
@@ -262,33 +136,6 @@ namespace Emulators.Database
             foreach (T item in items)
                 sqlHandler(item);
             EndTransaction();
-        }
-
-        public double CurrentDBVersion
-        {
-            get
-            {
-                SQLData result = Execute("SELECT value FROM Info WHERE name='version'");
-                if (result.Rows.Count == 0)
-                    return DB_VERSION; //Fresh install
-                else
-                    return double.Parse(result.Rows[0].fields[0], System.Globalization.CultureInfo.InvariantCulture);
-            }
-        }
-
-        public void UpdateDBVersion()
-        {
-            lock (syncRoot)
-            {
-                SQLData result = ExecuteWithoutLock("SELECT value FROM Info WHERE name='version'");
-                string query;
-                if (result.Rows.Count == 0)
-                    query = "INSERT INTO Info VALUES('version','{0}')";
-                else
-                    query = "UPDATE Info SET value='{0}' WHERE name='version'";
-
-                ExecuteWithoutLock(query, DB_VERSION);
-            }
         }
 
         public Dictionary<int, DBItem> GetAllAsDictionary(Type tableType)
@@ -729,9 +576,7 @@ namespace Emulators.Database
 
         public HashSet<string> GetAllValues(DBField field)
         {
-            Type t = field.OwnerType;
             ICollection items = Get(field.OwnerType, null);
-
             // loop through all items in the DB and grab all existing values for this field
             HashSet<string> uniqueStrings = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
             foreach (DBItem currItem in items)

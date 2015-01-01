@@ -178,9 +178,9 @@ namespace Emulators
                     if (romMatch != null)
                     {
                         Scraper scraper = romMatch.GameDetails.DataProvider;
-                        covers = scraper.GetCoverUrls(romMatch.GameDetails, false);
-                        screens = scraper.GetScreenUrls(romMatch.GameDetails, false);
-                        fanarts = scraper.GetFanartUrls(romMatch.GameDetails, false);
+                        covers = scraper.GetCoverUrls(romMatch.GameDetails);
+                        screens = scraper.GetScreenUrls(romMatch.GameDetails);
+                        fanarts = scraper.GetFanartUrls(romMatch.GameDetails);
                     }
                     else
                         new EmulatorScraper().GetThumbs(platformId, out covers, out screens);

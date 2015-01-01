@@ -127,9 +127,9 @@ namespace Emulators
             emuPathTextBox.Text = selectedProfile.EmulatorPath;
             workingDirTextBox.Text = selectedProfile.WorkingDirectory;
             argumentsTextBox.Text = selectedProfile.Arguments;
-            useQuotesCheckBox.Checked = selectedProfile.UseQuotes != false;
+            useQuotesCheckBox.Checked = selectedProfile.UseQuotes;
             //suspend
-            suspendMPCheckBox.Checked = selectedProfile.SuspendMP == true;
+            suspendMPCheckBox.Checked = selectedProfile.SuspendMP;
             delayResumeCheckBox.Checked = selectedProfile.DelayResume;
             resumeDelayUpDown.Value = selectedProfile.ResumeDelay;
             bool enabled = suspendMPCheckBox.Checked;
@@ -711,8 +711,8 @@ namespace Emulators
                 if (autoSettings.HasSettings)
                 {
                     argumentsTextBox.Text = autoSettings.Arguments;
-                    useQuotesCheckBox.Checked = autoSettings.UseQuotes != false; //default to true if null
-                    suspendMPCheckBox.Checked = autoSettings.SuspendMP == true;
+                    useQuotesCheckBox.Checked = autoSettings.UseQuotes;
+                    suspendMPCheckBox.Checked = autoSettings.SuspendMP;
                     if (autoSettings.WorkingDirectory == EmuSettingsAutoFill.USE_EMULATOR_DIRECTORY)
                     {
                         System.IO.FileInfo file = new System.IO.FileInfo(emuPathTextBox.Text);

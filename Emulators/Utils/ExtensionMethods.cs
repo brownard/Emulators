@@ -8,6 +8,13 @@ namespace Emulators
 {
     public static class ExtensionMethods
     {
+        public static string EmptyIfNull(this string value)
+        {
+            if (value == null)
+                return string.Empty;
+            return value;
+        }
+
         public static void AddRange<T, U>(this List<T> destination, IEnumerable<U> source) where U : T 
         {
             foreach (U item in source)
@@ -46,6 +53,5 @@ namespace Emulators
             arguments = null;
             return false;
         }
-
     }
 }

@@ -9,20 +9,22 @@ namespace Emulators
     public abstract class ThumbItem : DBItem
     {
         public abstract string ThumbFolder { get; }
-        public abstract string Title { get; set; }
 
         public virtual bool HasGameArt 
         { 
             get { return false; } 
         }
+
         public virtual double AspectRatio 
         {
             get { return 0; }
         }
+
         public virtual ThumbItem DefaultThumbItem 
         { 
             get { return null; } 
         }
+
         public virtual void DeleteThumbs()
         {
             using (ThumbGroup thumbs = new ThumbGroup(this))

@@ -9,17 +9,40 @@ namespace Emulators
     [DBTable("Games")]
     public class Game : ThumbItem, IComparable<Game>
     {
-        public static List<Game> GetAll(bool? imported = null)
+        #region Get Games
+
+        /// <summary>
+        /// Retrieves all games from the database
+        /// </summary>
+        public static List<Game> GetAll()
         {
-            if (imported.HasValue)
-                return DB.Instance.Get<Game>(new BaseCriteria(DBField.GetField(typeof(Game), "InfoChecked"), "=", imported.Value));
             return DB.Instance.GetAll<Game>();
         }
 
-        public Game() { }
-        public Game(Emulator parentEmu, string path, string launchFile = null)
+        /// <summary>
+        /// Retrieves all games that have/haven't been imported
+        /// </summary>
+        /// <param name="haveBeenImported">Whether to return games that have/haven't been imported</param>
+        public static List<Game> GetAll(bool haveBeenImported)
         {
-            parentEmulator = parentEmu;
+            return DB.Instance.Get<Game>(new BaseCriteria(DBField.GetField(typeof(Game), "InfoChecked"), "=", haveBeenImported));
+        }
+
+        #endregion
+
+        #region Ctor
+
+        public Game() { }
+
+        /// <summary>
+        /// Creates a new game for the specified emulator
+        /// </summary>
+        /// <param name="parentEmulator">The emulator that this game belongs to</param>
+        /// <param name="path">The path to the game. This can be a path to a Goodmerge archive</param>
+        /// <param name="launchFile">Optional file to extract if path is a Goodmerge archive</param>
+        public Game(Emulator parentEmulator, string path, string launchFile = null)
+        {
+            this.parentEmulator = parentEmulator;
             if (parentEmulator.IsPc())
             {
                 GameProfiles.Add(new EmulatorProfile(true) { SuspendMP = true });
@@ -27,19 +50,34 @@ namespace Emulators
             }
             Discs.Add(new GameDisc(path, launchFile));
             Discs.Populated = true;
-            Title = GetDefaultTitle();         
+            Title = GetDefaultTitle();
         }
 
-        public string GetDefaultTitle()
-        {
-            string title = System.IO.Path.GetFileNameWithoutExtension(CurrentDisc.Path);
-            if (parentEmulator != null && parentEmulator.Platform == "Arcade")
-                title = MameNameHandler.Instance.GetName(title);
-            return title;
-        }
+        #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// The emulator used to launch the game
+        /// </summary>
         [DBField]
-        public override string Title
+        public Emulator ParentEmulator
+        {
+            get { return parentEmulator; }
+            set
+            {
+                parentEmulator = value;
+                isGoodmerge = null;
+                CommitNeeded = true;
+            }
+        }
+        Emulator parentEmulator = null;
+
+        /// <summary>
+        /// The title of the game
+        /// </summary>
+        [DBField]
+        public string Title
         {
             get { return title; }
             set
@@ -50,6 +88,9 @@ namespace Emulators
         }
         string title = "";
 
+        /// <summary>
+        /// The developer of the game
+        /// </summary>
         [DBField]
         public string Developer
         {
@@ -62,6 +103,9 @@ namespace Emulators
         }
         string developer = "";
 
+        /// <summary>
+        /// The release year of the game
+        /// </summary>
         [DBField]
         public int Year
         {
@@ -74,7 +118,9 @@ namespace Emulators
         }
         int year = 0;
 
-        private string description = "";
+        /// <summary>
+        /// Description of the game
+        /// </summary>
         [DBField]
         public string Description
         {
@@ -85,8 +131,11 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
+        string description = "";
 
-        private string genre = "";
+        /// <summary>
+        /// '|' delimited list of genres
+        /// </summary>
         [DBField]
         public string Genre
         {
@@ -97,8 +146,11 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
+        string genre = "";
 
-        private int grade = 0;
+        /// <summary>
+        /// The user rating of the game
+        /// </summary>
         [DBField]
         public int Grade
         {
@@ -109,8 +161,11 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
-        
-        private int playCount = 0;
+        int grade = 0;
+
+        /// <summary>
+        /// The number of times the game has been played
+        /// </summary>
         [DBField]
         public int PlayCount
         {
@@ -121,8 +176,11 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
+        int playCount = 0;
 
-        private DateTime latestplay = DateTime.MinValue;
+        /// <summary>
+        /// The date/time the game was last played
+        /// </summary>
         [DBField]
         public DateTime Latestplay
         {
@@ -133,7 +191,11 @@ namespace Emulators
                 CommitNeeded = true;
             }
         }
+        DateTime latestplay = DateTime.MinValue;
 
+        /// <summary>
+        /// Whether the game has been marked as a favourite
+        /// </summary>
         [DBField]
         public bool Favourite
         {
@@ -145,7 +207,10 @@ namespace Emulators
             }
         }
         bool favourite = false;
-        
+
+        /// <summary>
+        /// Whether the game has been updated by the user/importer
+        /// </summary>
         [DBField]
         public bool InfoChecked
         {
@@ -158,18 +223,9 @@ namespace Emulators
         }
         bool infoChecked = false;
 
-        [DBField]
-        public string Arguments
-        {
-            get { return arguments; }
-            set
-            {
-                arguments = value;
-                CommitNeeded = true;
-            }
-        }
-        string arguments = "";
-
+        /// <summary>
+        /// Path to an associated video file
+        /// </summary>
         [DBField]
         public string VideoPreview
         {
@@ -185,104 +241,70 @@ namespace Emulators
         }
         string videoPreview = "";
 
-        [DBField]
-        public Emulator ParentEmulator
-        {
-            get { return parentEmulator; }
-            set 
-            { 
-                parentEmulator = value;
-                isGoodmerge = null;
-                CommitNeeded = true;            
-            }
-        }
-        Emulator parentEmulator = null;
-
-        GameDisc currentDisc = null;
-        [DBField]
-        public GameDisc CurrentDisc
-        {
-            get 
-            {
-                if (currentDisc == null && Discs.Count > 0)
-                    currentDisc = Discs[0];
-                return currentDisc; 
-            }
-            set 
-            {
-                currentDisc = value;
-                isGoodmerge = null;
-                CommitNeeded = true;            
-            }
-        }
-
-        EmulatorProfile currentProfile = null;
-        [DBField]
-        public EmulatorProfile CurrentProfile
-        {
-            get 
-            {
-                if (currentProfile == null && EmulatorProfiles.Count > 0)
-                    currentProfile = EmulatorProfiles[0];
-                return currentProfile; 
-            }
-            set
-            {
-                currentProfile = value;
-                CommitNeeded = true;
-            }
-        }
-        
-        public override string ToString()
-        {
-            return Title;
-        }
-
-        DBRelationList<GameDisc> discs = null;
-        [DBRelation(AutoRetrieve = true)]
-        public DBRelationList<GameDisc> Discs
+        bool? isGoodmerge = null;
+        /// <summary>
+        /// Whether the currently selected disc is a Goodmerge archive
+        /// </summary>
+        public bool IsGoodmerge
         {
             get
             {
-                if (discs == null)
-                    discs = new DBRelationList<GameDisc>(this); //GetDiscs();
-                return discs;
-            }
-        }
+                if (isGoodmerge.HasValue)
+                    return isGoodmerge.Value;
 
-        //public List<EmulatorProfile> GetProfiles()
-        //{
-        //    if (!parentEmulator.IsPc())
-        //        return parentEmulator.GetProfiles();
+                isGoodmerge = false;
+                EmulatorProfile profile = CurrentProfile;
+                //check if we have a profile and it's configured to use goodmerge
+                if (profile == null || !profile.EnableGoodmerge)
+                    return false;
 
-        //    BaseCriteria criteria = new BaseCriteria(DBField.GetField(typeof(EmulatorProfile), "ParentGame"), "=", Id);
-        //    return DB.Instance.Get<EmulatorProfile>(criteria);
-        //}
+                string path = CurrentDisc.Path;
+                if (string.IsNullOrEmpty(path))
+                    return false;
 
-        public DBRelationList<EmulatorProfile> EmulatorProfiles
-        {
-            get
-            {
-                if (parentEmulator.IsPc())
-                    return GameProfiles;
-                return parentEmulator.EmulatorProfiles;
-            }
-        }
+                //get file extension
+                string extension = System.IO.Path.GetExtension(path);
+                if (string.IsNullOrEmpty(extension))
+                    return false;
 
-        DBRelationList<EmulatorProfile> profiles = null;
-        [DBRelation(AutoRetrieve = true)]
-        public DBRelationList<EmulatorProfile> GameProfiles
-        {
-            get
-            {
-                if (profiles == null)
-                    profiles = new DBRelationList<EmulatorProfile>(this);
-                return profiles;
+                //get configured Goodmerge extensions
+                string[] goodmergeExts = Options.Instance.GetStringOption("goodmergefilters").Split(';');
+                for (int x = 0; x < goodmergeExts.Length; x++)
+                {
+                    //see if extension matches filter
+                    if (goodmergeExts[x].EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                    {
+                        isGoodmerge = true;
+                        return true;
+                    }
+                }
+                //no match was found
+                return false;
             }
         }
 
         /// <summary>
-        /// Reset the game object to a blank state. Only the filepath and filename remains.
+        /// Custom search term to use when retrieving online info
+        /// </summary>
+        public string SearchTitle { get; set; }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Returns the default title for this game, based on the path or platform specific naming (e.g Mame)
+        /// </summary>
+        public string GetDefaultTitle()
+        {
+            string title = System.IO.Path.GetFileNameWithoutExtension(CurrentDisc.Path);
+            if (parentEmulator != null && parentEmulator.Platform == "Arcade")
+                title = MameNameHandler.Instance.GetName(title);
+            return title;
+        }
+
+        /// <summary>
+        /// Resets the game to a blank state, deleting all images and using the default title
         /// </summary>
         public void Reset()
         {
@@ -302,16 +324,20 @@ namespace Emulators
                 thumbs.SaveAllThumbs();
             }
         }
-        
+
+        /// <summary>
+        /// Determines whether the game has missing information
+        /// </summary>
+        /// <returns></returns>
         public bool IsMissingInfo()
         {
             if (this.Id == -2) return true;
-            if (String.IsNullOrEmpty(this.Title) ) return true;
-            if (this.Grade == 0 ) return true;
+            if (string.IsNullOrEmpty(this.Title)) return true;
+            if (this.Grade == 0) return true;
             if (this.Year == 0) return true;
-            if (String.IsNullOrEmpty(this.Description)) return true;
-            if (String.IsNullOrEmpty(this.Genre)) return true;
-            if (String.IsNullOrEmpty(this.Developer)) return true;
+            if (string.IsNullOrEmpty(this.Description)) return true;
+            if (string.IsNullOrEmpty(this.Genre)) return true;
+            if (string.IsNullOrEmpty(this.Developer)) return true;
             //don't technically need to dispose of ThumbGroup as we don't load any images
             //but just in case
             using (ThumbGroup thumbs = new ThumbGroup(this))
@@ -327,66 +353,135 @@ namespace Emulators
                 if (string.IsNullOrEmpty(thumbs.Fanart.Path))
                     return true;
             }
-            
             return false;
         }
 
-        bool? isGoodmerge = null;
-        public bool IsGoodmerge
-        {
-            get
-            {                
-                if (isGoodmerge.HasValue)
-                    return isGoodmerge.Value;    
-            
-                isGoodmerge = false;
-                if (CurrentProfile == null || !CurrentProfile.EnableGoodmerge)
-                    return false;
-
-                string lPath = CurrentDisc.Path;
-                if (string.IsNullOrEmpty(lPath))
-                    return false;
-
-                int index = lPath.LastIndexOf('.');
-                if (index < 0)
-                    return false; //file doesn't have an extension
-
-                //get file extension
-                string extension = lPath.Substring(index, lPath.Length - index).ToLower();
-                //get configured Goodmerge extensions
-                string[] goodmergeExts = Options.Instance.GetStringOption("goodmergefilters").Split(';');
-                for (int x = 0; x < goodmergeExts.Length; x++)
-                {
-                    //see if extension matches filter
-                    if (goodmergeExts[x].EndsWith(extension, StringComparison.OrdinalIgnoreCase))
-                    {
-                        isGoodmerge = true;
-                        return true;
-                    }
-                }
-                //no match was found
-                return false;
-            }
-        }
-
-        public string SearchTitle { get; set; }
-
+        /// <summary>
+        /// Saves the InfoChecked property. Currently just does a full commit
+        /// </summary>
         internal void SaveInfoCheckedStatus()
         {
             Commit();
         }
 
+        /// <summary>
+        /// Saves the PlayCount and LatestPlay properties. Currently just does a full commit
+        /// </summary>
         public void SaveGamePlayInfo()
         {
             Commit();
         }
 
+        /// <summary>
+        /// Increments PlayCount and sets LatestPlay to current date/time, then commits
+        /// </summary>
         public void UpdateAndSaveGamePlayInfo()
         {
             playCount++;
             Latestplay = DateTime.Now;
             Commit();
         }
+
+        public override string ToString()
+        {
+            return Title;
+        }
+
+        #endregion
+
+        #region Discs
+
+        GameDisc currentDisc = null;
+        /// <summary>
+        /// The currently selected disc
+        /// </summary>
+        [DBField]
+        public GameDisc CurrentDisc
+        {
+            get
+            {
+                if (currentDisc == null && Discs.Count > 0)
+                    currentDisc = Discs[0];
+                return currentDisc;
+            }
+            set
+            {
+                currentDisc = value;
+                isGoodmerge = null;
+                CommitNeeded = true;
+            }
+        }
+
+        DBRelationList<GameDisc> discs = null;
+        /// <summary>
+        /// All discs associated with this game
+        /// </summary>
+        [DBRelation(AutoRetrieve = true)]
+        public DBRelationList<GameDisc> Discs
+        {
+            get
+            {
+                if (discs == null)
+                    discs = new DBRelationList<GameDisc>(this);
+                return discs;
+            }
+        }
+
+        #endregion
+
+        #region Profiles
+
+        EmulatorProfile currentProfile = null;
+        /// <summary>
+        /// The currently selected profile used to launch this game
+        /// </summary>
+        [DBField]
+        public EmulatorProfile CurrentProfile
+        {
+            get
+            {
+                if (currentProfile == null && EmulatorProfiles.Count > 0)
+                    currentProfile = EmulatorProfiles[0];
+                return currentProfile;
+            }
+            set
+            {
+                currentProfile = value;
+                CommitNeeded = true;
+            }
+        }
+
+        /// <summary>
+        /// All profiles that can be used to launch this game
+        /// </summary>
+        public DBRelationList<EmulatorProfile> EmulatorProfiles
+        {
+            get
+            {
+                if (parentEmulator.IsPc())
+                    return GameProfiles;
+                return parentEmulator.EmulatorProfiles;
+            }
+        }
+
+        DBRelationList<EmulatorProfile> profiles = null;
+        /// <summary>
+        /// If this game is a PC game, returns all profiles associated with this game
+        /// </summary>
+        [DBRelation(AutoRetrieve = true)]
+        public DBRelationList<EmulatorProfile> GameProfiles
+        {
+            get
+            {
+                if (profiles == null)
+                    profiles = new DBRelationList<EmulatorProfile>(this);
+                return profiles;
+            }
+        }
+
+        #endregion
+
+        #region DBItem Overrides
 
         public override void BeforeDelete()
         {
@@ -401,12 +496,9 @@ namespace Emulators
             base.BeforeDelete();
         }
 
-        public int CompareTo(Game other)
-        {
-            if (other == null)
-                return 1;
-            return this.title.CompareTo(other.title);
-        }
+        #endregion
+
+        #region ThumbItem Overrides
 
         public override string ThumbFolder
         {
@@ -432,5 +524,18 @@ namespace Emulators
         {
             get { return parentEmulator; }
         }
+
+        #endregion
+
+        #region IComparable
+
+        public int CompareTo(Game other)
+        {
+            if (other == null)
+                return 1;
+            return this.title.CompareTo(other.title);
+        }
+
+        #endregion
     }
 }

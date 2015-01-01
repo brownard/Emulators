@@ -308,8 +308,8 @@ namespace Emulators
                     guiProperties["#Emulators2.CurrentItem.Profile.emulatorpath"] = game.CurrentProfile.EmulatorPath;
                     guiProperties["#Emulators2.CurrentItem.Profile.arguments"] = game.CurrentProfile.Arguments;
                     guiProperties["#Emulators2.CurrentItem.Profile.workingdirectory"] = game.CurrentProfile.WorkingDirectory;
-                    guiProperties["#Emulators2.CurrentItem.Profile.suspendmp"] = (game.CurrentProfile.SuspendMP == true).ToString();
-                    guiProperties["#Emulators2.CurrentItem.Profile.usequotes"] = (game.CurrentProfile.UseQuotes == true).ToString();
+                    guiProperties["#Emulators2.CurrentItem.Profile.suspendmp"] = game.CurrentProfile.SuspendMP.ToString();
+                    guiProperties["#Emulators2.CurrentItem.Profile.usequotes"] = game.CurrentProfile.UseQuotes.ToString();
                     guiProperties["#Emulators2.CurrentItem.Profile.mountimages"] = game.CurrentProfile.MountImages.ToString();
                     guiProperties["#Emulators2.CurrentItem.Profile.escapetoexit"] = game.CurrentProfile.EscapeToExit.ToString();
                     guiProperties["#Emulators2.CurrentItem.Profile.checkcontroller"] = game.CurrentProfile.CheckController.ToString();

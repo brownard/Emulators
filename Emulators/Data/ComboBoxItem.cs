@@ -13,20 +13,22 @@ namespace Emulators
 
         public ComboBoxItem(DBItem item)
         {
-            Emulator emu = item as Emulator;
-            if (emu != null)
+            if (item != null)
             {
-                ID = emu.Id.Value;
-                Name = emu.Title;
+                Emulator emu = item as Emulator;
+                if (emu != null)
+                {
+                    ID = emu.Id.Value;
+                    Name = emu.Title;
+                }
+                else
+                {
+                    Game game = (Game)item;
+                    ID = game.Id.Value;
+                    Name = game.Title;
+                }
+                Value = item;
             }
-            else
-            {
-                Game game = (Game)item;
-                ID = game.Id.Value;
-                Name = game.Title;
-            }
-
-            Value = item;
         }
 
         public override string ToString()

@@ -23,7 +23,7 @@ namespace Emulators
             EmulatorProfile defaultProfile = parent.NewEmulator.DefaultProfile;
             mountImagesCheckBox.Checked = defaultProfile.MountImages;
             escExitCheckBox.Checked = defaultProfile.EscapeToExit;
-            suspendMPCheckBox.Checked = defaultProfile.SuspendMP == true;
+            suspendMPCheckBox.Checked = defaultProfile.SuspendMP;
             enableGMCheckBox.Checked = defaultProfile.EnableGoodmerge;
         }
 

@@ -53,19 +53,19 @@
 
   <action name="get_details">
     <set name="rx_title">
-      <![CDATA[<div class="rightPanelHeader"><h1.*?><a href=".*?">(.*?)</a>]]>
+      <![CDATA[<h1 class="niceHeaderTitle"><a href=".*?">(.*?)</a>]]>
     </set>
     <set name="rx_company">
-      <![CDATA[Published by</div><div style="font-size: 90%; padding-left: 1em; padding-bottom: 0.25em;"><a href="/company/.*?">(.*?)</a>]]>
+      <![CDATA[Published by</div><div[^>]*><a href="/company/.*?">(.*?)</a>]]>
     </set>
     <set name="rx_yearmade">
-      <![CDATA[<div style="font-size: 100%; font-weight: bold;">Released</div><div style="font-size: 90%; padding-left: 1em; padding-bottom: 0.25em;"><a href="/game/.*?/release-info">.*?(\d{4})</a>]]>
+      <![CDATA[Released</div><div[^>]*><a href="/game/.*?/release-info">.*?(\d{4})</a>]]>
     </set>
     <set name="rx_description">
-      <![CDATA[<h2 class="m5">Description</h2>(.*?)<div class="sideBarLinks">]]>
+      <![CDATA[Description</h2>(.*?)<div class="sideBarLinks">]]>
     </set>
     <set name="rx_genre_block">
-      <![CDATA[<div style="font-size: 100%; font-weight: bold;">Genre</div><div style="font-size: 90%; padding-left: 1em; padding-bottom: 0.25em;">(.*?)</div>]]>
+      <![CDATA[Genre</div><div[^>]*>(.*?)</div>]]>
     </set>
     <set name="rx_genre">
       <![CDATA[<a href="/genre/sheet/.*?/">(.*?)</a>]]>

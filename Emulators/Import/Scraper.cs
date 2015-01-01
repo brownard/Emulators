@@ -5,6 +5,13 @@ using System.Text;
 
 namespace Emulators.Import
 {
+    enum ThumbSearchType
+    {
+        Covers,
+        Screens,
+        Fanart
+    }
+
     public abstract class Scraper
     {
         public abstract string IdString { get; }
@@ -13,8 +20,6 @@ namespace Emulators.Import
         public abstract bool RetrievesCovers { get; }
         public abstract bool RetrievesScreens { get; }
         public abstract bool RetrievesFanart { get; }
-
-        public virtual bool IsReady { get { return true; } }
 
         public override string ToString()
         {
@@ -42,19 +47,34 @@ namespace Emulators.Import
             return null;
         }
 
-        public virtual List<string> GetCoverUrls(ScraperResult result, bool autoMatch)
+        public virtual List<string> GetCoverUrls(ScraperResult result)
         {
             return new List<string>();
         }
 
-        public virtual List<string> GetScreenUrls(ScraperResult result, bool autoMatch)
+        public virtual bool PopulateCovers(ScraperResult result, ScraperGame scraperGame) 
+        {
+            return !string.IsNullOrEmpty(scraperGame.BoxFrontUrl) && !string.IsNullOrEmpty(scraperGame.BoxBackUrl);
+        }
+
+        public virtual List<string> GetScreenUrls(ScraperResult result)
         {
             return new List<string>();
         }
 
-        public virtual List<string> GetFanartUrls(ScraperResult result, bool autoMatch)
+        public virtual bool PopulateScreens(ScraperResult result, ScraperGame scraperGame) 
+        {
+            return !string.IsNullOrEmpty(scraperGame.TitleScreenUrl) && !string.IsNullOrEmpty(scraperGame.InGameUrl);
+        }
+
+        public virtual List<string> GetFanartUrls(ScraperResult result)
         {
             return new List<string>();
+        }
+
+        public virtual bool PopulateFanart(ScraperResult result, ScraperGame scraperGame) 
+        {
+            return !string.IsNullOrEmpty(scraperGame.FanartUrl);
         }
     }
 }

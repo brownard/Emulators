@@ -462,33 +462,28 @@ namespace Emulators
         {
             int prevSelected = -2;
             if (emuComboBox.SelectedItem != null)
-            {
                 prevSelected = ((ComboBoxItem)emuComboBox.SelectedItem).ID;
-            }
 
             emuComboBox.SelectedIndexChanged -= new EventHandler(emuComboBox_SelectedIndexChanged);
-
             emuComboBox.BeginUpdate();
+
             emuComboBox.Items.Clear();
             foreach (ComboBoxItem item in Dropdowns.GetEmuComboBoxItems())
                 emuComboBox.Items.Add(item);
 
-            bool found = false;
-            if (prevSelected != -2)
+            if (emuComboBox.Items.Count > 0)
             {
+                int selectedIndex = 0;
                 for (int x = 0; x < emuComboBox.Items.Count; x++)
                 {
                     if (((ComboBoxItem)emuComboBox.Items[x]).ID == prevSelected)
                     {
-                        emuComboBox.SelectedIndex = x;
-                        found = true;
+                        selectedIndex = x;
                         break;
                     }
                 }
+                emuComboBox.SelectedIndex = selectedIndex;
             }
-
-            if (!found && emuComboBox.Items.Count > 0)
-                emuComboBox.SelectedIndex = 0;
 
             emuComboBox.EndUpdate();
             emuComboBox.SelectedIndexChanged += new EventHandler(emuComboBox_SelectedIndexChanged);
@@ -916,7 +911,7 @@ namespace Emulators
             updatePCSettingsButtons();
             if (selectedProfile == null)
                 return;
-            suspendMPCheckBox.Checked = selectedProfile.SuspendMP == true;
+            suspendMPCheckBox.Checked = selectedProfile.SuspendMP;
             argumentsTextBox.Text = selectedProfile.Arguments;
             launchedFileTextBox.Text = selectedProfile.LaunchedExe;
             preCommandText.Text = selectedProfile.PreCommand;

@@ -26,8 +26,8 @@ namespace Emulators.Import
                     string scriptDirectory = Path.Combine(EmulatorsSettings.Instance.Settings.DataPath, "Scripts");
                     foreach (string script in Directory.GetFiles(scriptDirectory, "*.xml"))
                     {
-                        ScriptScraper scriptScraper = new ScriptScraper(script, ScriptSource.File);
-                        if (scriptScraper.IsReady)
+                        ScriptScraper scriptScraper = ScriptScraper.TryCreate(script, false);
+                        if (scriptScraper != null)
                             allScrapers.Add(scriptScraper);
                         else
                             Logger.LogDebug("Failed to parse scraper script '{0}'", script);
@@ -255,31 +255,17 @@ namespace Emulators.Import
 
                 if (searchType == ThumbSearchType.Fanart)
                 {
-                    scraper.GetFanartUrls(result, true);
-                    if (result.FanartUrl != null)
-                    {
-                        scraperGame.FanartUrl = result.FanartUrl;
+                    if (scraper.PopulateFanart(result, scraperGame))
                         break;
-                    }
                 }
                 else if (searchType == ThumbSearchType.Covers)
                 {
-                    scraper.GetCoverUrls(result, true);
-                    if (scraperGame.BoxFrontUrl == null && result.BoxFrontUrl != null)
-                        scraperGame.BoxFrontUrl = result.BoxFrontUrl;
-                    if (scraperGame.BoxBackUrl == null && result.BoxBackUrl != null)
-                        scraperGame.BoxBackUrl = result.BoxBackUrl;
-                    if (scraperGame.BoxFrontUrl != null && scraperGame.BoxBackUrl != null)
+                    if (scraper.PopulateCovers(result, scraperGame))
                         break;
                 }
                 else if (searchType == ThumbSearchType.Screens)
                 {
-                    scraper.GetScreenUrls(result, true);
-                    if (scraperGame.TitleScreenUrl == null && result.TitleScreenUrl != null)
-                        scraperGame.TitleScreenUrl = result.TitleScreenUrl;
-                    if (scraperGame.InGameUrl == null && result.InGameUrl != null)
-                        scraperGame.InGameUrl = result.InGameUrl;
-                    if (scraperGame.TitleScreenUrl != null && scraperGame.InGameUrl != null)
+                    if (scraper.PopulateScreens(result, scraperGame))
                         break;
                 }
             }
@@ -331,13 +317,6 @@ namespace Emulators.Import
             s = Regex.Replace(s, @"\s\s+", " ");
             s = s.Replace("é", "e");
             return s.Trim();
-        }
-
-        enum ThumbSearchType
-        {
-            Covers,
-            Screens,
-            Fanart
         }
 
         #region IDoWork Members

@@ -25,7 +25,7 @@ namespace Emulators
             pathTextBox.Text = defaultProfile.EmulatorPath;
             workingDirTextBox.Text = defaultProfile.WorkingDirectory;
             argumentsTextBox.Text = defaultProfile.Arguments;
-            useQuotesCheckBox.Checked = defaultProfile.UseQuotes != false;
+            useQuotesCheckBox.Checked = defaultProfile.UseQuotes;
         }
 
         public override bool Next()

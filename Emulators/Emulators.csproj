@@ -98,7 +98,6 @@
     <Compile Include="Launcher\LaunchCommand.cs" />
     <Compile Include="Import\EmulatorScraper.cs" />
     <Compile Include="Utils\ControllerHandler.cs" />
-    <Compile Include="Database\DB_Updater.cs" />
     <Compile Include="Hasher\Crc32.cs" />
     <Compile Include="Hasher\Hasher.cs" />
     <Compile Include="Hasher\MD4.cs" />
@@ -128,7 +127,6 @@
     <Compile Include="Utils\Cornerstone\Tools\AdvancedStringComparer.cs" />
     <Compile Include="Utils\Cornerstone\Tools\WebGrabber.cs" />
     <Compile Include="Utils\ExtensionMethods.cs" />
-    <Compile Include="Utils\GroupHandler.cs" />
     <Compile Include="Import\ScriptScraper.cs" />
     <Compile Include="Base\DBItem.cs" />
     <Compile Include="Data\Dropdowns.cs" />
@@ -173,7 +171,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Data\mamelist.txt" />
-    <Content Include="External\SharpCompress.3.5.dll" />
     <None Include="Import\Scripts\TheGamesDB.xml">
       <SubType>Designer</SubType>
     </None>
@@ -187,7 +184,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Docs\ChangeLog.txt" />
-    <Content Include="External\hasher.dll" />
     <None Include="Properties\DataSources\RomMatch.datasource" />
     <None Include="Import\Scripts\Maws.xml">
       <SubType>Designer</SubType>

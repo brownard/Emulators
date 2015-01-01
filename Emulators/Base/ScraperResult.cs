@@ -7,10 +7,12 @@ namespace Emulators.Import
 {
     public class ScraperResult : IComparable<ScraperResult>
     {
-        public string SiteId { get; set; }
-        public string Title { get; set; }
-        public string System { get; set; }
-        public string Year { get; set; }
+        #region Properties
+        
+        public string SiteId { get; private set; }
+        public string Title { get; private set; }
+        public string System { get; private set; }
+        public string Year { get; private set; }
         public string BoxFrontUrl { get; set; }
         public string BoxBackUrl { get; set; }
         public string TitleScreenUrl { get; set; }
@@ -24,46 +26,46 @@ namespace Emulators.Import
 
         public string DisplayMember
         {
-            get
-            {
-                string dispStr = "";
-                if (!string.IsNullOrEmpty(Year))
-                {
-                    dispStr += Year;
-                }
-                if (!string.IsNullOrEmpty(System))
-                {
-                    if (!string.IsNullOrEmpty(dispStr))
-                        dispStr += ", ";
-                    dispStr += System;
-                }
-                if (!string.IsNullOrEmpty(dispStr))
-                    dispStr = " (" + dispStr + ")";
-
-                return string.Format("{0}{1} [{2}]", Title, dispStr, DataProvider.Name);
-            }
+            get { return ToString(); }
         }
 
-        public override string ToString()
-        {
-            return DisplayMember;
-        }
+        #endregion
 
-        public ScraperResult Self
-        {
-            get { return this; }
-        }
+        #region Ctor
 
         public ScraperResult(string siteId, string title, string system, string year, Scraper dataProvider, ScraperSearchParams searchParams)
         {
-            SiteId = siteId == null ? "" : siteId;
-            Title = title == null ? "" : title;
-            System = system == null ? "" : system;
-            Year = year == null ? "" : year;
+            SiteId = siteId.EmptyIfNull();
+            Title = title.EmptyIfNull();
+            System = system.EmptyIfNull();
+            Year = year.EmptyIfNull();
             DataProvider = dataProvider;
             SearchParams = searchParams;
             SearchDistance = 0;
         }
+
+        #endregion
+
+        #region Overrides
+
+        public override string ToString()
+        {
+            string s = Year;
+            if (System != string.Empty)
+            {
+                if (s != string.Empty)
+                    s += ", ";
+                s += System;
+            }
+            if (s != string.Empty)
+                s = " (" + s + ")";
+
+            return string.Format("{0}{1} [{2}]", Title, s, DataProvider.Name);
+        }
+
+        #endregion
+
+        #region IComparable
 
         public int CompareTo(ScraperResult other)
         {
@@ -77,5 +79,7 @@ namespace Emulators.Import
                 comp = this.Priority.CompareTo(other.Priority);
             return comp;
         }
+
+        #endregion
     }
 }

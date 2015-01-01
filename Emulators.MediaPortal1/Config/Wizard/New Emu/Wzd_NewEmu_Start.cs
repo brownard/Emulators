@@ -45,7 +45,7 @@ namespace Emulators
                 return false;
             }
 
-            parent.NewEmulator = new Emulator(EmulatorType.Standard);
+            parent.NewEmulator = Emulator.CreateNewEmulator();
             parent.NewEmulator.DefaultProfile.EmulatorPath = pathTextBox.Text;
             autoConfig();
             return true;
@@ -73,8 +73,8 @@ namespace Emulators
                 {
                     EmulatorProfile defaultProfile = parent.NewEmulator.DefaultProfile;
                     defaultProfile.Arguments = autoSettings.Arguments;
-                    defaultProfile.UseQuotes = autoSettings.UseQuotes != false; //default to true if null
-                    defaultProfile.SuspendMP = autoSettings.SuspendMP == true;
+                    defaultProfile.UseQuotes = autoSettings.UseQuotes;
+                    defaultProfile.SuspendMP = autoSettings.SuspendMP;
                     defaultProfile.WorkingDirectory = autoSettings.WorkingDirectory;
                     defaultProfile.MountImages = autoSettings.MountImages;
                     defaultProfile.EscapeToExit = autoSettings.EscapeToExit;

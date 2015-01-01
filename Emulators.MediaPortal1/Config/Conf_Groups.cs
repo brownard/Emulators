@@ -13,6 +13,8 @@ namespace Emulators
 {
     internal partial class Conf_Groups : ContentPanel
     {
+        static readonly string[] DYNAMIC_COLUMNS = new[] { "Developer", "Genre", "Grade", "PlayCount", "Year" };
+
         ListViewItem selectedListItem = null;
         RomGroup selectedGroup = null;
 
@@ -35,7 +37,7 @@ namespace Emulators
         {
             InitializeComponent();
                         
-            dynamicColumns.AddRange(new string[] { "Developer", "Genre", "Grade", "PlayCount", "Year" });
+            dynamicColumns.AddRange(DYNAMIC_COLUMNS);
             foreach (string s in dynamicColumns)
                 dyn_ColumnComboBox.Items.Add(s);
 
@@ -121,7 +123,7 @@ namespace Emulators
                         newNode.Nodes.Add("Loading...");
                         break;
                     case GroupItemType.EMULATOR:
-                        if (item.ItemId == -2)
+                        if (item.ItemId == GroupItemInfo.ALL_ITEMS_ID)
                         {
                             newNode.Text = "All Emulators";
                             newNode.Nodes.Add("Loading...");
@@ -136,7 +138,7 @@ namespace Emulators
                         }
                         break;
                     case GroupItemType.GAME:
-                        if (item.ItemId == -2)
+                        if (item.ItemId == GroupItemInfo.ALL_ITEMS_ID)
                         {
                             newNode.Text = "All Games";
                             newNode.Nodes.Add("Loading...");

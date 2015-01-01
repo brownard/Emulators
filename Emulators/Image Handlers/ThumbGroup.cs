@@ -183,7 +183,7 @@ namespace Emulators
                 {
                     if (string.IsNullOrEmpty(thumbPath))
                     {
-                        Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                        Logger.LogWarn("No thumb path found for '{0}'", parentItem);
                         manualPath = "";
                     }
                     else
@@ -224,7 +224,7 @@ namespace Emulators
         {
             if (string.IsNullOrEmpty(thumbPath))
             {
-                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem);
                 return;
             }
 
@@ -275,7 +275,7 @@ namespace Emulators
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("Error creating thumb directory for {0} - {1}", parentItem.Title, ex.Message);
+                        Logger.LogError("Error creating thumb directory for {0} - {1}", parentItem, ex.Message);
                         return;
                     }
                 }
@@ -438,7 +438,7 @@ namespace Emulators
         {
             if (string.IsNullOrEmpty(thumbPath))
             {
-                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem);
                 return;
             }
 
@@ -490,7 +490,7 @@ namespace Emulators
                 if (string.IsNullOrEmpty(thumbObject.Path))
                     deleteThumb(thumbPath, thumbName);
                 else
-                    Logger.LogError("Unable to save {0} for {1} - error loading path '{2}'", thumbType, parentItem.Title, thumbObject.Path);
+                    Logger.LogError("Unable to save {0} for {1} - error loading path '{2}'", thumbType, parentItem, thumbObject.Path);
             }
             else
             {
@@ -579,7 +579,7 @@ namespace Emulators
         {
             if (string.IsNullOrEmpty(thumbPath))
             {
-                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem);
                 return;
             }
 
@@ -607,7 +607,7 @@ namespace Emulators
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("Error copying new Manual for {1} - {2}", parentItem.Title, ex.Message);
+                    Logger.LogError("Error copying new Manual for {1} - {2}", parentItem, ex.Message);
                     return;
                 }
             }
@@ -750,7 +750,7 @@ namespace Emulators
         {
             if (string.IsNullOrEmpty(thumbPath))
             {
-                Logger.LogWarn("No thumb path found for '{0}'", parentItem.Title);
+                Logger.LogWarn("No thumb path found for '{0}'", parentItem);
                 return null;
             }
             string path = thumbPath;
