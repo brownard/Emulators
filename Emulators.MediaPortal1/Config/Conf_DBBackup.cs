@@ -17,14 +17,14 @@ namespace Emulators
         {
             InitializeComponent();
 
-            Options opts = Options.Instance;
+            Options options = EmulatorsCore.Options;
+            options.EnterReadLock();
+            backupPathTextBox.Text = options.BackupFile;
+            backupThumbsCheckBox.Checked = options.BackupImages;
 
-            backupPathTextBox.Text = opts.GetStringOption("backupfile");
-            backupThumbsCheckBox.Checked = opts.GetBoolOption("backupthumbs");
-
-            restorePathTextBox.Text = opts.GetStringOption("restorefile");
-            restoreThumbsCheckBox.Checked = opts.GetBoolOption("restorethumbs");
-            mergeRadioButton.Checked = opts.GetBoolOption("restoremerge");
+            restorePathTextBox.Text = options.RestoreFile;
+            restoreThumbsCheckBox.Checked = options.RestoreImages;
+            mergeRadioButton.Checked = options.RestoreMerge;
 
             BackupDropdownItem create = new BackupDropdownItem("Create new", MergeType.Create);
             BackupDropdownItem ignore = new BackupDropdownItem("Ignore", MergeType.Ignore);
@@ -35,7 +35,7 @@ namespace Emulators
             emuMergeComboBox.ValueMember = "ValueMember";
             emuMergeComboBox.Items.AddRange(new object[] { create, ignore, merge }); //allow all 3 options
 
-            int index = sanitiseIndex(opts.GetIntOption("restoreemusetting"), emuMergeComboBox.Items.Count);
+            int index = sanitiseIndex(options.MergeEmulatorSetting, emuMergeComboBox.Items.Count);
             emuMergeComboBox.SelectedItem = emuMergeComboBox.Items[index];
 
             //games
@@ -43,9 +43,10 @@ namespace Emulators
             gameMergeComboBox.ValueMember = "ValueMember";
             gameMergeComboBox.Items.AddRange(new object[] { ignore, merge }); //don't allow Create
 
-            index = sanitiseIndex(opts.GetIntOption("restoregamesetting"), gameMergeComboBox.Items.Count);
+            index = sanitiseIndex(options.MergeGameSetting, gameMergeComboBox.Items.Count);
             gameMergeComboBox.SelectedItem = gameMergeComboBox.Items[index];
 
+            options.ExitReadLock();
             updateMergePanels();
         }
 
@@ -166,16 +167,18 @@ namespace Emulators
 
         public override void ClosePanel()
         {
-            Options opts = Options.Instance;
-            opts.UpdateOption("backupfile", backupPathTextBox.Text);
-            opts.UpdateOption("backupthumbs", backupThumbsCheckBox.Checked);
+            Options opts = EmulatorsCore.Options;
+            opts.EnterWriteLock();
+            opts.BackupFile = backupPathTextBox.Text;
+            opts.BackupImages = backupThumbsCheckBox.Checked;
 
-            opts.UpdateOption("restorefile", restorePathTextBox.Text);
-            opts.UpdateOption("restorethumbs", restoreThumbsCheckBox.Checked);
-            opts.UpdateOption("restoremerge", mergeRadioButton.Checked);
+            opts.RestoreFile = restorePathTextBox.Text;
+            opts.RestoreImages = restoreThumbsCheckBox.Checked;
+            opts.RestoreMerge = mergeRadioButton.Checked;
 
-            opts.UpdateOption("restoreemusetting", emuMergeComboBox.SelectedIndex);
-            opts.UpdateOption("restoregamesetting", gameMergeComboBox.SelectedIndex);
+            opts.MergeEmulatorSetting = emuMergeComboBox.SelectedIndex;
+            opts.MergeGameSetting = gameMergeComboBox.SelectedIndex;
+            opts.ExitWriteLock();
         }
     }
 

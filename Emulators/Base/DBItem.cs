@@ -52,12 +52,12 @@ namespace Emulators
 
         public virtual void Commit()
         {
-            DB.Instance.Commit(this);
+            EmulatorsCore.Database.Commit(this);
         }
 
         public virtual void Delete()
         {
-            DB.Instance.Delete(this);
+            EmulatorsCore.Database.Delete(this);
         }
 
         public void LoadFromRow(SQLDataRow row)

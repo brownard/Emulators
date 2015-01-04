@@ -54,7 +54,8 @@ namespace Emulators.MediaPortal1
             oldDbPath = Config.GetFile(Config.Dir.Database, "Emulators2_v1.db3");
             newDbPath = Config.GetFile(Config.Dir.Database, "Emulators2_v2.db3");
             dbUpgradeNeeded = System.IO.File.Exists(oldDbPath) && !System.IO.File.Exists(newDbPath);
-            EmulatorsSettings.Instance.Init(new MP1Settings());
+            MP1Settings settings = new MP1Settings();
+            EmulatorsCore.Init(settings);
         }
 
         public string PluginName()
@@ -103,15 +104,15 @@ namespace Emulators.MediaPortal1
         //Show Configuration
         public void ShowPlugin()
         {
-            EmulatorsSettings.Instance.IsConfig = true;
+            MP1Utils.IsConfig = true;
             if (dbUpgradeNeeded)
             {
                 MP1Utils.ShowProgressDialog(new DatabaseUpgrader(new MP1DataProvider(oldDbPath)));
                 dbUpgradeNeeded = false;
             }
             new Conf_Main().ShowDialog();
-            Options.Instance.Save();
-            EmulatorsSettings.Instance.IsConfig = false;
+            EmulatorsCore.Options.Save();
+            MP1Utils.IsConfig = false;
         }
 
         //Show Plugin
@@ -128,14 +129,13 @@ namespace Emulators.MediaPortal1
             if (guiHandler != null)
                 guiHandler.Dispose();
             LaunchHandler.Instance.Dispose();
-            Options.Instance.Save();
-            DB.Instance.Dispose();
+            EmulatorsCore.DeInit();
             base.DeInit();
         }
 
         public bool GetHome(out string strButtonText, out string strButtonImage, out string strButtonImageFocus, out string strPictureImage)
         {
-            strButtonText = Options.Instance.GetStringOption("shownname");
+            strButtonText = EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName);
             strButtonImage = String.Empty;
             strButtonImageFocus = String.Empty;
             strPictureImage = MP1Utils.HOME_HOVER;
@@ -144,7 +144,7 @@ namespace Emulators.MediaPortal1
 
         public override string GetModuleName()
         {
-            return Options.Instance.GetStringOption("shownname");
+            return EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName);
         }
 
         protected override void OnPageLoad()
@@ -165,20 +165,23 @@ namespace Emulators.MediaPortal1
 
         void doLoad()
         {
+            Options options = EmulatorsCore.Options;
+            options.EnterReadLock();
             if (firstLoad)
             {
                 firstLoad = false;
+
                 GUIPropertyManager.SetProperty("#Emulators2.PreviewVideo.playing", "no");
                 //Image Handlers
                 backdrop = new ImageSwapper();
-                backdrop.ImageResource.Delay = Options.Instance.GetIntOption("fanartdelay");
+                backdrop.ImageResource.Delay = options.FanartDelay;
                 backdrop.PropertyOne = "#Emulators2.CurrentItem.fanartpath";
                 backdrop.PropertyTwo = "#Emulators2.CurrentItem.fanartpath2";
 
                 guiHandler = new GUIPresenter();
                 guiHandler.OnSortAscendingChanged += new GUIPresenter.SortAscendingChanged(newGUIHandler_OnSortAscendingChanged);
                 guiHandler.OnPreviewVideoStatusChanged += new GUIPresenter.PreviewVideoStatusChanged(newGUIHandler_OnPreviewVideoStatusChanged);
-                GUIPropertyManager.SetProperty("#Emulators2.plugintitle", Options.Instance.GetStringOption("shownname"));
+                GUIPropertyManager.SetProperty("#Emulators2.plugintitle", options.PluginDisplayName);
 
                 onVideoStopped = new g_Player.StoppedHandler(g_Player_PlayBackStopped);
                 onVideoEnded = new g_Player.EndedHandler(g_Player_PlayBackEnded);
@@ -194,20 +197,22 @@ namespace Emulators.MediaPortal1
                 buttonSort.SortChanged += new SortEventHandler(guiHandler.OnSort);
             }
 
-            if (Options.Instance.GetBoolOption("showfanart"))
+            if (options.ShowFanart)
             {
                 backdrop.GUIImageOne = fanartControl1;
                 backdrop.GUIImageTwo = fanartControl2;
             }
 
             if (gameArtEnabled != null)
-                gameArtEnabled.Visible = Options.Instance.GetBoolOption("showgameart"); //update gameart dummy control visibility
+                gameArtEnabled.Visible = options.ShowVideoPreview; //update gameart dummy control visibility
 
-            if (Options.Instance.GetBoolOption("showvideopreview"))
+            if (options.ShowVideoPreview)
             {
                 if (videoPreviewEnabled != null)
                     videoPreviewEnabled.Visible = true; //videoPreview dummy
             }
+
+            options.ExitReadLock();
 
             g_Player.PlayBackStopped += onVideoStopped;
             g_Player.PlayBackEnded += onVideoEnded;
@@ -374,7 +379,7 @@ namespace Emulators.MediaPortal1
 
         void getStartupSettings(ref DBItem startupItem, ref bool launch)
         {
-            //startupItem = DB.Instance.GetGame(5359);
+            //startupItem = EmulatorsCore.Database.GetGame(5359);
             //launch = false;
             //return;
 
@@ -395,14 +400,14 @@ namespace Emulators.MediaPortal1
                     case "emulator":
                         int id;
                         if (int.TryParse(m.Groups[2].Value, out id))
-                            startupItem = DB.Instance.Get<Emulator>(id);
+                            startupItem = EmulatorsCore.Database.Get<Emulator>(id);
                         break;
                     case "rom":
                         if (int.TryParse(m.Groups[2].Value, out id))
-                            startupItem = DB.Instance.Get<Game>(id);
+                            startupItem = EmulatorsCore.Database.Get<Game>(id);
                         break;
                     case "group":
-                        List<DBItem> groups = DB.Instance.Get(typeof(RomGroup), new BaseCriteria(DBField.GetField(typeof(RomGroup), "Title"), "=", m.Groups[2].Value));
+                        List<DBItem> groups = EmulatorsCore.Database.Get(typeof(RomGroup), new BaseCriteria(DBField.GetField(typeof(RomGroup), "Title"), "=", m.Groups[2].Value));
                         if (groups.Count > 0)
                             startupItem = groups[0];
                         break;

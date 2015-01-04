@@ -18,21 +18,31 @@ namespace Emulators.MediaPortal1
         void initImporter()
         {
             GUIPropertyManager.SetProperty("#Emulators2.Importer.working", "no");
-
-            if (Options.Instance.GetBoolOption("autoimportgames"))
+            EmulatorsCore.Options.EnterReadLock();
+            if (EmulatorsCore.Options.AutoImportGames)
                 autoimport = true;
-            else if (Options.Instance.GetBoolOption("autorefreshgames"))
+            else if (EmulatorsCore.Options.AutoRefreshGames)
                 autoimport = false;
             else
                 autoimport = null;
-                        
+            EmulatorsCore.Options.ExitReadLock();
+
             importer = new Importer(true, autoimport == false);
             importer.ImportStatusChanged += importerStatusChangedHandler;
             importer.RomStatusChanged += romStatusChangedHandler;
+            EmulatorsCore.Database.OnItemDeleting += Database_OnItemDeleting;
+
             //pause importer during game execution
             LaunchHandler.Instance.StatusChanged += launch_StatusChanged;
             if (autoimport != null)
                 importer.Start();
+        }
+
+        void Database_OnItemDeleting(DBItem changedItem)
+        {
+            Game game = changedItem as Game;
+            if (game != null && importer != null)
+                importer.Remove(game.Id);
         }
         
         void resumeImporter()
@@ -94,7 +104,7 @@ namespace Emulators.MediaPortal1
         {
             if (e.Status == RomMatchStatus.Committed)
             {
-                Game game = DB.Instance.Get<Game>(e.RomMatch.ID);
+                Game game = EmulatorsCore.Database.Get<Game>(e.RomMatch.ID);
                 Logger.LogDebug("Importer action: {0} updated", game.Title);
                 UpdateGame(game);
             }

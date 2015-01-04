@@ -62,13 +62,13 @@ namespace Emulators
             group.GroupItemInfos.Add(GroupItemInfo.CreateDynamicGroup("Genre", null));
             groups.Add(group);
 
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             for (int x = 0; x < groups.Count; x++)
             {
                 groups[x].Position = x;
                 groups[x].Commit();
             }
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
 
             return groups;
         }
@@ -83,7 +83,7 @@ namespace Emulators
         /// <returns></returns>
         public static List<RomGroup> GetAll()
         {
-            List<RomGroup> groups = DB.Instance.GetAll<RomGroup>();
+            List<RomGroup> groups = EmulatorsCore.Database.GetAll<RomGroup>();
             if (groups.Count < 1)
                 groups = createDefaultGroups();
             return groups;

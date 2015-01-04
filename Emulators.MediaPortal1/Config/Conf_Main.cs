@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Emulators.Import;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,10 +13,17 @@ namespace Emulators
     public partial class Conf_Main : Form
     {
         ContentPanel selectedPanel = null;
+        Importer importer;
 
         public Conf_Main()
         {
             InitializeComponent();
+
+            importer = new Importer();
+            conf_EmuBrowser1.Importer = importer;
+            conf_DBBrowser1.Importer = importer;
+            conf_DBImporter1.Importer = importer;
+            EmulatorsCore.Database.OnItemDeleting += Database_OnItemDeleting;
 
             emuBrowserTab.Tag = conf_EmuBrowser1;
             romBrowserTab.Tag = conf_DBBrowser1;
@@ -25,8 +33,14 @@ namespace Emulators
             optionsTab.Tag = conf_Options_New1;
 
             mainTabControl.SelectedIndexChanged += new EventHandler(mainTabControl_SelectedIndexChanged);
-
             selectedPanel = mainTabControl.SelectedTab.Tag as ContentPanel;
+        }
+
+        void Database_OnItemDeleting(DBItem changedItem)
+        {
+            Game game = changedItem as Game;
+            if (game != null && importer != null)
+                importer.Remove(game.Id);
         }
 
         void mainTabControl_SelectedIndexChanged(object sender, EventArgs e)

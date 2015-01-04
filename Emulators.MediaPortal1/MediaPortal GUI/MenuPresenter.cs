@@ -66,7 +66,7 @@ namespace Emulators.MediaPortal1
             if (dlg != null)
             {
                 dlg.Reset();
-                dlg.SetHeading(Options.Instance.GetStringOption("shownname"));
+                dlg.SetHeading(EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName));
 
                 dlg.Add(new GUIListItem(Translator.Instance.switchview));
                 dlg.Add(new GUIListItem(Translator.Instance.runimport));
@@ -102,7 +102,7 @@ namespace Emulators.MediaPortal1
             {
                 int windowID = Plugin.WINDOW_ID;
                 dlg.Reset();
-                dlg.SetHeading(Options.Instance.GetStringOption("shownname"));
+                dlg.SetHeading(EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName));
 
                 GUIListItem playItem = new GUIListItem("Play");
                 dlg.Add(playItem);
@@ -454,19 +454,24 @@ namespace Emulators.MediaPortal1
                 dlg.Reset();
                 dlg.SetHeading(Translator.Instance.options);
 
-                int startup;
+                StartupState startup;
                 var startupStates = MP1Utils.GetStartupOptions(out startup);
                 string startupValue = startupStates.Single(s => s.Value == startup).Name;
                 dlg.Add(new GUIListItem(Translator.Instance.startupview) { Label2 = startupValue });
 
-                bool clickToDetails = Options.Instance.GetBoolOption("clicktodetails");
+                Options options = EmulatorsCore.Options;
+                options.EnterReadLock();
+
+                bool clickToDetails = options.ClickToDetails;
                 dlg.Add(new GUIListItem(Translator.Instance.clicktodetails) { Label2 = clickToDetails.ToString() });
 
-                bool stopMedia = Options.Instance.GetBoolOption("stopmediaplayback");
+                bool stopMedia = options.StopMediaPlayback;
                 dlg.Add(new GUIListItem(Translator.Instance.stopmediaplayback) { Label2 = stopMedia.ToString() });
 
-                bool showSortValue = Options.Instance.GetBoolOption("showsortvalue");
+                bool showSortValue = options.ShowSortValue;
                 dlg.Add(new GUIListItem(Translator.Instance.showsortvalue) { Label2 = showSortValue.ToString() });
+
+                options.ExitReadLock();
 
                 dlg.SelectedLabel = selectedLabel;
                 dlg.DoModal(Plugin.WINDOW_ID);
@@ -474,25 +479,27 @@ namespace Emulators.MediaPortal1
 
                 if (dlg.SelectedId > 0)
                 {
+                    options.EnterWriteLock();
                     switch (dlg.SelectedId)
                     {
                         case 1:
                             if (ShowStringSelect(ref startupValue, startupStates.Select(s => s.Name).ToArray(), Plugin.WINDOW_ID))
-                                Options.Instance.UpdateOption("startupstate", startupStates.Single(s => s.Name == startupValue).Value);
+                                options.StartupState = startupStates.Single(s => s.Name == startupValue).Value;
                             break;
                         case 2:
                             if (ShowBoolDialog(ref clickToDetails, Plugin.WINDOW_ID))
-                                Options.Instance.UpdateOption("clicktodetails", clickToDetails);
+                                options.ClickToDetails = clickToDetails;
                             break;
                         case 3:
                             if (ShowBoolDialog(ref stopMedia, Plugin.WINDOW_ID))
-                                Options.Instance.UpdateOption("stopmediaplayback", stopMedia);
+                                options.StopMediaPlayback = stopMedia;
                             break;
                         case 4:
                             if (ShowBoolDialog(ref showSortValue, Plugin.WINDOW_ID))
-                                Options.Instance.UpdateOption("showsortvalue", showSortValue);
+                                options.ShowSortValue = showSortValue;
                             break;
                     }
+                    options.ExitWriteLock();
                     ShowSettingsDialog(selectedLabel);
                     return true;
                 }

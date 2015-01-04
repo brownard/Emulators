@@ -40,7 +40,7 @@ namespace Emulators.Database
         public bool CommitNeeded { get; set; }
         public void Commit()
         {
-            DB.Instance.Commit(this);
+            EmulatorsCore.Database.Commit(this);
         }
 
         protected override void OnChanged(EventArgs e)

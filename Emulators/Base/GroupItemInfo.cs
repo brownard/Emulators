@@ -177,19 +177,19 @@ namespace Emulators
             switch (itemType)
             {
                 case GroupItemType.SQL:
-                    return DB.Instance.Get(typeof(Game), new SimpleCriteria(sql, order));
+                    return EmulatorsCore.Database.Get(typeof(Game), new SimpleCriteria(sql, order));
                 case GroupItemType.DYNAMIC:
                     return getSubGroups(sortProperty);
                 case GroupItemType.EMULATOR:
                     if (itemId == ALL_ITEMS_ID)
                         return Emulator.GetAll(true).Select(e => (DBItem)e).ToList();
                     else
-                        return new List<DBItem> { DB.Instance.Get(typeof(Emulator), itemId) };
+                        return new List<DBItem> { EmulatorsCore.Database.Get(typeof(Emulator), itemId) };
                 case GroupItemType.GAME:
                     if (itemId == ALL_ITEMS_ID)
-                        return DB.Instance.GetAll(typeof(Game));
+                        return EmulatorsCore.Database.GetAll(typeof(Game));
                     else
-                        return new List<DBItem> { DB.Instance.Get(typeof(Game), itemId) };
+                        return new List<DBItem> { EmulatorsCore.Database.Get(typeof(Game), itemId) };
                 default:
                     return new List<DBItem>();
             }
@@ -214,7 +214,7 @@ namespace Emulators
             if (column == "Genre")
             {
                 //get all unique genres
-                List<string> genres = DB.Instance.GetAllValues(DBField.GetField(typeof(Game), "Genre")).ToList();
+                List<string> genres = EmulatorsCore.Database.GetAllValues(DBField.GetField(typeof(Game), "Genre")).ToList();
                 genres.Sort();
                 //create groups that will return all games that contain the specified genre
                 foreach (string genre in genres)
@@ -226,7 +226,7 @@ namespace Emulators
             string order = string.IsNullOrEmpty(this.order) ? "" : " " + this.order;
             string sql = string.Format("SELECT DISTINCT {0} FROM {1} ORDER BY {0}{2}", column, DB.GetTableName(typeof(Game)), order);
             Logger.LogDebug("Created sql for dynamic group '{0}'", sql);
-            SQLData results = DB.Instance.Execute(sql);
+            SQLData results = EmulatorsCore.Database.Execute(sql);
 
             //create groups that will return all games with the specified column value
             foreach (SQLDataRow row in results.Rows)

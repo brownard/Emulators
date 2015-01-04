@@ -5,79 +5,84 @@
       <Filters>*.uae</Filters>
     </Emulator>
   </Platform>
-  
+
   <Platform name="Atari 8-bit">
     <Emulator exe="atari800win.exe">
       <Filters>*.atr</Filters>
     </Emulator>
   </Platform>
-  
+
   <Platform name="Dreamcast" caseaspect="0.71">
     <Emulator exe="nulldc.exe">
       <Filters>*.cdi</Filters>
     </Emulator>
   </Platform>
-  
+
   <Platform name="Game Boy" caseaspect="1.12">
     <Emulator exe="vba.exe">
       <Filters>*.gba;*.gbc;*.sgb;*.gb</Filters>
     </Emulator>
   </Platform>
-  
+
   <Platform name="Arcade">
     <Emulator name="Mame" exe="mame.exe" >
-      <UseQuotes>false</UseQuotes>
-      <Arguments>-rp "%ROMDIRECTORY%" %ROM_WITHOUT_EXT%</Arguments>
+      <Profile>
+        <UseQuotes>false</UseQuotes>
+        <Arguments>-rp "%ROMDIRECTORY%" %ROM_WITHOUT_EXT%</Arguments>
+      </Profile>
     </Emulator>
     <Emulator name="Mame" exe="mamep.exe">
-      <UseQuotes>false</UseQuotes>
+      <Profile>
+        <UseQuotes>false</UseQuotes>
+      </Profile>
     </Emulator>
     <Emulator name="Mame" exe="mameui32.exe">
-      <UseQuotes>false</UseQuotes>
+      <Profile>
+        <UseQuotes>false</UseQuotes>
+      </Profile>
     </Emulator>
   </Platform>
-  
+
   <Platform name="NES" caseaspect="1.45">
     <Emulator exe="fceu.exe">
       <Filters>*.nes</Filters>
     </Emulator>
   </Platform>
-  
+
   <Platform name="Nintendo 64" caseaspect="1.45">
     <Emulator name="Project 64" exe="project64.exe">
       <Filters>*.n64;*.z64;*.v64;*.rom</Filters>
-      <UseQuotes>false</UseQuotes>
+      <Profile>
+        <UseQuotes>false</UseQuotes>
+      </Profile>
     </Emulator>
   </Platform>
 
-  <Platform name="Nintendo Wii" caseaspect="0.71">
-    <Emulator name="Dolphin" exe="dolphin.exe">
-      <Filters>*.iso;*.elf;*.dol;*.gcm;*.wbfs;*.ciso;*.gcz;*.wad</Filters>
-      <Arguments>-b -e</Arguments>
-    </Emulator>
-  </Platform>
-  
   <Platform name="PlayStation" caseaspect="1.14">
     <Emulator name="ePSXe" exe="epsxe.exe">
       <Filters>*.bin;*.iso;*.img</Filters>
-      <Arguments>-nogui -loadbin</Arguments>
-      <EscapeToExit>true</EscapeToExit>
-    </Emulator>    
+      <Profile>
+        <Arguments>-nogui -loadbin</Arguments>
+        <EscapeToExit>true</EscapeToExit>
+      </Profile>
+    </Emulator>
   </Platform>
 
   <Platform name="PlayStation 2" caseaspect="0.71">
     <Emulator name="PCSX2" exe="pcsx2*.exe">
       <Filters>*.bin;*.iso;*.img</Filters>
-      <Arguments>--nogui</Arguments>
+      <Profile>
+        <Arguments>--nogui</Arguments>
+      </Profile>
     </Emulator>
   </Platform>
-  
+
   <Platform name="SEGA 32X" caseaspect="0.71">
     <Emulator exe="fusion.exe">
       <Filters>*.bin;*.smd</Filters>
     </Emulator>
   </Platform>
-  
+
   <Platform name="SNES" caseaspect="1.45">
     <Emulator exe="snes9xw.exe">
       <Filters>*.smc</Filters>
@@ -87,6 +92,15 @@
     </Emulator>
     <Emulator exe="snes9x.exe">
       <Filters>*.bin;*.fig;*.smc</Filters>
+    </Emulator>
+  </Platform>
+
+  <Platform name="Wii" caseaspect="0.71">
+    <Emulator name="Dolphin" exe="dolphin.exe">
+      <Filters>*.iso;*.elf;*.dol;*.gcm;*.wbfs;*.ciso;*.gcz;*.wad</Filters>
+      <Profile>
+        <Arguments>-b -e</Arguments>
+      </Profile>
     </Emulator>
   </Platform>
 </Platforms>

@@ -3,410 +3,527 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.Windows.Forms;
+using System.Threading;
+using System.Reflection;
+using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Emulators
 {
-    public enum OptionType
+    #region Option MetaData
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class OptionAttribute : Attribute
     {
-        Bool,
-        Int,
-        String
+        public bool HasDefault { get; set; }
+        object defaultValue;
+        public object Default
+        {
+            get { return defaultValue; }
+            set
+            {
+                HasDefault = true;
+                defaultValue = value;
+            }
+        }
     }
+
+    public class OptionMetadata
+    {
+        public PropertyInfo PropertyInfo { get; set; }
+        public OptionAttribute OptionAttribute { get; set; }
+    }
+
+    #endregion
 
     public class Options
     {
-        //sync root for thread safety
-        object optionSync = new object();
+        #region Options PropertyInfo
 
-        //Dynamic options
-        Dictionary<string, bool> boolOptions = null;
-        Dictionary<string, int> intOptions = null;
-        Dictionary<string, string> stringOptions = null;
+        static object propertiesSync = new object();
+        static Dictionary<Type, Dictionary<string, OptionMetadata>> properties;
+        static Dictionary<string, OptionMetadata> GetProperties(Type type)
+        {
+            lock (propertiesSync)
+            {
+                if (properties == null)
+                    properties = new Dictionary<Type, Dictionary<string, OptionMetadata>>();
+                else if (properties.ContainsKey(type))
+                    return properties[type];
+
+                Dictionary<string, OptionMetadata> typeProperties = new Dictionary<string, OptionMetadata>();
+                foreach (PropertyInfo p in type.GetProperties())
+                    foreach (object attr in p.GetCustomAttributes(true))
+                    {
+                        if (attr.GetType() == typeof(OptionAttribute))
+                        {
+                            typeProperties[p.Name] = new OptionMetadata() { PropertyInfo = p, OptionAttribute = (OptionAttribute)attr };
+                            break;
+                        }
+                    }
+                properties[type] = typeProperties;
+                return typeProperties;
+            }
+        }
+
+        #endregion
+
+        #region Private Members
+        
+        object optionSync = new object();
+        ReaderWriterLockSlim readWriteLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         List<string> ignoredFiles = null;
 
-        #region Singleton
+        #endregion
 
-        static object instanceSync = new object();
-        static Options instance = null;
-        public static Options Instance
+        #region Init
+
+        public virtual void Init()
         {
-            get
-            {
-                if (instance == null)
-                    lock (instanceSync)
-                        if (instance == null)
-                            instance = new Options();
-                return instance;
-            }
+            ignoredFiles = new List<string>();
+            setDefaults();
+            Load();
+        }
+
+        void setDefaults()
+        {
+            foreach (OptionMetadata meta in GetProperties(this.GetType()).Values)
+                if (meta.OptionAttribute.HasDefault)
+                    meta.PropertyInfo.GetSetMethod().Invoke(this, new[] { meta.OptionAttribute.Default });
         }
 
         #endregion
 
-        #region Defaults
+        #region Load/Save
 
-        //sets the default options, the option value is only set if it is not already in the current list of options
-        private void loadDefaults()
+        public string SavePath { get; set; }
+
+        public virtual void Load()
         {
-            AddOption("shownname", "My Emulators"); //Plugin title
-            AddOption("language", "English"); //Plugin language
-            AddOption("autoconfemu", true); //Whether to auto configurate the profile when selecting an executable path
-
-            AddOption("startupstate", -1);
-            AddOption("laststartupstate", 1);
-            AddOption("clicktodetails", true);
-
-            //View options, 
-            //0 = List, 1=small icons, 2=large icons, 3=filmstrip, 4=coverflow
-
-            AddOption("viewemus", 0); //The default view for the emulator list
-            AddOption("defaultviewroms", 0); //default view for rom list
-            AddOption("viewpcgames", 0); //default view for PC game list
-            AddOption("viewfavourites", 0); //default view for favourite list
-
-            AddOption("showsortvalue", true); //Whether to display the sorted value in the facade when sorting
-
-            //Thumb options
-            AddOption("fanartdelay", 500); //the delay in ms before fanart is loaded for a new item
-            AddOption("gameartdelay", 500); //the delay in ms before gameart is loaded for a new item
-            AddOption("showfanart", true); //Whether to show fanart (supported skin required)
-            AddOption("showgameart", true); //Whether to show gameart (supported skin required)
-
-            //Import options
-            AddOption("autorefreshgames", true); //Whether to auto refresh the database on plugin start
-            AddOption("importtop", false); //Whether to auto select the top search result when a better match is not found
-            AddOption("importexact", false); //Whether to only approve exact title and platform match
-            AddOption("autoimportgames", true); //Whether to auto-import games when opening the plugin in MP
-            AddOption("resizethumbs", true); //Whether to resize selected box art to the correct aspect ratio for the platform
-            AddOption("thoroughthumbsearch", false); //Whether to search all scrapers recursively until all missing artwork is found
-            AddOption("thumblocation", ""); //Location to store artwork
-
-            //key map
-            AddOption("domap", false); //Whether to stop emulation on mapped key
-            AddOption("mappedkey", ""); //The key used to stop emulation
-
-            //community server
-            AddOption("retrieveGameDetials", true); // use the community server to get the most likely info for a game, rather then scrapping for it.
-            AddOption("submitGameDetails", true); // submit scrapped info to the community server for other clients to use.
-            AddOption("communityServerAddress", "technohub.dyndns-home.com:4567"); // the address of the community server.
-            AddOption("communityServerConnectionRetryTime", 15); // The time to wait in minutes to retry to connect to server after previous connection error.
-
-            //advanced options
-            AddOption("goodmergefilters", "*.7z;*.rar;*.zip;*.tar"); //The file filters used to determine whether a rom is a Goodmerge archive
-            AddOption("showgmdialogonce", true); //Whether to display the goodmerge select dialog only on first run of game
-            AddOption("showgmdialog", false); //Whether to ever display the goodmerge select dialog
-
-            AddOption("importthreadcount", 5); //The number of background threads to use when running the importer, a higher count will give better performance on high-end machines
-            AddOption("hashthreadcount", 2); //The maximum number of import threads allowed to hash files at the same time, a lower count helps limit cpu usage
-            AddOption("stopmediaplayback", true); //Whether to stop any playing media in MP when starting a game
-
-            //PC Emulator
-            AddOption("pcitemtitle", "PC Games"); //Title
-            AddOption("pcitemcompany", ""); //Company
-            AddOption("pcitemdescription", ""); //Description
-            AddOption("pcitemyear", 0); //Year
-            AddOption("pcitemgrade", 0); //Grade
-            AddOption("pcitemposition", 0); //List position
-            AddOption("pcitemvideopreview", ""); //Preview Vid
-            AddOption("pcitemcaseaspect", 71); //case aspect, default to DVD
-            AddOption("pcitemcheckcontroller", false);
-            AddOption("pcitemdirectory", "");
-            AddOption("pcitemfilter", "*.lnk");
-
-            //video previews
-            AddOption("showvideopreview", false); //show videos
-            AddOption("loopvideopreview", false); //loop videos
-            AddOption("defaultvideopreview", false); //use emu video if game vid not present
-            AddOption("videopreviewdelay", 2000); //delay before video starts (ms)
-
-            AddOption("scraperpriorities", "99999996;99999999;99999995;99999998;99999997;");
-            AddOption("ignoredscrapers", "99999997;99999998"); //script ids (as strings) to ignore, delimited by ';' - Ignore RetroCPU by default as SLOOOOW
-            AddOption("coversscraperid", "99999996");
-            AddOption("screensscraperid", "99999999");
-            AddOption("fanartscraperid", "99999996");
-
-            AddOption("maxthumbdimension", 640);
-
-            //Backup/Restore preferences
-            AddOption("backupfile", "");
-            AddOption("backupthumbs", true);
-            AddOption("restorefile", "");
-            AddOption("restorethumbs", true);
-            AddOption("restoremerge", true);
-            AddOption("restoreemusetting", 0);
-            AddOption("restoreprofilesetting", 0);
-            AddOption("restoregamesetting", 1);
-
-            AddOption("mappedkeydata", 0);
-            AddOption("coversscraperid", "");
-            AddOption("screensscraperid", "");
-            AddOption("fanartscraperid", "");
-        }
-
-        #endregion
-
-        public Options()
-        {
-            init();
-        }
-
-        void init()
-        {
-            lock (optionSync)
-            {
-                //initialise dictionaries
-                boolOptions = new Dictionary<string, bool>();
-                intOptions = new Dictionary<string, int>();
-                stringOptions = new Dictionary<string, string>();
-                ignoredFiles = new List<string>();
-
-                //load the xmlfile
-                loadDoc();
-                //set default options if not already present
-                loadDefaults();
-            }
-        }
-
-        //private method used to add options from xmldoc, attempts to parse the string value to the specified type
-        void addXMLOption(string name, string value, OptionType optionType)
-        {
-            if (value == null)
-            {
-                Logger.LogError("Error adding option, value cannot be null");
-            }
-
-            switch (optionType)
-            {
-                case OptionType.Bool:
-                    bool boolVal;
-                    if (!bool.TryParse(value, out boolVal)) //try and get bool from string
-                    {
-                        Logger.LogError("Error adding bool option '{0}', the value passed was not boolean", name);
-                        return;
-                    }
-                    AddOption(name, boolVal); //add if successful
-                    break;
-                case OptionType.Int:
-                    int intVal;
-                    if (!int.TryParse(value, out intVal))
-                    {
-                        Logger.LogError("Error adding int option '{0}', the value passed was not an integer", name);
-                        return;
-                    }
-                    AddOption(name, intVal);
-                    break;
-                case OptionType.String:
-                    AddOption(name, value); //no need to convert string
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Adds the specified option to options list.
-        /// The option value is only set if the option is not already in the current list.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value">Should be the correct Type for the value, i.e. int, bool or string</param>
-        public void AddOption(string name, object value)
-        {
-            if (string.IsNullOrEmpty(name)) //don't allow empty or null option names
-            {
-                Logger.LogError("Option name cannot be empty or null");
+            string sourcePath = SavePath;
+            if (string.IsNullOrEmpty(sourcePath))
                 return;
-            }
 
-            lock (optionSync)
+            try
             {
-                if (value is bool)
+                XmlDocument doc = new XmlDocument();
+                doc.Load(sourcePath); //get the xml file
+
+                XmlNodeList nodes = doc.GetElementsByTagName("option"); //select option node
+                if (nodes.Count == 0)
+                    return;
+                var optionProperties = GetProperties(this.GetType());
+
+                //loop through each option and determine the option Type
+                foreach (XmlNode node in nodes)
                 {
-                    if (boolOptions.ContainsKey(name))
-                        return;
-                    boolOptions.Add(name, (bool)value);
-                }
-                else if (value is int)
-                {
-                    if (intOptions.ContainsKey(name))
-                        return;
-                    intOptions.Add(name, (int)value);
-                }
-                else
-                {
-                    string stringVal = value as string;
-                    if (stringVal == null)
+                    XmlNode attr = node.Attributes.GetNamedItem("property");
+                    if (attr == null || string.IsNullOrEmpty(attr.Value) || !optionProperties.ContainsKey(attr.Value))
+                        continue;
+
+                    string name = attr.Value;
+                    string strValue = node.InnerText;
+
+                    PropertyInfo property = optionProperties[name].PropertyInfo;
+                    Type type = property.PropertyType;
+
+                    object value;
+                    if (strValue == "")
                     {
-                        Logger.LogError("Error adding option '{0}', the value was not a valid Type", name);
-                        return;
+                        if (type.IsValueType && Nullable.GetUnderlyingType(type) == null)
+                            continue;
+                        value = null;
                     }
-                    if (stringOptions.ContainsKey(name))
-                        return;
-                    stringOptions.Add(name, stringVal);
+                    else if (type == typeof(string))
+                    {
+                        if (strValue.Trim() == "")
+                            strValue = strValue.Substring(1);
+                        value = strValue;
+                    }
+                    else if (type == typeof(bool) || type == typeof(Nullable<bool>))
+                    {
+                        value = bool.Parse(strValue);
+                    }
+                    else if (type == typeof(int) || type == typeof(Nullable<int>))
+                    {
+                        value = int.Parse(strValue, CultureInfo.InvariantCulture);
+                    }
+                    else if (type == typeof(double) || type == typeof(Nullable<double>))
+                    {
+                        value = double.Parse(strValue, CultureInfo.InvariantCulture);
+                    }
+                    else if (type.IsEnum)
+                    {
+                        value = Enum.Parse(type, strValue);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    property.GetSetMethod().Invoke(this, new[] { value });
+                }
+
+                foreach (XmlNode node in doc.GetElementsByTagName("ignorefile"))
+                {
+                    string path = node.Attributes.GetNamedItem("path").Value;
+                    if (!ignoredFiles.Contains(path))
+                        ignoredFiles.Add(path);
                 }
             }
+            catch (Exception ex) { Logger.LogError(ex); }
         }
 
-        /// <summary>
-        /// Updates the specified option with the specified value.
-        /// If the option is not in the current list it is added.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value">Should be the correct Type for the value, i.e. int, bool or string</param>
-        public void UpdateOption(string name, object value)
+        public virtual void Save()
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                Logger.LogError("Option name cannot be empty or null");
+            string sourcePath = SavePath;
+            if (string.IsNullOrEmpty(sourcePath))
                 return;
-            }
 
-            lock (optionSync)
+            XmlDocument doc = new XmlDocument();
+            XmlNode headNode = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+            doc.AppendChild(headNode);
+
+            XmlNode options = doc.CreateElement("options");
+            doc.AppendChild(options);
+
+            var properties = GetProperties(this.GetType());
+            readWriteLock.EnterReadLock();
+            foreach (OptionMetadata meta in properties.Values)
             {
-                if (value is bool)
-                {
-                    if (boolOptions.ContainsKey(name))
-                        boolOptions[name] = (bool)value;
-                    else
-                        boolOptions.Add(name, (bool)value);
-                }
-                else if (value is int)
-                {
-                    if (intOptions.ContainsKey(name))
-                        intOptions[name] = (int)value;
-                    else
-                        intOptions.Add(name, (int)value);
-                }
-                else
-                {
-                    string stringVal = value as string;
-                    if (stringVal == null)
-                    {
-                        Logger.LogError("Error adding option '{0}', the value was not a valid Type", name);
-                        return;
-                    }
-                    if (stringOptions.ContainsKey(name))
-                        stringOptions[name] = stringVal;
-                    else
-                        stringOptions.Add(name, stringVal);
-                }
+                XmlElement option = doc.CreateElement("option");
+                XmlAttribute attr = doc.CreateAttribute("property");
+                attr.Value = meta.PropertyInfo.Name;
+                option.Attributes.Append(attr);
+                object value = meta.PropertyInfo.GetGetMethod().Invoke(this, null);
+                option.InnerText = createOptionString(value, meta.PropertyInfo.PropertyType);
+                options.AppendChild(option);
+            }
+            readWriteLock.ExitReadLock();
+
+            createIgnoreNodes(options, doc);
+            try { doc.Save(sourcePath); }
+            catch (Exception ex)
+            {
+                Logger.LogError("Options: Failed to save options to {0} - {1}", sourcePath, ex.Message);
             }
         }
 
-        #region Get Values
-
-        /// <summary>
-        /// Returns the specified option value as a basic object which will need
-        /// to be manually casted to the correct Type. Returns null if the option was not found.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="optionType"></param>
-        /// <returns></returns>
-        public object GetOption(string name)
+        static string createOptionString(object option, Type type)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                Logger.LogError("Option name cannot be empty or null");
-                return null;
-            }
-
-            lock (optionSync)
-            {
-                if (boolOptions.ContainsKey(name))
-                    return boolOptions[name];
-                else if (intOptions.ContainsKey(name))
-                    return intOptions[name];
-                else if (stringOptions.ContainsKey(name))
-                    return stringOptions[name];
-                else
-                    Logger.LogError("Option '{0}' was not found", name);
-
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Returns the specified bool value.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public bool GetBoolOption(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                Logger.LogDebug("Option name cannot be empty or null, using default value of false");
-                return false;
-            }
-
-            lock (optionSync)
-            {
-                if (!boolOptions.ContainsKey(name))
-                {
-                    Logger.LogDebug("Bool option '{0}' does not exist, using default value of false", name);
-                    return false;
-                }
-                return boolOptions[name];
-            }
-        }
-
-        /// <summary>
-        /// Returns the specified int value.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public int GetIntOption(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                Logger.LogDebug("Option name cannot be empty or null, using default value of 0");
-                return 0;
-            }
-
-            lock (optionSync)
-            {
-                if (!intOptions.ContainsKey(name))
-                {
-                    Logger.LogDebug("Int option '{0}' does not exist, using default value of 0", name);
-                    return 0;
-                }
-
-                return intOptions[name];
-            }
-        }
-
-        /// <summary>
-        /// Returns the specified string value.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public string GetStringOption(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                Logger.LogDebug("Option name cannot be empty or null, using default value of \"\"");
+            if (option == null)
                 return "";
-            }
-
-            lock (optionSync)
+            else if (type == typeof(string))
             {
-                if (!stringOptions.ContainsKey(name))
-                {
-                    Logger.LogDebug("String option '{0}' does not exist, using default value of \"\"", name);
-                    return "";
-                }
-                return stringOptions[name];
+                string s = (string)option;
+                if (s == "" || s.Trim() == "")
+                    s += " ";
+                return s;
             }
+            else if (type == typeof(int) || type == typeof(Nullable<int>))
+            {
+                return ((int)option).ToString(CultureInfo.InvariantCulture);
+            }
+            else if (type == typeof(double) || type == typeof(Nullable<double>))
+            {
+                return ((double)option).ToString(CultureInfo.InvariantCulture);
+            }
+            return option.ToString();
         }
-        
-        public StartupState GetStartupState()
-        {
-            int opt = GetIntOption("startupstate");
-            if (opt == -1)
-                opt = GetIntOption("laststartupstate");
 
-            if (!Enum.IsDefined(typeof(StartupState), opt))
-                opt = 0;
-            return (StartupState)opt;
+        void createIgnoreNodes(XmlNode parent, XmlDocument parentDoc)
+        {
+            foreach (string file in ignoredFiles)
+            {
+                XmlNode fileNode = parentDoc.CreateElement("ignorefile");
+                XmlAttribute path = parentDoc.CreateAttribute("path");
+                path.Value = file;
+                fileNode.Attributes.Append(path);
+                parent.AppendChild(fileNode);
+            }
         }
 
         #endregion
-        
+
+        #region Read/Write Locking
+
+        public void EnterReadLock()
+        {
+            readWriteLock.EnterReadLock();
+        }
+
+        public void ExitReadLock()
+        {
+            readWriteLock.ExitReadLock();
+        }
+
+        public void EnterWriteLock()
+        {
+            readWriteLock.EnterWriteLock();
+        }
+
+        public void ExitWriteLock()
+        {
+            readWriteLock.ExitWriteLock();
+        }
+
+        public T ReadOption<T>(Func<Options, T> reader)
+        {
+            readWriteLock.EnterReadLock();
+            T value = reader(this);
+            readWriteLock.ExitReadLock();
+            return value;
+        }
+
+        public void WriteOption(Action<Options> writer)
+        {
+            readWriteLock.EnterWriteLock();
+            writer(this);
+            readWriteLock.ExitWriteLock();
+        }
+
+        #endregion
+
+        #region Options
+        /// <summary>
+        /// The display name of the plugin
+        /// </summary>
+        [OptionAttribute(Default = "Emulators")]
+        public string PluginDisplayName { get; set; }
+        /// <summary>
+        /// The language file to use
+        /// </summary>
+        [OptionAttribute(Default = "English")]
+        public string Language { get; set; }
+        /// <summary>
+        /// The view to use when starting the plugin
+        /// </summary>
+        [OptionAttribute(Default = StartupState.GROUPS)]
+        public StartupState StartupState { get; set; }
+        /// <summary>
+        /// The last used view
+        /// </summary>
+        [OptionAttribute(Default = StartupState.GROUPS)]
+        public StartupState LastStartupState { get; set; }
+        /// <summary>
+        /// Whether to display the details view when a game is selected
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool ClickToDetails { get; set; }
+        /// <summary>
+        /// The layout to use when viewing emulators
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int EmulatorLayout { get; set; }
+        /// <summary>
+        /// The layout to use when viewing PC games
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int PCGamesLayout { get; set; }
+        /// <summary>
+        /// The layout to use when viewing emulator roms
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int GamesLayout { get; set; }
+        /// <summary>
+        /// The layout to use when viewing favourites
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int FavouritesLayout { get; set; }
+        /// <summary>
+        /// Whether to display the sort value when sorting
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool ShowSortValue { get; set; }
+        /// <summary>
+        /// Whether to display fanart
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool ShowFanart { get; set; }
+        /// <summary>
+        /// Whether to display gameart
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool ShowGameart { get; set; }
+        /// <summary>
+        /// The delay before fanart is displayed (ms)
+        /// </summary>
+        [OptionAttribute(Default = 500)]
+        public int FanartDelay { get; set; }
+        /// <summary>
+        /// The delay before gameart is displayed (ms)
+        /// </summary>
+        [OptionAttribute(Default = 500)]
+        public int GameartDelay { get; set; }
+        /// <summary>
+        /// Whether to auto refresh the database on plugin start
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool AutoRefreshGames { get; set; }
+        /// <summary>
+        /// Whether to auto refresh the database on plugin start
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool AutoImportGames { get; set; }
+        /// <summary>
+        /// Whether to auto select the top search result when a better match is not found
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool ImportTop { get; set; }
+        /// <summary>
+        /// Whether to only approve exact title and platform match
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool ImportExact { get; set; }
+        /// <summary>
+        /// Whether to resize gameart to the correct aspect ratio for the platform
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool ResizeGameart { get; set; }
+        /// <summary>
+        /// Whether to search all scrapers recursively until all missing artwork is found
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool TryAndFillMissingArt { get; set; }
+        /// <summary>
+        /// Directory to store artwork
+        /// </summary>
+        [OptionAttribute(Default = "")]
+        public string ImageDirectory { get; set; }
+        /// <summary>
+        /// Whether to close the emulator when the mapped key is pressed
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool StopOnMappedKey { get; set; }
+        /// <summary>
+        /// Mapped key for closing emulator
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int MappedKey { get; set; }
+        /// <summary>
+        /// The file filters used to determine whether a rom is a Goodmerge archive
+        /// </summary>
+        [OptionAttribute(Default = "*.7z;*.rar;*.zip;*.tar")]
+        public string GoodmergeFilters { get; set; }
+        /// <summary>
+        /// Whether to display the goodmerge select dialog only on first run of game
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool ShowGoodmergeDialogOnFirstOpen { get; set; }
+        /// <summary>
+        /// Whether to always display the goodmerge select dialog
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool AlwaysShowGoodmergeDialog { get; set; }
+        /// <summary>
+        /// The number of background threads to use when running the importer
+        /// </summary>
+        [OptionAttribute(Default = 5)]
+        public int ImportThreads { get; set; }
+        /// <summary>
+        /// The maximum number of import threads allowed to hash files at the same time, a lower count helps limit cpu usage
+        /// </summary>
+        [OptionAttribute(Default = 2)]
+        public int HashThreads { get; set; }
+        /// <summary>
+        /// Whether to stop any playing media in MediaPortal when starting a game
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool StopMediaPlayback { get; set; }
+        /// <summary>
+        /// Whether to play preview videos
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool ShowVideoPreview { get; set; }
+        /// <summary>
+        /// Whether to loop preview videos
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool LoopVideoPreview { get; set; }
+        /// <summary>
+        /// Use emulator video if no game video
+        /// </summary>
+        [OptionAttribute(Default = false)]
+        public bool FallBackToEmulatorVideo { get; set; }
+        /// <summary>
+        /// The delay before starting preview videos (ms)
+        /// </summary>
+        [OptionAttribute(Default = 2000)]
+        public int PreviewVideoDelay { get; set; }
+        /// <summary>
+        /// Scraper Ids in order of priority 
+        /// </summary>
+        [OptionAttribute(Default = "1;2;4;3")]
+        public string ScraperPriorities { get; set; }
+        /// <summary>
+        /// Ids of scrapers to ignore
+        /// </summary>
+        [OptionAttribute(Default = "3")] //GameFaqs, blocks IP address if detects you are scraping
+        public string IgnoredScrapers { get; set; }
+        /// <summary>
+        /// The scraper to use first to find covers
+        /// </summary>
+        [OptionAttribute(Default = "1")] //TheGamesDB seems to be most consistent and best quality
+        public string PriorityCoversScraper { get; set; }
+        /// <summary>
+        /// The scraper to use first to find screens
+        /// </summary>
+        [OptionAttribute(Default = "2")] //MobyGames has more screens than TheGamesDB
+        public string PriorityScreensScraper { get; set; }
+        /// <summary>
+        /// The scraper to use first to find fanart
+        /// </summary>
+        [OptionAttribute(Default = "1")] //TheGamesDB only scraper with fanart
+        public string PriorityFanartScraper { get; set; }
+        /// <summary>
+        /// The maximum width to resize gameart. Lower to save space at cost of quality
+        /// </summary>
+        [OptionAttribute(Default = 640)]
+        public int MaxImageDimensions { get; set; }
+
+        /// <summary>
+        /// The path to save backup to
+        /// </summary>
+        [OptionAttribute(Default = "")]
+        public string BackupFile { get; set; }
+        /// <summary>
+        /// Whether to backup images
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool BackupImages { get; set; }
+        /// <summary>
+        /// The file to load backup from
+        /// </summary>
+        [OptionAttribute(Default = "")]
+        public string RestoreFile { get; set; }
+        /// <summary>
+        /// Whether to restore images
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool RestoreImages { get; set; }
+        /// <summary>
+        /// Whether to merge backup with existing database
+        /// </summary>
+        [OptionAttribute(Default = true)]
+        public bool RestoreMerge { get; set; }
+        /// <summary>
+        /// How to handle merging emulators
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int MergeEmulatorSetting { get; set; }
+        /// <summary>
+        /// How to handle merging profiles
+        /// </summary>
+        [OptionAttribute(Default = 0)]
+        public int MergeProfileSetting { get; set; }
+        /// <summary>
+        /// How to handle merging games
+        /// </summary>
+        [OptionAttribute(Default = 1)]
+        public int MergeGameSetting { get; set; }
+
+        #endregion
+
         public static string GetKeyDisplayString(int keyData)
         {
             int ctrl = (int)Keys.Control;
@@ -473,132 +590,6 @@ namespace Emulators
             lock (optionSync)
                 if (ignoredFiles.Contains(path))
                     ignoredFiles.Remove(path);
-        }
-
-        #endregion
-
-        #region Load/Save
-
-        //load the options xml document and populate the list of dynamic options
-        void loadDoc()
-        {
-            try
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.Load(EmulatorsSettings.Instance.Settings.OptionsPath); //get the xml file
-
-                XmlNodeList nodes = doc.GetElementsByTagName("option"); //select option node
-
-                //loop through each option and determine the option Type
-                foreach (XmlNode node in nodes)
-                {
-                    string type = node.Attributes.GetNamedItem("type").Value;
-
-                    OptionType optionType = OptionType.String; //default to string
-                    if (type.Equals("bool"))
-                        optionType = OptionType.Bool;
-                    else if (type.Equals("int"))
-                        optionType = OptionType.Int;
-
-                    //add the option to the correct list based on Type
-                    addXMLOption(node.Attributes.GetNamedItem("name").Value, node.Attributes.GetNamedItem("value").Value, optionType);
-                }
-
-                foreach (XmlNode node in doc.GetElementsByTagName("ignorefile"))
-                {
-                    string path = node.Attributes.GetNamedItem("path").Value;
-                    if (!ignoredFiles.Contains(path))
-                        ignoredFiles.Add(path);
-                }
-            }
-            catch (Exception ex) { Logger.LogError(ex); }
-        }
-
-        /// <summary>
-        /// Saves the current list of options to the XML file.
-        /// </summary>
-        public void Save()
-        {
-            lock (optionSync)
-            {
-                XmlDocument doc = new XmlDocument();
-                XmlNode headNode = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
-                doc.AppendChild(headNode);
-
-                XmlNode topnode = doc.CreateElement("options");
-                doc.AppendChild(topnode);
-
-                createOptionNodes(OptionType.Bool, topnode, doc);
-                createOptionNodes(OptionType.Int, topnode, doc);
-                createOptionNodes(OptionType.String, topnode, doc);
-
-                createIgnoreNodes(topnode, doc);
-
-                doc.Save(EmulatorsSettings.Instance.Settings.OptionsPath);
-            }
-        }
-
-        //creates an xml node with the correct type for saving to the xml file
-        void createOptionNodes(OptionType optionType, XmlNode parent, XmlDocument parentDoc)
-        {
-            Dictionary<string, string> nodes = new Dictionary<string, string>();
-            string header = null;
-            switch (optionType)
-            {
-                case OptionType.Bool:
-                    header = "bool"; //set correct type
-                    lock (optionSync)
-                    {
-                        foreach (KeyValuePair<string, bool> keyVal in boolOptions)
-                            nodes.Add(keyVal.Key, keyVal.Value.ToString()); //loop through each value and create string representation
-                        break;
-                    }
-                case OptionType.Int:
-                    header = "int";
-                    lock (optionSync)
-                    {
-                        foreach (KeyValuePair<string, int> keyVal in intOptions)
-                            nodes.Add(keyVal.Key, keyVal.Value.ToString());
-                        break;
-                    }
-                case OptionType.String: //still loop through string values and create local copy so we are thread safe later
-                    header = "string";
-                    lock (optionSync)
-                    {
-                        foreach (KeyValuePair<string, string> keyVal in stringOptions)
-                            nodes.Add(keyVal.Key, keyVal.Value);
-                        break;
-                    }
-            }
-
-            //loop through all the required options and add to the parent node
-            foreach (KeyValuePair<string, string> keyVal in nodes)
-            {
-                //create node in format <option type="string" name="shownname" value="My Emulators" />
-                XmlNode node = parentDoc.CreateElement("option");
-                XmlAttribute att1 = parentDoc.CreateAttribute("type");
-                att1.Value = header;
-                node.Attributes.Append(att1);
-                XmlAttribute att2 = parentDoc.CreateAttribute("name");
-                att2.Value = keyVal.Key;
-                node.Attributes.Append(att2);
-                XmlAttribute att3 = parentDoc.CreateAttribute("value");
-                att3.Value = keyVal.Value;
-                node.Attributes.Append(att3);
-                parent.AppendChild(node);
-            }
-        }
-
-        void createIgnoreNodes(XmlNode parent, XmlDocument parentDoc)
-        {
-            foreach (string file in ignoredFiles)
-            {
-                XmlNode fileNode = parentDoc.CreateElement("ignorefile");
-                XmlAttribute path = parentDoc.CreateAttribute("path");
-                path.Value = file;
-                fileNode.Attributes.Append(path);
-                parent.AppendChild(fileNode);
-            }
         }
 
         #endregion

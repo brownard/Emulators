@@ -19,9 +19,24 @@ namespace Emulators
 
         Image[] statusImages;
         Image[] mergeImages;
-        Importer importer = null;
         BindingSource importerBindingSource = null;
         List<RomMatch> importBindingList = null;
+        
+        Importer importer;
+        public Importer Importer 
+        {
+            get { return importer; }
+            set
+            {
+                importer = value;
+                if (importer != null)
+                {
+                    importer.ProgressChanged += importer_Progress;
+                    importer.ImportStatusChanged += importer_ImportStatusChanged;
+                    importer.RomStatusChanged += importer_RomStatusChanged;
+                }
+            }
+        }
 
         public Conf_DBImporter()
         {
@@ -44,11 +59,6 @@ namespace Emulators
             importGridView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(importGridView_ColumnHeaderMouseClick);
             importGridView.RowsAdded += importGridView_RowsAdded;
             comboBoxChangedHandler = new EventHandler(resultsComboBox_SelectedIndexChanged);
-            
-            importer = EmulatorsSettings.Instance.Importer;
-            importer.ProgressChanged += importer_Progress;
-            importer.ImportStatusChanged += importer_ImportStatusChanged;
-            importer.RomStatusChanged += importer_RomStatusChanged;
 
             statusImages = new[] { Resources.information, Resources.approved, Resources.accept };
             mergeImages = new[] { Resources.arrow_divide, Resources.arrow_join };
@@ -586,7 +596,7 @@ namespace Emulators
             handler.ActionDelegate = game =>
             {                
                 foreach (GameDisc disc in game.Discs)
-                    Options.Instance.AddIgnoreFile(disc.Path);                    
+                    EmulatorsCore.Options.AddIgnoreFile(disc.Path);                    
                 game.Delete();
             };
 
@@ -630,9 +640,9 @@ namespace Emulators
                 game.Discs.Add(newDisc);
                 removeGames.Add(match.Game);
             }
-            lock (DB.Instance.SyncRoot)
+            lock (EmulatorsCore.Database.SyncRoot)
             {
-                DB.Instance.ExecuteTransaction(removeGames, removeGame =>
+                EmulatorsCore.Database.ExecuteTransaction(removeGames, removeGame =>
                 {
                     importer.Remove(removeGame.Id);
                     removeGame.Delete();

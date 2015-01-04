@@ -284,11 +284,14 @@ namespace Emulators.Import
         {
             lock (syncRoot)
             {
-                threadCount = Options.Instance.GetIntOption("importthreadcount");
+                Options options = EmulatorsCore.Options;
+                options.EnterReadLock();
+                threadCount = options.ImportThreads;
+                hashThreadCount = options.HashThreads;
+                options.ExitReadLock();
+
                 if (threadCount < 1) //0 threads will take a very long time to complete :)
                     threadCount = 1;
-
-                hashThreadCount = Options.Instance.GetIntOption("hashthreadcount");
                 if (hashThreadCount < 1)
                     hashThreadCount = 1;
 
@@ -317,12 +320,12 @@ namespace Emulators.Import
             {
                 ImporterStatus = ImportAction.ImportStarting;
 
-                if (Options.Instance.GetBoolOption("retrieveGameDetials") || Options.Instance.GetBoolOption("submitGameDetails"))
-                {
+                //if (EmulatorsCore.Options.GetBoolOption("retrieveGameDetials") || EmulatorsCore.Options.GetBoolOption("submitGameDetails"))
+                //{
                     //var myBinding = new BasicHttpBinding();
-                    //var myEndpoint = new EndpointAddress("http://" + Options.Instance.GetStringOption("communityServerAddress") + "/CommunityServerService/service");
+                    //var myEndpoint = new EndpointAddress("http://" + EmulatorsCore.Options.GetStringOption("communityServerAddress") + "/CommunityServerService/service");
                     //client = new CommunityServerWCFServiceClient(myBinding, myEndpoint);
-                }
+                //}
 
                 doWork = true;
                 if (importerThreads.Count == 0)
@@ -447,7 +450,7 @@ namespace Emulators.Import
             lock (importStatusLock)
             {
                 List<int> gameIds = new List<int>();
-                DB.Instance.ExecuteTransaction(games, game =>
+                EmulatorsCore.Database.ExecuteTransaction(games, game =>
                 {
                     if (game == null)
                         return;
@@ -532,7 +535,7 @@ namespace Emulators.Import
         /// <param name="romMatches"></param>
         public void Approve(IEnumerable<RomMatch> romMatches)
         {
-            DB.Instance.ExecuteTransaction(romMatches, romMatch =>
+            EmulatorsCore.Database.ExecuteTransaction(romMatches, romMatch =>
             {
                 if (romMatch.PossibleGameDetails == null || romMatch.PossibleGameDetails.Count < 1 || !romMatch.Game.Id.HasValue)
                     return;
@@ -601,7 +604,7 @@ namespace Emulators.Import
         /// <param name="romMatch"></param>
         public void Ignore(IEnumerable<RomMatch> romMatches)
         {
-            DB.Instance.ExecuteTransaction(romMatches, romMatch =>
+            EmulatorsCore.Database.ExecuteTransaction(romMatches, romMatch =>
             {
                 lock (lookupSync)
                 {
@@ -869,7 +872,7 @@ namespace Emulators.Import
             deleteMissingGames(allGames);
             if (!doWork) return;
 
-            List<string> dbPaths = DB.Instance.GetAll(typeof(GameDisc)).Select(g => ((GameDisc)g).Path).ToList();
+            List<string> dbPaths = EmulatorsCore.Database.GetAll(typeof(GameDisc)).Select(g => ((GameDisc)g).Path).ToList();
             List<Emulator> emus = Emulator.GetAll();
             if (!doWork) return;
 
@@ -906,7 +909,7 @@ namespace Emulators.Import
                         if (!doWork) return;
                         string path = gamePaths[x];
                         //check that path is not ignored, already in DB or not already picked up by a previous filter
-                        if (!Options.Instance.ShouldIgnoreFile(path) && !dbPaths.Contains(path))
+                        if (!EmulatorsCore.Options.ShouldIgnoreFile(path) && !dbPaths.Contains(path))
                         {
                             filesFound++;
                             OnProgressChanged(new ImportProgressEventArgs(0, 0, filesFound, string.Format("Updating {0}", emu.Title)));
@@ -921,7 +924,7 @@ namespace Emulators.Import
                 return;
 
             int filesAdded = 0;
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             foreach (Game game in newGames)
             {
                 filesAdded++;
@@ -929,7 +932,7 @@ namespace Emulators.Import
                 OnProgressChanged(new ImportProgressEventArgs((filesAdded * 100) / filesFound, filesAdded, filesFound, "Commiting " + game.Title));
                 game.Commit();
             }
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
             OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NewFilesFound, null));
         }
 
@@ -937,7 +940,7 @@ namespace Emulators.Import
         {
             OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Removing deleted games"));
             List<string> missingDrives = new List<string>();
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             foreach (Game game in games)
             {
                 List<GameDisc> missingDiscs = new List<GameDisc>();
@@ -976,7 +979,7 @@ namespace Emulators.Import
                 }
                 if (!doWork) break;
             }
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
         }
 
         void setListCapacities(int capacity)
@@ -1117,12 +1120,12 @@ namespace Emulators.Import
             //    return;
 
             //// Get game info from community server.
-            //TimeSpan checkingTime = new TimeSpan(0, Options.Instance.GetIntOption("communityServerConnectionRetryTime"), 0);
+            //TimeSpan checkingTime = new TimeSpan(0, EmulatorsCore.Options.GetIntOption("communityServerConnectionRetryTime"), 0);
             //DateTime checkTime = DateTime.Now.Subtract(checkingTime);
 
             //myemulators2.v1.GameDetails receivedGameDetails = null;
 
-            //if (lastConnectionErrorTime > checkTime && Options.Instance.GetBoolOption("retrieveGameDetials"))
+            //if (lastConnectionErrorTime > checkTime && EmulatorsCore.Options.GetBoolOption("retrieveGameDetials"))
             //{
             //    try
             //    {
@@ -1361,7 +1364,7 @@ namespace Emulators.Import
         //update and commit game
         void commitGame(RomMatch romMatch)
         {
-            Game dbGame = DB.Instance.Get<Game>(romMatch.ID);
+            Game dbGame = EmulatorsCore.Database.Get<Game>(romMatch.ID);
             if (dbGame == null)
                 return; //game deleted
 

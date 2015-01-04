@@ -31,7 +31,7 @@ namespace Emulators.Import
             nameLookup = new Dictionary<string, string>();
             try
             {
-                FileInfo mameList = new FileInfo(Path.Combine(EmulatorsSettings.Instance.Settings.DataPath, MAME_LIST_NAME));
+                FileInfo mameList = new FileInfo(Path.Combine(EmulatorsCore.DataPath, MAME_LIST_NAME));
                 using (StreamReader reader = new StreamReader(mameList.OpenRead()))
                 {
                     reader.ReadLine();

@@ -68,7 +68,7 @@ namespace Emulators
                 return;
             }
 
-            bool isConfig = EmulatorsSettings.Instance.IsConfig;
+            bool isConfig = MP1Utils.IsConfig;
             BackgroundTaskHandler handler = new BackgroundTaskHandler();
             handler.ActionDelegate = () =>
             {
@@ -143,7 +143,7 @@ namespace Emulators
         {
             ExecutorItem launcher = new ExecutorItem(isPc);
             launcher.Arguments = profile.Arguments;
-            launcher.Suspend = !EmulatorsSettings.Instance.IsConfig && profile.SuspendMP;
+            launcher.Suspend = !MP1Utils.IsConfig && profile.SuspendMP;
             if (launcher.Suspend && profile.DelayResume && profile.ResumeDelay > 0)
                 launcher.ResumeDelay = profile.ResumeDelay;
 
@@ -168,10 +168,10 @@ namespace Emulators
                 if (profile.StopEmulationOnKey.HasValue)
                     mapKey = profile.StopEmulationOnKey.Value;
                 else
-                    mapKey = Options.Instance.GetBoolOption("domap");
+                    mapKey = EmulatorsCore.Options.ReadOption(o => o.StopOnMappedKey);
                 if (mapKey)
                 {
-                    launcher.MappedExitKeyData = Options.Instance.GetIntOption("mappedkeydata");
+                    launcher.MappedExitKeyData = EmulatorsCore.Options.ReadOption(o => o.MappedKey);
                     launcher.EscapeToExit = profile.EscapeToExit;
                 }
             }
@@ -240,7 +240,7 @@ namespace Emulators
 
         void stopMediaPlayback()
         {
-            if (Options.Instance.GetBoolOption("stopmediaplayback") && MediaPortal.Player.g_Player.Playing)
+            if (EmulatorsCore.Options.ReadOption(o => o.StopMediaPlayback) && MediaPortal.Player.g_Player.Playing)
             {
                 Logger.LogDebug("Stopping playing media...");
                 MediaPortal.Player.g_Player.Stop();

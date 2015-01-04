@@ -29,14 +29,12 @@ namespace Emulators
             if (input == null)
                 return null;
 
-            bool resize = ratio > 0 && Options.Instance.GetBoolOption("resizethumbs");
-
             int newWidth = input.Width;
             int newHeight = input.Height;
 
             if (input.Width > input.Height)
             {
-                if (resize)
+                if (ratio > 0)
                 {
                     newWidth = input.Width;
                     newHeight = Convert.ToInt32(input.Width / ratio);
@@ -50,7 +48,7 @@ namespace Emulators
             }
             else
             {
-                if (resize)
+                if (ratio > 0)
                 {
                     newWidth = Convert.ToInt32(input.Height * ratio);
                     newHeight = input.Height;

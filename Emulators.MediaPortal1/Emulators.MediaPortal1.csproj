@@ -249,6 +249,7 @@
     <Compile Include="MediaPortal GUI\GUIProgressDialogHandler.cs" />
     <Compile Include="MediaPortal GUI\ListItemComparer.cs" />
     <Compile Include="MediaPortal GUI\MenuPresenter.cs" />
+    <Compile Include="MediaPortalOptions.cs" />
     <Compile Include="MP1DataProvider.cs" />
     <Compile Include="MP1Logger.cs" />
     <Compile Include="MP1Settings.cs" />

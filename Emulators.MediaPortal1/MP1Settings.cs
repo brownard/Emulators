@@ -20,10 +20,9 @@ namespace Emulators.MediaPortal1
             get { return logger; }
         }
 
-        string optionsPath = Config.GetFile(Config.Dir.Config, "Emulators_2.xml");
-        public string OptionsPath
+        public Options Options
         {
-            get { return optionsPath; }
+            get { return MP1Utils.Options; }
         }
 
         string dataPath = System.IO.Path.Combine(Config.GetFolder(Config.Dir.Config), "Emulators");
@@ -42,5 +41,5 @@ namespace Emulators.MediaPortal1
         {
             get { return Translator.Instance.unknown; }
         }
-    }
+    }    
 }

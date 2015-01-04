@@ -33,13 +33,13 @@ namespace Emulators.MediaPortal2
 
         ~EmulatorsWorkflowModel()
         {
-            Options.Instance.Save();
+            EmulatorsCore.Options.Save();
         }
 
         void startUp()
         {
             Guid stateId;
-            StartupState startupState = Options.Instance.GetStartupState();
+            StartupState startupState = EmulatorsCore.Options.ReadOption(o => o.StartupState);
             switch (startupState)
             {
                 case StartupState.EMULATORS:

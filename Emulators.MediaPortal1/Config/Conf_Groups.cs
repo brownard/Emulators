@@ -618,10 +618,10 @@ namespace Emulators
                 }
             }
 
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             foreach (RomGroup group in allGroups)
                 group.Commit();
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
             base.ClosePanel();
         }
     }

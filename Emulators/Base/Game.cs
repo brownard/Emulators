@@ -16,7 +16,7 @@ namespace Emulators
         /// </summary>
         public static List<Game> GetAll()
         {
-            return DB.Instance.GetAll<Game>();
+            return EmulatorsCore.Database.GetAll<Game>();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Emulators
         /// <param name="haveBeenImported">Whether to return games that have/haven't been imported</param>
         public static List<Game> GetAll(bool haveBeenImported)
         {
-            return DB.Instance.Get<Game>(new BaseCriteria(DBField.GetField(typeof(Game), "InfoChecked"), "=", haveBeenImported));
+            return EmulatorsCore.Database.Get<Game>(new BaseCriteria(DBField.GetField(typeof(Game), "InfoChecked"), "=", haveBeenImported));
         }
 
         #endregion
@@ -268,7 +268,7 @@ namespace Emulators
                     return false;
 
                 //get configured Goodmerge extensions
-                string[] goodmergeExts = Options.Instance.GetStringOption("goodmergefilters").Split(';');
+                string[] goodmergeExts = EmulatorsCore.Options.ReadOption(o => o.GoodmergeFilters).Split(';');
                 for (int x = 0; x < goodmergeExts.Length; x++)
                 {
                     //see if extension matches filter
@@ -485,14 +485,13 @@ namespace Emulators
 
         public override void BeforeDelete()
         {
-            EmulatorsSettings.Instance.Importer.Remove(Id);
             DeleteThumbs();
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             foreach (GameDisc disc in Discs)
                 disc.Delete();
             foreach (EmulatorProfile profile in GameProfiles)
                 profile.Delete();
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
             base.BeforeDelete();
         }
 

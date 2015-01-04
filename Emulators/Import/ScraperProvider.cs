@@ -23,7 +23,7 @@ namespace Emulators.Import
                     //if (mameScraper.IsReady)
                     //    allScrapers.Add(new OfflineMameScraper());
 
-                    string scriptDirectory = Path.Combine(EmulatorsSettings.Instance.Settings.DataPath, "Scripts");
+                    string scriptDirectory = Path.Combine(EmulatorsCore.DataPath, "Scripts");
                     foreach (string script in Directory.GetFiles(scriptDirectory, "*.xml"))
                     {
                         ScriptScraper scriptScraper = ScriptScraper.TryCreate(script, false);
@@ -53,11 +53,11 @@ namespace Emulators.Import
         {
             loadScrapers();
 
-            List<string> scraperPriorities = new List<string>(Options.Instance.GetStringOption("scraperpriorities").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));            
+            List<string> scraperPriorities = new List<string>(EmulatorsCore.Options.ReadOption(o => o.ScraperPriorities).Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             List<string> ignoredScraperIds = new List<string>();
             if (!allowIgnored)
             {
-                ignoredScraperIds.AddRange(Options.Instance.GetStringOption("ignoredscrapers").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                ignoredScraperIds.AddRange(EmulatorsCore.Options.ReadOption(o => o.IgnoredScrapers).Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             List<Scraper> scrapers = new List<Scraper>();
@@ -96,13 +96,16 @@ namespace Emulators.Import
 
         public void Update()
         {
-            importTop = Options.Instance.GetBoolOption("importtop");
-            importExact = Options.Instance.GetBoolOption("importexact");
-            thoroughThumbSearch = Options.Instance.GetBoolOption("thoroughthumbsearch");
+            Options options = EmulatorsCore.Options;
+            options.EnterReadLock();
+            importTop = options.ImportTop;
+            importExact = options.ImportExact;
+            thoroughThumbSearch = options.TryAndFillMissingArt;
+            string coversScraperId = options.PriorityCoversScraper;
+            string screensScraperId = options.PriorityScreensScraper;
+            string fanartScraperId = options.PriorityFanartScraper;
+            options.ExitReadLock();
 
-            string coversScraperId = Options.Instance.GetStringOption("coversscraperid");
-            string screensScraperId = Options.Instance.GetStringOption("screensscraperid");
-            string fanartScraperId = Options.Instance.GetStringOption("fanartscraperid");
             lock (scraperSync)
             {
                 scrapers = GetScrapers();

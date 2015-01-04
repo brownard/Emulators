@@ -10,6 +10,7 @@ using System.Threading;
 using Emulators.Import;
 using Emulators.MediaPortal1;
 using Emulators.Database;
+using Emulators.AutoConfig;
 
 namespace Emulators
 {
@@ -36,6 +37,8 @@ namespace Emulators
 
         bool updateEmuPositions = false;
         bool thumbsLoaded = false;
+
+        public Importer Importer { get; set; }    
 
         //add changed event handlers to controls
         //to determine whether to update selected Emulator 
@@ -264,46 +267,33 @@ namespace Emulators
             emulatorListView.Items.Clear();
 
             //load on seperate thread to ensure responsiveness
-            Thread thread = new Thread(new ThreadStart(delegate()
+            Thread thread = new Thread(delegate()
             {
                 List<Emulator> emus = Emulator.GetAll();
-                foreach (Emulator emu in emus)
-                {
-                    ListViewItem item = new ListViewItem(emu.Title);
-                    item.Tag = emu; //keep reference to emulator
-                    try
-                    {
-                        //add the emulators to the list view on main thread
-                        Invoke(new MethodInvoker(delegate
-                        {
-                            dbEmus.Add(item);
-                            emulatorListView.Items.Add(item);
-                        }
-                        ));
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        //form closed before complete
-                        return;
-                    }
-                }
+                var listItems = emus.Select(e => new ListViewItem(e.Title) { Tag = e }).ToArray();
                 try
                 {
+                    //add the emulators to the list view on main thread
                     BeginInvoke(new MethodInvoker(delegate
                     {
+                        dbEmus.AddRange(listItems);
+                        emulatorListView.Items.AddRange(listItems);
                         if (emulatorListView.Items.Count > 0)
                             emulatorListView.Items[0].Selected = true;
                         emulatorListView.EndUpdate();
                         loadingEmusPanel.Visible = false;
                         listLoading = false;
                     }
-                        ));
+                    ));
                 }
-                catch { listLoading = false; } //form closed before complete
+                catch (InvalidOperationException)
+                {
+                    //form closed before complete
+                    listLoading = false;
+                    return;
+                }
             }
-            ));
-
-            thread.Name = "Emulator browser populator";
+            ) { Name = "Emulator browser populator" };
             thread.Start();
         }
 
@@ -385,7 +375,7 @@ namespace Emulators
             txt_description.Text = dbEmu.Description;
             gradeUpDown.Value = dbEmu.Grade;
 
-            EmuSettingsAutoFill.SetupAspectDropdown(thumbAspectComboBox, dbEmu.CaseAspect);
+            EmuAutoConfig.SetupAspectDropdown(thumbAspectComboBox, dbEmu.CaseAspect);
 
             videoTextBox.Text = dbEmu.VideoPreview;
 
@@ -689,43 +679,64 @@ namespace Emulators
             if (!allowChangedEvents || selectedEmulator == null)
                 return;
 
-            EmulatorProfile autoSettings = EmuSettingsAutoFill.Instance.CheckForSettings(emuPathTextBox.Text);
-            if (autoSettings == null)
+            EmulatorConfig autoConfig = EmuAutoConfig.Instance.CheckForSettings(emuPathTextBox.Text);
+            if (autoConfig == null)
                 return;
-            
-            if (MessageBox.Show(string.Format("Would you like to use the recommended settings for {0}?", autoSettings.Title), "Use recommended settings?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                if (Options.Instance.GetBoolOption("autoconfemu"))
-                    updateFilterBox(autoSettings.Filters);
 
-                if (autoSettings.Platform != null && platformComboBox.Text == "Unspecified")
+            if (confirmUseAutoConfig(autoConfig.Name))
+            {
+                if (!string.IsNullOrEmpty(autoConfig.Filters))
+                    updateFilterBox(autoConfig.Filters);
+
+                if (!string.IsNullOrEmpty(autoConfig.Platform) && platformComboBox.Text == "Unspecified")
                 {
-                    int index = platformComboBox.FindStringExact(autoSettings.Platform);
+                    int index = platformComboBox.FindStringExact(autoConfig.Platform);
                     if (index > -1)
                     {
                         platformComboBox.SelectedItem = platformComboBox.Items[index];
-                        EmuSettingsAutoFill.SetupAspectDropdown(thumbAspectComboBox, EmuSettingsAutoFill.Instance.GetCaseAspect(platformComboBox.Text));
+                        EmuAutoConfig.SetupAspectDropdown(thumbAspectComboBox, autoConfig.CaseAspect);
                     }
                 }
 
-                if (autoSettings.HasSettings)
+                ProfileConfig profile = autoConfig.ProfileConfig;
+                if (profile != null)
                 {
-                    argumentsTextBox.Text = autoSettings.Arguments;
-                    useQuotesCheckBox.Checked = autoSettings.UseQuotes;
-                    suspendMPCheckBox.Checked = autoSettings.SuspendMP;
-                    if (autoSettings.WorkingDirectory == EmuSettingsAutoFill.USE_EMULATOR_DIRECTORY)
-                    {
-                        System.IO.FileInfo file = new System.IO.FileInfo(emuPathTextBox.Text);
-                        if (file.Exists)
-                            workingDirTextBox.Text = file.Directory.FullName;
-                    }
-                    else
-                        workingDirTextBox.Text = autoSettings.WorkingDirectory;
+                    if (!string.IsNullOrEmpty(profile.Arguments))
+                        argumentsTextBox.Text = profile.Arguments;
+                    if (profile.UseQuotes.HasValue)
+                        useQuotesCheckBox.Checked = profile.UseQuotes.Value;
+                    if (profile.SuspendMP.HasValue)
+                        suspendMPCheckBox.Checked = profile.SuspendMP.Value;
+                    if (profile.MountImages.HasValue)
+                        mountImagesCheckBox.Checked = profile.MountImages.Value;
+                    if (profile.EscapeToExit.HasValue)
+                        escExitCheckBox.Checked = profile.EscapeToExit.Value;
 
-                    mountImagesCheckBox.Checked = autoSettings.MountImages;
-                    escExitCheckBox.Checked = autoSettings.EscapeToExit;
+                    if (!string.IsNullOrEmpty(profile.WorkingDirectory))
+                    {
+                        if (profile.WorkingDirectory == EmuAutoConfig.USE_EMULATOR_DIRECTORY)
+                        {
+                            try
+                            {
+                                System.IO.FileInfo file = new System.IO.FileInfo(emuPathTextBox.Text);
+                                if (file.Exists)
+                                    workingDirTextBox.Text = file.Directory.FullName;
+                            }
+                            catch { }
+                        }
+                        else
+                        {
+                            workingDirTextBox.Text = profile.WorkingDirectory;
+                        }
+                    }
                 }
             }
+        }
+
+        bool confirmUseAutoConfig(string settingsName)
+        {
+            string message = string.Format("Would you like to use the recommended settings for {0}?", settingsName);
+            return MessageBox.Show(message, "Use recommended settings?", MessageBoxButtons.YesNo) == DialogResult.Yes;
         }
 
         private void updateFilterBox(string filters)
@@ -781,7 +792,9 @@ namespace Emulators
                     updateEmulator();
                     updateProfile();
                     newEmu.Commit();
-                    EmulatorsSettings.Instance.Importer.Restart();
+
+                    if (Importer != null)
+                        Importer.Restart();
                     using (ThumbGroup thumbGroup = new ThumbGroup(newEmu))
                     {
                         if (wzd.Logo != null)

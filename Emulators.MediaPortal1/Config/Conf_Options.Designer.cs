@@ -33,7 +33,6 @@
             this.label19 = new System.Windows.Forms.Label();
             this.startupComboBox = new System.Windows.Forms.ComboBox();
             this.stopMediaCheckBox = new System.Windows.Forms.CheckBox();
-            this.autoconfemuBox = new System.Windows.Forms.CheckBox();
             this.showSortPropertyBox = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.shownnameBox = new System.Windows.Forms.TextBox();
@@ -61,6 +60,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.thoroughThumbCheckBox = new System.Windows.Forms.CheckBox();
             this.resizeThumbCheckBox = new System.Windows.Forms.CheckBox();
             this.approveTopCheckBox = new System.Windows.Forms.CheckBox();
             this.exactMatchCheckBox = new System.Windows.Forms.CheckBox();
@@ -96,7 +96,6 @@
             this.label8 = new System.Windows.Forms.Label();
             this.thumbDirTextBox = new System.Windows.Forms.TextBox();
             this.thumbDirButton = new System.Windows.Forms.Button();
-            this.thoroughThumbCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.prevVidDelayBox)).BeginInit();
@@ -122,7 +121,6 @@
             this.groupBox1.Controls.Add(this.label19);
             this.groupBox1.Controls.Add(this.startupComboBox);
             this.groupBox1.Controls.Add(this.stopMediaCheckBox);
-            this.groupBox1.Controls.Add(this.autoconfemuBox);
             this.groupBox1.Controls.Add(this.showSortPropertyBox);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.shownnameBox);
@@ -130,7 +128,7 @@
             this.groupBox1.Controls.Add(this.languageBox);
             this.groupBox1.Location = new System.Drawing.Point(11, 6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(282, 222);
+            this.groupBox1.Size = new System.Drawing.Size(282, 197);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General";
@@ -168,22 +166,12 @@
             // stopMediaCheckBox
             // 
             this.stopMediaCheckBox.AutoSize = true;
-            this.stopMediaCheckBox.Location = new System.Drawing.Point(9, 185);
+            this.stopMediaCheckBox.Location = new System.Drawing.Point(9, 164);
             this.stopMediaCheckBox.Name = "stopMediaCheckBox";
             this.stopMediaCheckBox.Size = new System.Drawing.Size(232, 17);
             this.stopMediaCheckBox.TabIndex = 61;
             this.stopMediaCheckBox.Text = "Stop media playback when launching game";
             this.stopMediaCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // autoconfemuBox
-            // 
-            this.autoconfemuBox.AutoSize = true;
-            this.autoconfemuBox.Location = new System.Drawing.Point(9, 162);
-            this.autoconfemuBox.Name = "autoconfemuBox";
-            this.autoconfemuBox.Size = new System.Drawing.Size(213, 17);
-            this.autoconfemuBox.TabIndex = 12;
-            this.autoconfemuBox.Text = "Automatically set filter string for emulator";
-            this.autoconfemuBox.UseVisualStyleBackColor = true;
             // 
             // showSortPropertyBox
             // 
@@ -518,12 +506,22 @@
             this.groupBox5.Controls.Add(this.exactMatchCheckBox);
             this.groupBox5.Controls.Add(this.autoImportCheckBox);
             this.groupBox5.Controls.Add(this.autoRefreshGames);
-            this.groupBox5.Location = new System.Drawing.Point(11, 234);
+            this.groupBox5.Location = new System.Drawing.Point(11, 221);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(282, 169);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Database";
+            // 
+            // thoroughThumbCheckBox
+            // 
+            this.thoroughThumbCheckBox.AutoSize = true;
+            this.thoroughThumbCheckBox.Location = new System.Drawing.Point(9, 146);
+            this.thoroughThumbCheckBox.Name = "thoroughThumbCheckBox";
+            this.thoroughThumbCheckBox.Size = new System.Drawing.Size(162, 17);
+            this.thoroughThumbCheckBox.TabIndex = 20;
+            this.thoroughThumbCheckBox.Text = "Try and fill all missing artwork";
+            this.thoroughThumbCheckBox.UseVisualStyleBackColor = true;
             // 
             // resizeThumbCheckBox
             // 
@@ -922,16 +920,6 @@
             this.thumbDirButton.UseVisualStyleBackColor = true;
             this.thumbDirButton.Click += new System.EventHandler(this.thumbDirButton_Click);
             // 
-            // thoroughThumbCheckBox
-            // 
-            this.thoroughThumbCheckBox.AutoSize = true;
-            this.thoroughThumbCheckBox.Location = new System.Drawing.Point(9, 146);
-            this.thoroughThumbCheckBox.Name = "thoroughThumbCheckBox";
-            this.thoroughThumbCheckBox.Size = new System.Drawing.Size(162, 17);
-            this.thoroughThumbCheckBox.TabIndex = 20;
-            this.thoroughThumbCheckBox.Text = "Try and fill all missing artwork";
-            this.thoroughThumbCheckBox.UseVisualStyleBackColor = true;
-            // 
             // Conf_Options_New
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -976,7 +964,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox shownnameBox;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.CheckBox autoconfemuBox;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox showFanArtCheckBox;
         private System.Windows.Forms.CheckBox showGameArtCheckBox;

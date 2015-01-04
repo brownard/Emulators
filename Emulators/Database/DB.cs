@@ -17,27 +17,10 @@ namespace Emulators.Database
         public ISQLiteProvider DataProvider { get { return sqlClient; } set { sqlClient = value; } }
 
         public event DatabaseChangedHandler OnItemAdded;
+        public event DatabaseChangedHandler OnItemDeleting;
         public event DatabaseChangedHandler OnItemDeleted;
 
         public const double DB_VERSION = 2.0;
-
-        #region Singleton
-
-        static object instanceSync = new object();
-        static DB instance = null;
-        public static DB Instance
-        {
-            get
-            {
-                if (instance == null)
-                    lock (instanceSync)
-                        if (instance == null)
-                            instance = new DB();
-                return instance;
-            }
-        }
-
-        #endregion
 
         bool isInit = false;
         Dictionary<Type, bool> isVerified;
@@ -308,6 +291,10 @@ namespace Emulators.Database
         {
             if (dbItem == null || dbItem.Id == null)
                 return;
+
+            if (OnItemDeleting != null)
+                OnItemDeleting(dbItem);
+
             lock (dbItem.SyncRoot)
             {
                 if (dbItem.Id == null)
@@ -319,6 +306,7 @@ namespace Emulators.Database
                 dbItem.Id = null;
                 dbItem.AfterDelete();
             }
+
             if (OnItemDeleted != null)
                 OnItemDeleted(dbItem);
         }

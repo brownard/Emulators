@@ -27,6 +27,8 @@ namespace Emulators
         ThumbGroup itemThumbs = null;
         BindingSource discBindingSource = null;
 
+        public Importer Importer { get; set; }  
+
         public Conf_DBBrowser()
         {
             InitializeComponent();
@@ -354,9 +356,9 @@ namespace Emulators
                 }
             }
 
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             selectedGame.Commit();
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
 
             if (itemThumbs != null)
             {
@@ -395,9 +397,9 @@ namespace Emulators
                     selectedGame.Discs.Add(disc);
                 }
             }
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             selectedGame.Discs.Commit();
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
             saveDiscs = false;
         }
 
@@ -578,7 +580,10 @@ namespace Emulators
 
         void sendToImporter(IEnumerable<Game> games)
         {
-            Importer importer = EmulatorsSettings.Instance.Importer;
+            Importer importer = Importer;
+            if (importer == null)
+                return;
+
             BackgroundTaskHandler handler = new BackgroundTaskHandler();
             handler.StatusDelegate = () => { return "sending to Importer..."; };
             handler.ActionDelegate = () =>
@@ -608,7 +613,6 @@ namespace Emulators
             savePCSettings = false;
             saveDiscs = false;
 
-            Importer importer = EmulatorsSettings.Instance.Importer;
             List<Game> games = new List<Game>();
             foreach (ListViewItem item in dBListView.SelectedItems)
                 games.Add((Game)item.Tag);
@@ -617,9 +621,8 @@ namespace Emulators
             handler.StatusDelegate = game => { return "removing " + game.Title; };
             handler.ActionDelegate = game =>
             {
-                importer.Remove(game.Id);
                 foreach (GameDisc disc in game.Discs)
-                    Options.Instance.AddIgnoreFile(disc.Path);
+                    EmulatorsCore.Options.AddIgnoreFile(disc.Path);
                 game.Delete();
             };
 
@@ -796,12 +799,12 @@ namespace Emulators
 
             int selectedIndex = indices.Count > 0 ? indices[0] : 0;
 
-            DB.Instance.ExecuteTransaction(indices, index =>
+            EmulatorsCore.Database.ExecuteTransaction(indices, index =>
             {
                 GameDisc disc = discGridView.Rows[index].DataBoundItem as GameDisc;
                 if (disc != null)
                 {
-                    Options.Instance.AddIgnoreFile(disc.Path);
+                    EmulatorsCore.Options.AddIgnoreFile(disc.Path);
                     disc.Delete();
                 }
                 discBindingSource.RemoveAt(index);

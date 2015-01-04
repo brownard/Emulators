@@ -81,7 +81,7 @@ namespace Emulators.MediaPortal1
 
         public GUIPresenter()
         {
-            imageLoadingDelay = Options.Instance.GetIntOption("gameartdelay");
+            imageLoadingDelay = EmulatorsCore.Options.ReadOption(o => o.GameartDelay);
 
             cover = new AsyncImageResource();
             cover.Property = "#Emulators2.CurrentItem.coverpath";
@@ -132,16 +132,21 @@ namespace Emulators.MediaPortal1
 
         public void ReloadOptions()
         {
-            clickToDetails = Options.Instance.GetBoolOption("clicktodetails");
-            startupState = Options.Instance.GetStartupState();
-            showSortValue = Options.Instance.GetBoolOption("showsortvalue");
-            previewVidEnabled = Options.Instance.GetBoolOption("showvideopreview");
+            Options options = EmulatorsCore.Options;
+            options.EnterReadLock();
+            clickToDetails = options.ClickToDetails;
+            startupState = options.StartupState;
+            if (startupState == StartupState.LASTUSED)
+                startupState = options.LastStartupState;
+            showSortValue = options.ShowSortValue;
+            previewVidEnabled = options.ShowVideoPreview;
 
-            showGoodmergeDialogOnce = Options.Instance.GetBoolOption("showgmdialogonce");
-            alwaysShowGoodmergeDialog = !showGoodmergeDialogOnce && Options.Instance.GetBoolOption("showgmdialog");
+            showGoodmergeDialogOnce = options.ShowGoodmergeDialogOnFirstOpen;
+            alwaysShowGoodmergeDialog = !showGoodmergeDialogOnce && options.AlwaysShowGoodmergeDialog;
 
-            loopVideoPreview = Options.Instance.GetBoolOption("loopvideopreview");
-            videoPreviewDelay = Options.Instance.GetIntOption("videopreviewdelay");
+            loopVideoPreview = options.LoopVideoPreview;
+            videoPreviewDelay = options.PreviewVideoDelay;
+            options.ExitReadLock();
         }
 
         #region Item Selected Handlers
@@ -208,13 +213,13 @@ namespace Emulators.MediaPortal1
             if (startupState == StartupState.FAVOURITES)
             {
                 BaseCriteria favCriteria = new BaseCriteria(DBField.GetField(typeof(Game), "Favourite"), "=", true);
-                items.AddRange(DB.Instance.Get<Game>(favCriteria));
-                layout = Options.Instance.GetIntOption("viewfavourites");
+                items.AddRange(EmulatorsCore.Database.Get<Game>(favCriteria));
+                layout = EmulatorsCore.Options.ReadOption(o => o.FavouritesLayout);
             }
             else if (startupState == StartupState.PCGAMES)
             {
                 items.AddRange(Emulator.GetPC().Games);
-                layout = Options.Instance.GetIntOption("viewpcgames");
+                layout = EmulatorsCore.Options.ReadOption(o => o.PCGamesLayout);
             }
             else if (startupState == StartupState.GROUPS)
             {
@@ -229,7 +234,7 @@ namespace Emulators.MediaPortal1
             {
                 foreach (Emulator emu in Emulator.GetAll(true))
                     items.Add(emu);
-                layout = Options.Instance.GetIntOption("viewemus");
+                layout = EmulatorsCore.Options.ReadOption(o => o.EmulatorLayout);
             }
 
             if (!setItemsToFacade(items, null, 0, index))
@@ -685,23 +690,24 @@ namespace Emulators.MediaPortal1
                     {
                         if (startupGroup.Favourite)
                         {
-                            Options.Instance.UpdateOption("viewfavourites", view);
+                            EmulatorsCore.Options.WriteOption(o => o.FavouritesLayout = view);
                             startupGroup.Layout = view;
                         }
                     }
                 }
                 else
                 {
+
                     switch (startupState)
                     {
                         case StartupState.EMULATORS:
-                            Options.Instance.UpdateOption("viewemus", view);
+                            EmulatorsCore.Options.WriteOption(o => o.EmulatorLayout = view);
                             break;
                         case StartupState.FAVOURITES:
-                            Options.Instance.UpdateOption("viewfavourites", view);
+                            EmulatorsCore.Options.WriteOption(o => o.FavouritesLayout = view);
                             break;
                         case StartupState.PCGAMES:
-                            Options.Instance.UpdateOption("viewpcgames", view);
+                            EmulatorsCore.Options.WriteOption(o => o.PCGamesLayout = view);
                             break;
                         case StartupState.GROUPS:
                             groupsLayout = view;
@@ -714,7 +720,7 @@ namespace Emulators.MediaPortal1
                 if (lastItem.IsGroup)
                 {
                     if (lastItem.IsFavourites)
-                        Options.Instance.UpdateOption("viewfavourites", view);
+                        EmulatorsCore.Options.WriteOption(o => o.FavouritesLayout = view);
                     lastItem.RomGroup.Layout = view;
                 }
                 else if (lastItem.AssociatedEmulator != null)
@@ -1152,7 +1158,7 @@ namespace Emulators.MediaPortal1
                     OnPreviewVideoStatusChanged(null, false);
             }
             facadeIndex = facade.SelectedListItemIndex;
-            Options.Instance.UpdateOption("laststartupstate", (int)startupState);
+            EmulatorsCore.Options.WriteOption(o => o.LastStartupState = startupState);
             importer.Pause();
         }
     }

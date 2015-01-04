@@ -104,7 +104,7 @@ namespace Emulators.MediaPortal2
         {
             ExecutorItem launcher = new ExecutorItem(isPc);
             launcher.Arguments = profile.Arguments;
-            launcher.Suspend = !EmulatorsSettings.Instance.IsConfig && profile.SuspendMP;
+            launcher.Suspend = profile.SuspendMP;
             if (launcher.Suspend && profile.DelayResume && profile.ResumeDelay > 0)
                 launcher.ResumeDelay = profile.ResumeDelay;
 
@@ -129,10 +129,10 @@ namespace Emulators.MediaPortal2
                 if (profile.StopEmulationOnKey.HasValue)
                     mapKey = profile.StopEmulationOnKey.Value;
                 else
-                    mapKey = Options.Instance.GetBoolOption("domap");
+                    mapKey = EmulatorsCore.Options.ReadOption(o => o.StopOnMappedKey);
                 if (mapKey)
                 {
-                    launcher.MappedExitKeyData = Options.Instance.GetIntOption("mappedkeydata");
+                    launcher.MappedExitKeyData = EmulatorsCore.Options.ReadOption(o => o.MappedKey);
                     launcher.EscapeToExit = profile.EscapeToExit;
                 }
             }

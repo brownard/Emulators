@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Emulators.MediaPortal1
 {
-    class MP1Utils
+    static class MP1Utils
     {
         #region Skin Constants
 
@@ -17,6 +17,19 @@ namespace Emulators.MediaPortal1
         const string DEFAULT_FANART = "Emulators2_Fanart";
 
         #endregion
+
+        public static bool IsConfig { get; set; }
+
+        static MediaPortalOptions options;
+        public static MediaPortalOptions Options
+        {
+            get
+            {
+                if (options == null)
+                    options = new MediaPortalOptions();
+                return options;
+            }
+        }
 
         static bool defaultImagesLoaded = false;
         static string defaultLogo;
@@ -59,18 +72,15 @@ namespace Emulators.MediaPortal1
         }
 
 
-        public static List<StartupStateHandler> GetStartupOptions(out int selectedValue)
+        public static List<StartupStateHandler> GetStartupOptions(out StartupState selectedValue)
         {
-            selectedValue = Options.Instance.GetIntOption("startupstate");
-            if (selectedValue < -1 || selectedValue > 3)
-                selectedValue = -1;
-
+            selectedValue = EmulatorsCore.Options.ReadOption(o => o.StartupState);
             List<StartupStateHandler> opts = new List<StartupStateHandler>();
-            opts.Add(new StartupStateHandler() { Name = Translator.Instance.lastused, Value = -1 });
-            opts.Add(new StartupStateHandler() { Name = StartupState.EMULATORS.Translate(), Value = (int)StartupState.EMULATORS });
-            opts.Add(new StartupStateHandler() { Name = StartupState.GROUPS.Translate(), Value = (int)StartupState.GROUPS });
-            opts.Add(new StartupStateHandler() { Name = StartupState.PCGAMES.Translate(), Value = (int)StartupState.PCGAMES });
-            opts.Add(new StartupStateHandler() { Name = StartupState.FAVOURITES.Translate(), Value = (int)StartupState.FAVOURITES });
+            opts.Add(new StartupStateHandler() { Name = StartupState.LASTUSED.Translate(), Value = StartupState.LASTUSED });
+            opts.Add(new StartupStateHandler() { Name = StartupState.EMULATORS.Translate(), Value = StartupState.EMULATORS });
+            opts.Add(new StartupStateHandler() { Name = StartupState.GROUPS.Translate(), Value = StartupState.GROUPS });
+            opts.Add(new StartupStateHandler() { Name = StartupState.PCGAMES.Translate(), Value = StartupState.PCGAMES });
+            opts.Add(new StartupStateHandler() { Name = StartupState.FAVOURITES.Translate(), Value = StartupState.FAVOURITES });
             return opts;
         }
 
@@ -120,9 +130,9 @@ namespace Emulators.MediaPortal1
         public static void ShowMPDialog(string message, params object[] args)
         {
             message = string.Format(message, args);
-            string heading = Options.Instance.GetStringOption("shownname");
+            string heading = EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName);
 
-            if (EmulatorsSettings.Instance.IsConfig)
+            if (IsConfig)
             {
                 MessageBox.Show(message, heading, MessageBoxButtons.OK);
                 return;
@@ -144,7 +154,7 @@ namespace Emulators.MediaPortal1
 
         public static void ShowProgressDialog(IBackgroundTask handler)
         {
-            if (EmulatorsSettings.Instance.IsConfig)
+            if (IsConfig)
             {
                 using (Conf_ProgressDialog dialog = new Conf_ProgressDialog(handler))
                     dialog.ShowDialog();

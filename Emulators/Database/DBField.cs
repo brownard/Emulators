@@ -296,10 +296,10 @@ namespace Emulators.Database
                         string[] objectValues = strVal.Split(new string[] { "|||" }, StringSplitOptions.None);
                         if (objectValues.Length > 1)
                         {
-                            return DB.Instance.Get(Type.GetType(objectValues[1]), int.Parse(objectValues[0]));
+                            return EmulatorsCore.Database.Get(Type.GetType(objectValues[1]), int.Parse(objectValues[0]));
                         }
                         else
-                            return DB.Instance.Get(propertyInfo.PropertyType, int.Parse(strVal));
+                            return EmulatorsCore.Database.Get(propertyInfo.PropertyType, int.Parse(strVal));
 
                     case DBDataType.DB_FIELD:
                         string[] fieldValues = strVal.Split(new string[] { "|||" }, StringSplitOptions.None);

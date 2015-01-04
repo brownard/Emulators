@@ -157,7 +157,7 @@ namespace Emulators.Database
             dbVersion.Attributes.Append(attr);
             docNode.AppendChild(dbVersion);
 
-            lock (DB.Instance.SyncRoot)
+            lock (EmulatorsCore.Database.SyncRoot)
             {
                 createNodes(docNode, Emulator.GetAll(), backupDirectory, 0); //add emu nodes
                 createNodes(docNode, Game.GetAll(), backupDirectory, 50); //add game nodes
@@ -371,19 +371,19 @@ namespace Emulators.Database
 
             restoreItems = new DatabaseCache();
             updatedEmulators = new Dictionary<int, Emulator>();
-            lock (DB.Instance.SyncRoot)
+            lock (EmulatorsCore.Database.SyncRoot)
             {
                 if (CleanRestore)
                 {
                     Logger.LogInfo("Clean restore - deleting all existing data");
                     OnBackupProgress(new BackupProgressEventArgs(0, 0, 0, "Cleaning Database"));
                     List<Emulator> existingItems = Emulator.GetAll();
-                    DB.Instance.BeginTransaction();
+                    EmulatorsCore.Database.BeginTransaction();
                     foreach (Emulator emu in existingItems)
                     {
                         emu.Delete();
                     }
-                    DB.Instance.EndTransaction();
+                    EmulatorsCore.Database.EndTransaction();
                     dbEmulators = new Dictionary<string, Emulator>();
                     dbGames = new Dictionary<string, Game>();
                 }
@@ -398,7 +398,7 @@ namespace Emulators.Database
                 int total = emulators.Count + games.Count;
                 int current = 1;
 
-                DB.Instance.BeginTransaction();
+                EmulatorsCore.Database.BeginTransaction();
                 foreach (Emulator emu in emulators)
                 {
                     OnBackupProgress(new BackupProgressEventArgs((current * 100) / total, current, total, "Restoring " + emu.Title));
@@ -411,7 +411,7 @@ namespace Emulators.Database
                     current++;
                     updateGame(game);
                 }
-                DB.Instance.EndTransaction();
+                EmulatorsCore.Database.EndTransaction();
             }
             OnCompleted();
         }
@@ -674,7 +674,7 @@ namespace Emulators.Database
         static Dictionary<string, Emulator> getEmulatorNames()
         {
             Dictionary<string, Emulator> emulatorNames = new Dictionary<string, Emulator>();
-            foreach (Emulator emu in DB.Instance.GetAll<Emulator>())
+            foreach (Emulator emu in EmulatorsCore.Database.GetAll<Emulator>())
                 if (!emulatorNames.ContainsKey(emu.Title))
                     emulatorNames.Add(emu.Title, emu);
             return emulatorNames;
@@ -683,7 +683,7 @@ namespace Emulators.Database
         static Dictionary<string, Game> getGamePaths()
         {
             Dictionary<string, Game> gamePaths = new Dictionary<string, Game>();
-            foreach (Game game in DB.Instance.GetAll<Game>())
+            foreach (Game game in EmulatorsCore.Database.GetAll<Game>())
                 foreach (GameDisc disc in game.Discs)
                     gamePaths[disc.Path] = game;
             return gamePaths;

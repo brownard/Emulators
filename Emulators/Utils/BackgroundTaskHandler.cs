@@ -52,7 +52,7 @@ namespace Emulators
             {
                 int current = 0;
                 int total = Items.Count;
-                DB.Instance.ExecuteTransaction(Items, item =>
+                EmulatorsCore.Database.ExecuteTransaction(Items, item =>
                 {
                     if (!doWork)
                         return;

@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoConfig\EmulatorConfig.cs" />
     <Compile Include="Base\GroupItemInfo.cs" />
     <Compile Include="Base\ListItemProperty.cs" />
     <Compile Include="Base\StartupState.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Database\DBTableAttribute.cs" />
     <Compile Include="Database\ICriteria.cs" />
     <Compile Include="Database\ISQLProvider.cs" />
+    <Compile Include="EmulatorsCore.cs" />
     <Compile Include="Import\IDoWork.cs" />
     <Compile Include="Import\MameNameHandler.cs" />
     <Compile Include="Import\NFOCreator.cs" />
@@ -85,12 +87,10 @@
     <Compile Include="Utils\BackgroundTaskHandler.cs" />
     <Compile Include="Base\EmulatorProfile.cs" />
     <Compile Include="Base\GameDisc.cs" />
-    <Compile Include="Base\GameProperty.cs" />
     <Compile Include="Base\RomGroup.cs" />
     <Compile Include="Base\ScraperGame.cs" />
     <Compile Include="Base\ScraperResult.cs" />
     <Compile Include="CommunityServer\client.cs" />
-    <Compile Include="EmulatorsSettings.cs" />
     <Compile Include="Data\ComboBoxItem.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="Base\EmulatorsException.cs" />
@@ -132,7 +132,7 @@
     <Compile Include="Data\Dropdowns.cs" />
     <Compile Include="Base\Emulator.cs" />
     <Compile Include="Base\Game.cs" />
-    <Compile Include="Data\EmuSettingsAutoFill.cs" />
+    <Compile Include="AutoConfig\EmuAutoConfig.cs" />
     <Compile Include="Launcher\Extractor.cs" />
     <Compile Include="Image Handlers\ImageHandler.cs" />
     <Compile Include="Import\Importer.cs" />
@@ -167,7 +167,7 @@
     <None Include="Import\Scripts\MameDB.xml">
       <SubType>Designer</SubType>
     </None>
-    <EmbeddedResource Include="Data\EmuSettings.xml">
+    <EmbeddedResource Include="AutoConfig\EmuConfigs.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Data\mamelist.txt" />
@@ -177,12 +177,6 @@
     <None Include="Import\Scripts\GameFAQs.xml">
       <SubType>Designer</SubType>
     </None>
-    <EmbeddedResource Include="Data\Emulators2Groups.xml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Content Include="Data\myEmulatorsAspectRatios.xml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Docs\ChangeLog.txt" />
     <None Include="Properties\DataSources\RomMatch.datasource" />
     <None Include="Import\Scripts\Maws.xml">
@@ -200,6 +194,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

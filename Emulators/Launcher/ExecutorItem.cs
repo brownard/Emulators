@@ -12,6 +12,12 @@ namespace Emulators
 
     public class ExecutorItem : IDisposable
     {
+        #region Wildcards
+        public const string ROM_DIRECTORY_WILDCARD = "%ROMDIRECTORY%";
+        public const string GAME_WILDCARD = "%ROM%";
+        public const string GAME_WILDCARD_NO_EXT = "%ROM_WITHOUT_EXT%";
+        #endregion
+
         Process process;
         public event ExecutorLaunchHandler OnStarting;
         public event ExecutorLaunchHandler OnStarted;
@@ -192,20 +198,20 @@ namespace Emulators
 
         static string replaceWildcards(string args, string romPath, bool useQuotes)
         {
-            args = args.Replace(EmulatorsSettings.ROM_DIRECTORY_WILDCARD, System.IO.Path.GetDirectoryName(romPath));
+            args = args.Replace(ROM_DIRECTORY_WILDCARD, System.IO.Path.GetDirectoryName(romPath));
 
             string fmt = useQuotes ? "\"{0}\"" : "{0}";
             bool foundWildcard = false;
-            if (args.Contains(EmulatorsSettings.GAME_WILDCARD))
+            if (args.Contains(GAME_WILDCARD))
             {
                 foundWildcard = true;
-                args = args.Replace(EmulatorsSettings.GAME_WILDCARD, string.Format(fmt, romPath));
+                args = args.Replace(GAME_WILDCARD, string.Format(fmt, romPath));
             }
-            if (args.Contains(EmulatorsSettings.GAME_WILDCARD_NO_EXT))
+            if (args.Contains(GAME_WILDCARD_NO_EXT))
             {
                 foundWildcard = true;
                 string filename = System.IO.Path.GetFileNameWithoutExtension(romPath);
-                args = args.Replace(EmulatorsSettings.GAME_WILDCARD_NO_EXT, string.Format(fmt, filename));
+                args = args.Replace(GAME_WILDCARD_NO_EXT, string.Format(fmt, filename));
             }
             if (!foundWildcard)
             {
@@ -218,7 +224,7 @@ namespace Emulators
 
         static string removeWildcards(string args)
         {
-            return args.Replace(EmulatorsSettings.GAME_WILDCARD, "").Replace(EmulatorsSettings.GAME_WILDCARD_NO_EXT, "").Replace(EmulatorsSettings.ROM_DIRECTORY_WILDCARD, "").Trim();
+            return args.Replace(GAME_WILDCARD, "").Replace(GAME_WILDCARD_NO_EXT, "").Replace(ROM_DIRECTORY_WILDCARD, "").Trim();
         }
 
         //Fired when a key press is detected by the keyboard hook

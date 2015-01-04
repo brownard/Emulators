@@ -45,7 +45,6 @@ namespace Emulators
             startupComboBox.TextChanged += new EventHandler(generalOptionsChanged);
             clickToDetailsCheckBox.CheckedChanged += new EventHandler(generalOptionsChanged);
             showSortPropertyBox.CheckedChanged += new EventHandler(generalOptionsChanged);
-            autoconfemuBox.CheckedChanged += new EventHandler(generalOptionsChanged);
             stopMediaCheckBox.CheckedChanged += new EventHandler(generalOptionsChanged);
 
             //Layout options
@@ -152,63 +151,62 @@ namespace Emulators
 
         void getOptions()
         {
-            Options options = Options.Instance;
-
-            shownnameBox.Text = options.GetStringOption("shownname");
+            Options options = EmulatorsCore.Options;
+            options.EnterReadLock();
+            shownnameBox.Text = options.PluginDisplayName;
             foreach (string language in Translator.Instance.GetLanguages())
                 languageBox.Items.Add(language);
-            languageBox.Text = options.GetStringOption("language");
+            languageBox.Text = options.Language;
 
-            int selectedValue;
+            StartupState selectedValue;
             startupComboBox.DataSource = MP1Utils.GetStartupOptions(out selectedValue);//.ToArray();
             startupComboBox.SelectedValue = selectedValue;
 
-            clickToDetailsCheckBox.Checked = Options.Instance.GetBoolOption("clicktodetails");
-            showSortPropertyBox.Checked = options.GetBoolOption("showsortvalue");
-            autoconfemuBox.Checked = options.GetBoolOption("autoconfemu");
-            stopMediaCheckBox.Checked = options.GetBoolOption("stopmediaplayback");
+            clickToDetailsCheckBox.Checked = options.ClickToDetails;
+            showSortPropertyBox.Checked = options.ShowSortValue;
+            stopMediaCheckBox.Checked = options.StopMediaPlayback;
 
-            viewBox.SelectedIndex = options.GetIntOption("viewemus");
-            pcViewBox.SelectedIndex = options.GetIntOption("viewpcgames");
-            favouritesViewBox.SelectedIndex = options.GetIntOption("viewfavourites");
-            showFanArtCheckBox.Checked = options.GetBoolOption("showfanart");
-            fanartDelayBox.Value = options.GetIntOption("fanartdelay");
-            showGameArtCheckBox.Checked = options.GetBoolOption("showgameart");
-            gameArtDelayBox.Value = options.GetIntOption("gameartdelay");
+            viewBox.SelectedIndex = options.EmulatorLayout;
+            pcViewBox.SelectedIndex = options.PCGamesLayout;
+            favouritesViewBox.SelectedIndex = options.FavouritesLayout;
+            showFanArtCheckBox.Checked = options.ShowFanart;
+            fanartDelayBox.Value = options.FanartDelay;
+            showGameArtCheckBox.Checked = options.ShowGameart;
+            gameArtDelayBox.Value = options.GameartDelay;
 
-            showPrevVideoCheckBox.Checked = options.GetBoolOption("showvideopreview");
-            prevVidDelayBox.Value = options.GetIntOption("videopreviewdelay");
-            loopPrevVidCheckBox.Checked = options.GetBoolOption("loopvideopreview");
-            useEmuPrevVidCheckBox.Checked = options.GetBoolOption("defaultvideopreview");
-                
-            stopEmuCheckBox.Checked = options.GetBoolOption("domap");
-            keyData = options.GetIntOption("mappedkeydata");
+            showPrevVideoCheckBox.Checked = options.ShowVideoPreview;
+            prevVidDelayBox.Value = options.PreviewVideoDelay;
+            loopPrevVidCheckBox.Checked = options.LoopVideoPreview;
+            useEmuPrevVidCheckBox.Checked = options.FallBackToEmulatorVideo;
+
+            stopEmuCheckBox.Checked = options.StopOnMappedKey;
+            keyData = options.MappedKey;
             if (keyData > 0)
                 keyMapLabel.Text = Options.GetKeyDisplayString(keyData);
 
-            goodFiltersTextBox.Text = options.GetStringOption("goodmergefilters");
+            goodFiltersTextBox.Text = options.GoodmergeFilters;
 
-            if (options.GetBoolOption("showgmdialogonce"))
+            if (options.ShowGoodmergeDialogOnFirstOpen)
                 showGMDialogCheckBox.CheckState = CheckState.Indeterminate;
             else
-                showGMDialogCheckBox.CheckState = options.GetBoolOption("showgmdialog") ? CheckState.Checked : CheckState.Unchecked;
+                showGMDialogCheckBox.CheckState = options.AlwaysShowGoodmergeDialog ? CheckState.Checked : CheckState.Unchecked;
 
             //submitGameInfoToServer.Checked = options.GetBoolOption("submitGameDetails");
             //retrieveGameInfoToServer.Checked = options.GetBoolOption("retrieveGameDetials");
             //communityServerAddress.Text = options.GetStringOption("communityServerAddress");
             //communityServerErrorWaitTime.Value = options.GetIntOption("communityServerConnectionRetryTime");
 
-            autoRefreshGames.Checked = options.GetBoolOption("autorefreshgames");
-            autoImportCheckBox.Checked = options.GetBoolOption("autoimportgames");
-            exactMatchCheckBox.Checked = options.GetBoolOption("importexact");
-            approveTopCheckBox.Checked = options.GetBoolOption("importtop");
-            resizeThumbCheckBox.Checked = options.GetBoolOption("resizethumbs");
-            thoroughThumbCheckBox.Checked = options.GetBoolOption("thoroughthumbsearch");
+            autoRefreshGames.Checked = options.AutoRefreshGames;
+            autoImportCheckBox.Checked = options.AutoImportGames;
+            exactMatchCheckBox.Checked = options.ImportExact;
+            approveTopCheckBox.Checked = options.ImportTop;
+            resizeThumbCheckBox.Checked = options.ResizeGameart;
+            thoroughThumbCheckBox.Checked = options.TryAndFillMissingArt;
 
-            thumbDirTextBox.Text = options.GetStringOption("thumblocation");
+            thumbDirTextBox.Text = options.ImageDirectory;
 
             //validate threadcount
-            int threadCount = options.GetIntOption("importthreadcount");
+            int threadCount = options.ImportThreads;
             if (threadCount > 10)
             {
                 threadCount = 10;
@@ -222,7 +220,7 @@ namespace Emulators
             threadCountUpDown.Value = threadCount;
 
             hashThreadUpDown.Maximum = threadCount;
-            int hashThreads = options.GetIntOption("hashthreadcount");
+            int hashThreads = options.HashThreads;
             if (hashThreads > threadCount)
             {
                 hashThreads = threadCount;
@@ -237,7 +235,7 @@ namespace Emulators
 
             //scraper checkbox
             List<string> ignoredScripts = new List<string>();
-            string[] optStr = Options.Instance.GetStringOption("ignoredscrapers").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] optStr = options.IgnoredScrapers.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             ignoredScripts.AddRange(optStr);
 
             coversScraperComboBox.Items.Add("Use search result");
@@ -254,45 +252,45 @@ namespace Emulators
                 coversScraperComboBox.Items.Add(scraper);
                 screensScraperComboBox.Items.Add(scraper);
                 int index = fanartScraperComboBox.Items.Add(scraper);
-                if (scraper.IdString == options.GetStringOption("coversscraperid"))
+                if (scraper.IdString == options.PriorityCoversScraper)
                     coversScraperComboBox.SelectedIndex = index;
-                if (scraper.IdString == options.GetStringOption("screensscraperid"))
+                if (scraper.IdString == options.PriorityScreensScraper)
                     screensScraperComboBox.SelectedIndex = index;
-                if (scraper.IdString == options.GetStringOption("fanartscraperid"))
+                if (scraper.IdString == options.PriorityFanartScraper)
                     fanartScraperComboBox.SelectedIndex = index;
             }
+            options.ExitReadLock();
         }
-                
+
         public override void SavePanel()
         {
-            Options options = Options.Instance;
-
+            Options options = EmulatorsCore.Options;
+            options.EnterWriteLock();
             if (updateGeneral)
             {
-                options.UpdateOption("shownname", shownnameBox.Text);
-                options.UpdateOption("language", languageBox.Text);
-                options.UpdateOption("startupstate", startupComboBox.SelectedValue);
-                options.UpdateOption("clicktodetails", clickToDetailsCheckBox.Checked);
-                options.UpdateOption("showsortvalue", showSortPropertyBox.Checked);
-                options.UpdateOption("autoconfemu", autoconfemuBox.Checked);
-                options.UpdateOption("stopmediaplayback", stopMediaCheckBox.Checked);
+                options.PluginDisplayName = shownnameBox.Text;
+                options.Language = languageBox.Text;
+                options.StartupState = (StartupState)startupComboBox.SelectedValue;
+                options.ClickToDetails = clickToDetailsCheckBox.Checked;
+                options.ShowSortValue = showSortPropertyBox.Checked;
+                options.StopMediaPlayback = stopMediaCheckBox.Checked;
                 updateGeneral = false;
             }
 
             if (updateLayout)
             {
-                options.UpdateOption("viewemus", viewBox.SelectedIndex);
-                options.UpdateOption("viewpcgames", pcViewBox.SelectedIndex);
-                options.UpdateOption("viewfavourites", favouritesViewBox.SelectedIndex);
-                options.UpdateOption("fanartdelay", Convert.ToInt32(fanartDelayBox.Value));
-                options.UpdateOption("showfanart", showFanArtCheckBox.Checked);
-                options.UpdateOption("gameartdelay", Convert.ToInt32(gameArtDelayBox.Value));
-                options.UpdateOption("showgameart", showGameArtCheckBox.Checked);
+                options.EmulatorLayout = viewBox.SelectedIndex;
+                options.PCGamesLayout = pcViewBox.SelectedIndex;
+                options.FavouritesLayout = favouritesViewBox.SelectedIndex;
+                options.FanartDelay = Convert.ToInt32(fanartDelayBox.Value);
+                options.ShowFanart = showFanArtCheckBox.Checked;
+                options.GameartDelay = Convert.ToInt32(gameArtDelayBox.Value);
+                options.ShowGameart = showGameArtCheckBox.Checked;
 
-                options.UpdateOption("showvideopreview", showPrevVideoCheckBox.Checked);
-                options.UpdateOption("videopreviewdelay", Convert.ToInt32(prevVidDelayBox.Value));
-                options.UpdateOption("loopvideopreview", loopPrevVidCheckBox.Checked);
-                options.UpdateOption("defaultvideopreview", useEmuPrevVidCheckBox.Checked);
+                options.ShowVideoPreview = showPrevVideoCheckBox.Checked;
+                options.PreviewVideoDelay = Convert.ToInt32(prevVidDelayBox.Value);
+                options.LoopVideoPreview = loopPrevVidCheckBox.Checked;
+                options.FallBackToEmulatorVideo = useEmuPrevVidCheckBox.Checked;
 
                 updateLayout = false;
             }
@@ -300,23 +298,23 @@ namespace Emulators
             if (updateStopEmu)
             {
                 if (keyData > 0)
-                    options.UpdateOption("mappedkeydata", keyData);
-                options.UpdateOption("domap", stopEmuCheckBox.Checked);
+                    options.MappedKey = keyData;
+                options.StopOnMappedKey = stopEmuCheckBox.Checked;
                 updateStopEmu = false;
             }
 
             if (updateGoodmerge)
             {
-                options.UpdateOption("goodmergefilters", goodFiltersTextBox.Text);
+                options.GoodmergeFilters = goodFiltersTextBox.Text;
                 if (showGMDialogCheckBox.CheckState == CheckState.Indeterminate)
                 {
-                    options.UpdateOption("showgmdialogonce", true);
-                    options.UpdateOption("showgmdialog", false);
+                    options.ShowGoodmergeDialogOnFirstOpen = true;
+                    options.AlwaysShowGoodmergeDialog = false;
                 }
                 else
                 {
-                    options.UpdateOption("showgmdialogonce", false);
-                    options.UpdateOption("showgmdialog", showGMDialogCheckBox.Checked);
+                    options.ShowGoodmergeDialogOnFirstOpen = false;
+                    options.AlwaysShowGoodmergeDialog = showGMDialogCheckBox.Checked;
                 }
 
                 updateGoodmerge = false;
@@ -324,20 +322,20 @@ namespace Emulators
 
             if (updateDatabase)
             {
-                options.UpdateOption("autorefreshgames", autoRefreshGames.Checked);
-                options.UpdateOption("autoimportgames", autoImportCheckBox.Checked);
-                options.UpdateOption("importexact", exactMatchCheckBox.Checked);
-                options.UpdateOption("importtop", approveTopCheckBox.Checked);
-                options.UpdateOption("resizethumbs", resizeThumbCheckBox.Checked);
-                options.UpdateOption("thoroughthumbsearch", thoroughThumbCheckBox.Checked);
+                options.AutoRefreshGames = autoRefreshGames.Checked;
+                options.AutoImportGames = autoImportCheckBox.Checked;
+                options.ImportExact = exactMatchCheckBox.Checked;
+                options.ImportTop = approveTopCheckBox.Checked;
+                options.ResizeGameart = resizeThumbCheckBox.Checked;
+                options.TryAndFillMissingArt = thoroughThumbCheckBox.Checked;
                 updateDatabase = false;
             }
 
             if (updateAdvanced)
             {
-                options.UpdateOption("thumblocation", thumbDirTextBox.Text);
-                options.UpdateOption("importthreadcount", (int)threadCountUpDown.Value);
-                options.UpdateOption("hashthreadcount", (int)hashThreadUpDown.Value);
+                options.ImageDirectory = thumbDirTextBox.Text;
+                options.ImportThreads = (int)threadCountUpDown.Value;
+                options.HashThreads = (int)hashThreadUpDown.Value;
 
                 string ignoredScripts = "";
                 string scriptPriorities = "";
@@ -349,23 +347,23 @@ namespace Emulators
                     if (!scraperListBox.GetItemChecked(x))
                         ignoredScripts += optStr;
                 }
-                options.UpdateOption("ignoredscrapers", ignoredScripts);
-                options.UpdateOption("scraperpriorities", scriptPriorities);
+                options.IgnoredScrapers = ignoredScripts;
+                options.ScraperPriorities = scriptPriorities;
 
                 if (coversScraperComboBox.SelectedIndex < 1)
-                    options.UpdateOption("coversscraperid", "");
+                    options.PriorityCoversScraper = "";
                 else
-                    options.UpdateOption("coversscraperid", ((Scraper)coversScraperComboBox.SelectedItem).IdString);
+                    options.PriorityCoversScraper = ((Scraper)coversScraperComboBox.SelectedItem).IdString;
 
                 if (screensScraperComboBox.SelectedIndex < 1)
-                    options.UpdateOption("screensscraperid", "");
+                    options.PriorityScreensScraper = "";
                 else
-                    options.UpdateOption("screensscraperid", ((Scraper)screensScraperComboBox.SelectedItem).IdString);
+                    options.PriorityScreensScraper = ((Scraper)screensScraperComboBox.SelectedItem).IdString;
 
                 if (fanartScraperComboBox.SelectedIndex < 1)
-                    options.UpdateOption("fanartscraperid", "");
+                    options.PriorityFanartScraper = "";
                 else
-                    options.UpdateOption("fanartscraperid", ((Scraper)fanartScraperComboBox.SelectedItem).IdString);
+                    options.PriorityFanartScraper = ((Scraper)fanartScraperComboBox.SelectedItem).IdString;
 
                 updateAdvanced = false;
             }
@@ -377,7 +375,7 @@ namespace Emulators
                 //options.UpdateOption("communityServerAddress", communityServerAddress.Text);
                 //options.UpdateOption("communityServerConnectionRetryTime", communityServerErrorWaitTime.Value);
             }
-
+            options.ExitWriteLock();
             base.SavePanel();
         }
 

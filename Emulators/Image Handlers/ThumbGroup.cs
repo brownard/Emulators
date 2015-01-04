@@ -97,6 +97,7 @@ namespace Emulators
         EncoderParameters encoderParams = null;
         ThumbItem parentItem;
         double thumbAspect = 0;
+        int maxThumbDimension = 0;
                 
         /// <summary>
         /// Initialises a new ThumbGroup with the thumbs of the specified parent
@@ -107,13 +108,22 @@ namespace Emulators
             if (parent == null)
                 throw new ArgumentException("The parent item cannot be null", "parent");
 
+            Options options = EmulatorsCore.Options;
+            options.EnterReadLock();
+            bool doResize = options.ResizeGameart;
+            maxThumbDimension = EmulatorsCore.Options.MaxImageDimensions;
+            string imageDirectory = options.ImageDirectory;
+            options.ExitReadLock();
+
             string thumbFolder = parent.ThumbFolder;
-            thumbAspect = parent.AspectRatio;
+            if (doResize)
+                thumbAspect = parent.AspectRatio;
+            
             parentItem = parent;
             lock (parent.SyncRoot)
             {
                 if (parent.Id != null)
-                    thumbPath = string.Format(@"{0}\{1}\{2}\{3}\", EmulatorsSettings.Instance.ThumbDirectory, THUMB_DIR_NAME, thumbFolder, parent.Id);
+                    thumbPath = string.Format(@"{0}\{1}\{2}\{3}\", imageDirectory, THUMB_DIR_NAME, thumbFolder, parent.Id);
             }
 
             //init Thumbs
@@ -501,10 +511,8 @@ namespace Emulators
 
         void saveThumb(Thumb thumbObject, string savePathWithoutExt, bool isCover, bool shrink)
         {
-            int maxThumbDimension = 0;
             if (shrink)
             {
-                maxThumbDimension = Options.Instance.GetIntOption("maxthumbdimension");
                 if (maxThumbDimension < 0 || (thumbObject.Image.Width <= maxThumbDimension && thumbObject.Image.Height <= maxThumbDimension))
                     maxThumbDimension = 0;
             }

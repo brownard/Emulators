@@ -17,7 +17,7 @@ namespace Emulators
         /// <param name="hidePcIfEmpty">Whether to not return the PC emulator if no PC games have been configured</param>
         public static List<Emulator> GetAll(bool hidePcIfEmpty = false)
         {
-            List<Emulator> result = DB.Instance.GetAll<Emulator>();
+            List<Emulator> result = EmulatorsCore.Database.GetAll<Emulator>();
             if (hidePcIfEmpty)
             {
                 Emulator pc = Emulator.GetPC();
@@ -32,7 +32,7 @@ namespace Emulators
         /// </summary>
         public static Emulator GetPC()
         {
-            return DB.Instance.Get<Emulator>(-1);
+            return EmulatorsCore.Database.Get<Emulator>(-1);
         }
 
         #endregion
@@ -357,10 +357,10 @@ namespace Emulators
                         if (dbGames == null)
                         {
                             //inital init of backing list
-                            DB.Instance.OnItemAdded += onGameAdded;
-                            DB.Instance.OnItemDeleted += onGameDeleted;
+                            EmulatorsCore.Database.OnItemAdded += onGameAdded;
+                            EmulatorsCore.Database.OnItemDeleted += onGameDeleted;
                             BaseCriteria emuCriteria = new BaseCriteria(DBField.GetField(typeof(Game), "ParentEmulator"), "=", Id);
-                            dbGames = DB.Instance.Get<Game>(emuCriteria);
+                            dbGames = EmulatorsCore.Database.Get<Game>(emuCriteria);
                         }
                         //create a seperate, raad only collection that won't be modified on database changes
                         games = new List<Game>(dbGames).AsReadOnly();
@@ -417,14 +417,14 @@ namespace Emulators
         {
             //delete associated thumbs
             DeleteThumbs();
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             //delete all games
             foreach (Game game in Games)
                 game.Delete();
             //delete all profiles
             foreach (EmulatorProfile profile in EmulatorProfiles)
                 profile.Delete();
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
             base.BeforeDelete();
         }
 

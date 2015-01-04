@@ -1,4 +1,5 @@
-﻿using Emulators.MediaPortal1;
+﻿using Emulators.AutoConfig;
+using Emulators.MediaPortal1;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +33,7 @@ namespace Emulators
             if (index > -1)
                 platformComboBox.SelectedIndex = index;
 
-            EmuSettingsAutoFill.SetupAspectDropdown(thumbAspectComboBox, parent.NewEmulator.CaseAspect);
+            EmuAutoConfig.SetupAspectDropdown(thumbAspectComboBox, parent.NewEmulator.CaseAspect);
 
             if (firstLoad)
             {

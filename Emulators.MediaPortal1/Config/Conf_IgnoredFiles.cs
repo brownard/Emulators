@@ -18,7 +18,7 @@ namespace Emulators
 
         private void Conf_IgnoredFiles_Load(object sender, EventArgs e)
         {
-            foreach (string path in Options.Instance.IgnoredFiles())
+            foreach (string path in EmulatorsCore.Options.IgnoredFiles())
             {
                 dataGridView1.Rows.Add(path);
             }
@@ -29,7 +29,7 @@ namespace Emulators
             foreach (DataGridViewRow row in dataGridView1.SelectedRows)
             {
                 string path = row.Cells[0].Value as string;
-                Options.Instance.RemoveIgnoreFile(path);
+                EmulatorsCore.Options.RemoveIgnoreFile(path);
                 dataGridView1.Rows.Remove(row);
             }
         }

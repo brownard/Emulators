@@ -98,7 +98,7 @@ namespace Emulators.Database
             List<Game> games = upgradeGames(gameData);
 
             currentItem = 0;
-            DB.Instance.BeginTransaction();
+            EmulatorsCore.Database.BeginTransaction();
             foreach (Emulator emu in emuLookup.Values)
             {
                 setProgress("{0}/{1} - Commiting items", currentItem + 1, totalItems);
@@ -121,7 +121,7 @@ namespace Emulators.Database
                 }
                 game.Commit();
             }
-            DB.Instance.EndTransaction();
+            EmulatorsCore.Database.EndTransaction();
 
             //foreach (Emulator emu in emulators)
             //{
@@ -132,7 +132,7 @@ namespace Emulators.Database
             //        foreach (EmulatorProfile profile in emu.EmulatorProfiles)
             //            profile.Id = null;
             //    }
-            //    DB.Instance.BeginTransaction();
+            //    EmulatorsCore.Database.BeginTransaction();
             //    emu.Commit();
             //    foreach (Game game in games)
             //    {
@@ -143,7 +143,7 @@ namespace Emulators.Database
             //        }
             //        game.Commit();
             //    }
-            //    DB.Instance.EndTransaction();
+            //    EmulatorsCore.Database.EndTransaction();
             //}
 
             sqlClient.Dispose();
@@ -303,21 +303,21 @@ namespace Emulators.Database
         Emulator createPC()
         {
             Emulator emu = Emulator.GetPC();
-            string title = Options.Instance.GetStringOption("pcitemtitle");
-            if (title != "")
-                emu.Title = title;
-            emu.Developer = Options.Instance.GetStringOption("pcitemcompany");
-            emu.Description = Options.Instance.GetStringOption("pcitemdescription");
-            emu.Year = Options.Instance.GetIntOption("pcitemyear");
-            emu.Grade = Options.Instance.GetIntOption("pcitemgrade");
-            int lAspect = Options.Instance.GetIntOption("pcitemcaseaspect");
-            if (lAspect != 0)
-                emu.CaseAspect = lAspect / 100.00;
-            emu.Position = Options.Instance.GetIntOption("pcitemposition");
-            emu.VideoPreview = Options.Instance.GetStringOption("pcitemvideopreview");
-            emu.View = Options.Instance.GetIntOption("viewpcgames");
-            emu.PathToRoms = Options.Instance.GetStringOption("pcitemdirectory");
-            emu.Filter = Options.Instance.GetStringOption("pcitemfilter");
+            //string title = EmulatorsCore.Options.GetStringOption("pcitemtitle");
+            //if (title != "")
+            //    emu.Title = title;
+            //emu.Developer = EmulatorsCore.Options.GetStringOption("pcitemcompany");
+            //emu.Description = EmulatorsCore.Options.GetStringOption("pcitemdescription");
+            //emu.Year = EmulatorsCore.Options.GetIntOption("pcitemyear");
+            //emu.Grade = EmulatorsCore.Options.GetIntOption("pcitemgrade");
+            //int lAspect = EmulatorsCore.Options.GetIntOption("pcitemcaseaspect");
+            //if (lAspect != 0)
+            //    emu.CaseAspect = lAspect / 100.00;
+            //emu.Position = EmulatorsCore.Options.GetIntOption("pcitemposition");
+            //emu.VideoPreview = EmulatorsCore.Options.GetStringOption("pcitemvideopreview");
+            //emu.View = EmulatorsCore.Options.GetIntOption("viewpcgames");
+            //emu.PathToRoms = EmulatorsCore.Options.GetStringOption("pcitemdirectory");
+            //emu.Filter = EmulatorsCore.Options.GetStringOption("pcitemfilter");
             return emu;
         }
 

@@ -69,7 +69,7 @@ namespace Emulators
                 Company = game.Developer;
                 Grade = game.Grade;
                 videoPreview = game.VideoPreview;
-                if (string.IsNullOrEmpty(videoPreview) && Options.Instance.GetBoolOption("defaultvideopreview"))
+                if (string.IsNullOrEmpty(videoPreview) && EmulatorsCore.Options.ReadOption(o => o.FallBackToEmulatorVideo))
                     videoPreview = game.ParentEmulator.VideoPreview;
                 if (!string.IsNullOrEmpty(videoPreview))
                     VideoPreviewId = "game" + game.Id.ToString();

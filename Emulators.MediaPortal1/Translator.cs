@@ -116,7 +116,7 @@ namespace Emulators.MediaPortal1
             try
             {
                 XmlDocument doc = new XmlDocument();
-                doc.Load(transFolder + "\\" + Options.Instance.GetStringOption("language") + ".xml");
+                doc.Load(transFolder + "\\" + EmulatorsCore.Options.ReadOption(o => o.Language) + ".xml");
                 XmlNodeList nodes = doc.GetElementsByTagName("translatedstring");
                 Dictionary<string, string> translations = new Dictionary<string, string>();
                 foreach (XmlNode node in nodes)
@@ -191,6 +191,8 @@ namespace Emulators.MediaPortal1
         {
             switch (state)
             {
+                case StartupState.LASTUSED:
+                    return Translator.Instance.lastused;
                 case StartupState.EMULATORS:
                     return Translator.Instance.viewemulators;
                 case StartupState.GROUPS:

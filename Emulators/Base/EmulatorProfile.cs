@@ -309,14 +309,5 @@ namespace Emulators
         int resumeDelay = 0;
 
         #endregion
-
-        #region AutoConfig
-
-        //These are only used when creating auto-configuration settings
-        public string Filters { get; set; }
-        public string Platform { get; set; }
-        public bool HasSettings { get; set; }
-
-        #endregion
     }
 }

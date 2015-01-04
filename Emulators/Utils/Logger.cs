@@ -18,28 +18,28 @@ namespace Emulators
     {
         public static void LogInfo(string format, params object[] args)
         {
-            if (EmulatorsSettings.Instance.Logger != null)
-                EmulatorsSettings.Instance.Logger.LogInfo(format, args);
+            if (EmulatorsCore.Logger != null)
+                EmulatorsCore.Logger.LogInfo(format, args);
         }
         public static void LogDebug(string format, params object[] args)
         {
-            if (EmulatorsSettings.Instance.Logger != null)
-                EmulatorsSettings.Instance.Logger.LogDebug(format, args);
+            if (EmulatorsCore.Logger != null)
+                EmulatorsCore.Logger.LogDebug(format, args);
         }
         public static void LogWarn(string format, params object[] args)
         {
-            if (EmulatorsSettings.Instance.Logger != null)
-                EmulatorsSettings.Instance.Logger.LogWarn(format, args);
+            if (EmulatorsCore.Logger != null)
+                EmulatorsCore.Logger.LogWarn(format, args);
         }
         public static void LogError(string format, params object[] args)
         {
-            if (EmulatorsSettings.Instance.Logger != null)
-                EmulatorsSettings.Instance.Logger.LogError(format, args);
+            if (EmulatorsCore.Logger != null)
+                EmulatorsCore.Logger.LogError(format, args);
         }
         public static void LogError(Exception ex)
         {
-            if (EmulatorsSettings.Instance.Logger != null)
-                EmulatorsSettings.Instance.Logger.LogError(ex);
+            if (EmulatorsCore.Logger != null)
+                EmulatorsCore.Logger.LogError(ex);
         }
     }
 }
