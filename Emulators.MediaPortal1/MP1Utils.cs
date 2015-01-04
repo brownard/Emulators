@@ -20,13 +20,13 @@ namespace Emulators.MediaPortal1
 
         public static bool IsConfig { get; set; }
 
-        static MediaPortalOptions options;
-        public static MediaPortalOptions Options
+        static MP1Options options;
+        public static MP1Options Options
         {
             get
             {
                 if (options == null)
-                    options = new MediaPortalOptions();
+                    options = new MP1Options();
                 return options;
             }
         }
@@ -130,7 +130,7 @@ namespace Emulators.MediaPortal1
         public static void ShowMPDialog(string message, params object[] args)
         {
             message = string.Format(message, args);
-            string heading = EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName);
+            string heading = EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName);
 
             if (IsConfig)
             {

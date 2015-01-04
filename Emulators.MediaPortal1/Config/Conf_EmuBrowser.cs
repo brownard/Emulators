@@ -613,9 +613,9 @@ namespace Emulators
                 return;
             }
 
+            EmulatorProfile profile = selectedProfile;
             saveProfile = false;
             selectedProfile = null;
-            EmulatorProfile profile = selectedProfile;
             int index = profileComboBox.SelectedIndex;
             profileComboBox.Items.Remove(profile);
             selectedEmulator.EmulatorProfiles.Remove(profile);

@@ -156,6 +156,13 @@ namespace Emulators
                     {
                         value = Enum.Parse(type, strValue);
                     }
+                    else if (type == typeof(IList<string>))
+                    {
+                        List<string> list = new List<string>();
+                        foreach (string s in strValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                            list.Add(s);
+                        value = list;
+                    }
                     else
                     {
                         continue;
@@ -208,6 +215,8 @@ namespace Emulators
                 Logger.LogError("Options: Failed to save options to {0} - {1}", sourcePath, ex.Message);
             }
         }
+
+
 
         static string createOptionString(object option, Type type)
         {
@@ -275,6 +284,14 @@ namespace Emulators
             return value;
         }
 
+        public T ReadOption<T, T1>(Func<T1, T> reader) where T1 : Options
+        {
+            readWriteLock.EnterReadLock();
+            T value = reader((T1)this);
+            readWriteLock.ExitReadLock();
+            return value;
+        }
+
         public void WriteOption(Action<Options> writer)
         {
             readWriteLock.EnterWriteLock();
@@ -282,23 +299,20 @@ namespace Emulators
             readWriteLock.ExitWriteLock();
         }
 
+        public void WriteOption<T>(Action<T> writer) where T : Options
+        {
+            readWriteLock.EnterWriteLock();
+            writer((T)this);
+            readWriteLock.ExitWriteLock();
+        }
+
         #endregion
 
         #region Options
         /// <summary>
-        /// The display name of the plugin
-        /// </summary>
-        [OptionAttribute(Default = "Emulators")]
-        public string PluginDisplayName { get; set; }
-        /// <summary>
-        /// The language file to use
-        /// </summary>
-        [OptionAttribute(Default = "English")]
-        public string Language { get; set; }
-        /// <summary>
         /// The view to use when starting the plugin
         /// </summary>
-        [OptionAttribute(Default = StartupState.GROUPS)]
+        [OptionAttribute(Default = StartupState.LASTUSED)]
         public StartupState StartupState { get; set; }
         /// <summary>
         /// The last used view

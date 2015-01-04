@@ -151,7 +151,7 @@ namespace Emulators
 
         void getOptions()
         {
-            Options options = EmulatorsCore.Options;
+            MP1Options options = MP1Utils.Options;
             options.EnterReadLock();
             shownnameBox.Text = options.PluginDisplayName;
             foreach (string language in Translator.Instance.GetLanguages())
@@ -264,7 +264,7 @@ namespace Emulators
 
         public override void SavePanel()
         {
-            Options options = EmulatorsCore.Options;
+            MP1Options options = MP1Utils.Options;
             options.EnterWriteLock();
             if (updateGeneral)
             {

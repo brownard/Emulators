@@ -135,7 +135,7 @@ namespace Emulators.MediaPortal1
 
         public bool GetHome(out string strButtonText, out string strButtonImage, out string strButtonImageFocus, out string strPictureImage)
         {
-            strButtonText = EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName);
+            strButtonText = EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName);
             strButtonImage = String.Empty;
             strButtonImageFocus = String.Empty;
             strPictureImage = MP1Utils.HOME_HOVER;
@@ -144,7 +144,7 @@ namespace Emulators.MediaPortal1
 
         public override string GetModuleName()
         {
-            return EmulatorsCore.Options.ReadOption(o => o.PluginDisplayName);
+            return EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName);
         }
 
         protected override void OnPageLoad()
@@ -165,7 +165,7 @@ namespace Emulators.MediaPortal1
 
         void doLoad()
         {
-            Options options = EmulatorsCore.Options;
+            MP1Options options = MP1Utils.Options;
             options.EnterReadLock();
             if (firstLoad)
             {
