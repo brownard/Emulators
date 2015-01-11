@@ -1,4 +1,5 @@
-﻿using MediaPortal.Common.General;
+﻿using MediaPortal.Common.Commands;
+using MediaPortal.Common.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,30 +9,22 @@ namespace Emulators.MediaPortal2
 {
     public class GameViewModel : ItemViewModel
     {
-        protected AbstractProperty _nameProperty;
-        public AbstractProperty NameProperty { get { return _nameProperty; } }
-        public string Name
-        {
-            get { return (string)_nameProperty.GetValue(); }
-            set { _nameProperty.SetValue(value); }
-        }
-
-        protected AbstractProperty _frontCoverProperty;
-        public AbstractProperty FrontCoverProperty { get { return _frontCoverProperty; } }
-        public string FrontCover
-        {
-            get { return (string)_frontCoverProperty.GetValue(); }
-            set { _frontCoverProperty.SetValue(value); }
-        }
+        EmulatorsWorkflowModel model;
 
         public Game Game { get; private set; }
 
-        public GameViewModel(Game game)
+        public GameViewModel(Game game, EmulatorsWorkflowModel model)
         {
+            this.model = model;
             Game = game;
-            _nameProperty = new WProperty(typeof(string), game.Title);
+            Name = game.Title;
             using (ThumbGroup thumbs = new ThumbGroup(game))
-                _frontCoverProperty = new WProperty(typeof(string), thumbs.FrontCoverDefaultPath);
+                FrontCover = thumbs.FrontCoverDefaultPath;
+
+            Command = new MethodDelegateCommand(() =>
+                {
+                    model.GameSelected(Game);
+                });
         }
     }
 }

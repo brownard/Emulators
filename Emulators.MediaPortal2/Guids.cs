@@ -12,6 +12,7 @@ namespace Emulators.MediaPortal2
 
         public static readonly Guid WorkflowSatesMain = new Guid("3C370162-2586-416A-963C-F34DDDE184D4");
         public static readonly Guid WorkflowSatesEmulators = new Guid("97F9A2D9-B857-4890-9EF2-5E2BC66A53BB");
+        public static readonly Guid WorkflowSatesGroups = new Guid("C99B5E59-738D-4626-93D6-A881B853CC83");
         public static readonly Guid WorkflowSatesGames = new Guid("11A040E8-6845-490A-8EAE-1A5662324A4A");
 
         public static readonly Guid NewEmulatorWorkflow = new Guid("03F534A5-4495-4223-A7EB-0FC8D477CF4B");

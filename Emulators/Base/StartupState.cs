@@ -7,11 +7,11 @@ namespace Emulators
 {
     public enum StartupState
     {
+        LASTUSED = 4,
         EMULATORS = 0,
         GROUPS = 1,
         FAVOURITES = 2,
-        PCGAMES = 3,
-        LASTUSED = 4
+        PCGAMES = 3
     }
 
     public class StartupStateHandler

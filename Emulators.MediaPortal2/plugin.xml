@@ -33,17 +33,22 @@
   <Register Location="/Workflow/States">
     <WorkflowState Id="F1F446EC-03FD-4A22-BA04-7C45E6D72E06"
         Name="StartupView"
-        MainScreen="emulators"
         WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
+        MainScreen="emulators"
         DisplayLabel="Startup"
-        Temporary="true"/>
+        Temporary="true" />
 
     <WorkflowState Id="97F9A2D9-B857-4890-9EF2-5E2BC66A53BB"
         Name="EmulatorsView" MainScreen="emulators" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
-        DisplayLabel="Emulators"/>
-    <WorkflowState Id="11A040E8-6845-490A-8EAE-1A5662324A4A"
-            Name="GamesView" MainScreen="games" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
-            DisplayLabel="Games"/>
+        DisplayLabel="[Emulators.Emulators]"/>
+    
+    <WorkflowState Id="C99B5E59-738D-4626-93D6-A881B853CC83"
+        Name="GroupsView" MainScreen="emulators" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
+        DisplayLabel="[Emulators.Groups]"/>
+
+    <!--<WorkflowState Id="11A040E8-6845-490A-8EAE-1A5662324A4A"
+            Name="GamesView" MainScreen="emulators" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
+            DisplayLabel="Games"/>-->
 
     <WorkflowState Id="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
             Name="NewEmulatorView" MainScreen="NewEmulator" WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
@@ -83,16 +88,23 @@
 
   <!-- Registration of our configuration section -->
   
-  <!--<Register Location="/Configuration/Settings/Plugins">
+  <Register Location="/Configuration/Settings/Plugins">
     <ConfigSection
         Id="Emulators"
         Redundant="true"
         Text="Emulators"/>
-  </Register>-->
+  </Register>
 
   
   <!-- Contents of '/Plugins/Emulators' section -->
-  
+
+  <Register Location="/Configuration/Settings/Plugins/Emulators">
+    <ConfigSetting
+        Id="EmulatorsStartupState"
+        Text="View to show on first open"
+        HelpText=""
+        ClassName="Emulators.MediaPortal2.Settings.StartupStateSetting"/>
+  </Register>
   <!--<Register Location="/Configuration/Settings/Plugins/OnlineVideos">
     <ConfigSetting
         Id="OnlineVideosUseAgeConfirmation"
