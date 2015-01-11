@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Emulators.MediaPortal1</RootNamespace>
     <AssemblyName>Emulators.MediaPortal1</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -478,10 +478,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetPath)" "$(SolutionDir)Emulators.MediaPortal1\Release" /Y /E /I
-xcopy "$(TargetPath)" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows" /Y /E /I
-xcopy "$(TargetDir)Emulators.MediaPortal1.pdb" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows" /Y /E /I
-xcopy "$(SolutionDir)Emulators.MediaPortal1\External" "$(SolutionDir)Emulators.MediaPortal1\Release" /Y /E /I 
+    <PostBuildEvent>xcopy "$(TargetPath)" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows\" /Y /E /I
+xcopy "$(TargetDir)Emulators.MediaPortal1.pdb" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows\" /Y /E /I
+xcopy "$(TargetDir)Emulators.dll" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows\" /Y /E /I
+xcopy "$(TargetDir)Emulators.pdb" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows\" /Y /E /I
+xcopy "$(TargetDir)SharpCompress.3.5.dll" "%25programfiles(x86)%25\Team MediaPortal\MediaPortal\plugins\Windows\" /Y /E /I
+
+xcopy "$(TargetPath)" "$(SolutionDir)Emulators.MediaPortal1\Release\" /Y /E /I
+xcopy "$(TargetDir)Emulators.dll" "$(SolutionDir)Emulators.MediaPortal1\Release\" /Y /E /I
+xcopy "$(TargetDir)SharpCompress.3.5.dll" "$(SolutionDir)Emulators.MediaPortal1\Release\" /Y /E /I
 xcopy "$(SolutionDir)Emulators.MediaPortal1\Skin" "$(SolutionDir)Emulators.MediaPortal1\Release\Skin" /Y /E /I 
 xcopy "$(SolutionDir)Emulators.MediaPortal1\Language" "$(SolutionDir)Emulators.MediaPortal1\Release\Language" /Y /E /I</PostBuildEvent>
   </PropertyGroup>
