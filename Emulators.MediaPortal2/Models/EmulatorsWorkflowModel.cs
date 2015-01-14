@@ -59,6 +59,7 @@ namespace Emulators.MediaPortal2
 
         protected AbstractProperty _focusedItemProperty;
         protected AbstractProperty _layoutTypeProperty;
+        protected AbstractProperty _headerProperty;
 
         NavigationContext currentContext;
 
@@ -71,6 +72,7 @@ namespace Emulators.MediaPortal2
             EmulatorsCore.Init(new EmulatorsSettings());
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
             _focusedItemProperty = new WProperty(typeof(ItemViewModel), null);
+            _headerProperty = new WProperty(typeof(string));
         }
 
         ~EmulatorsWorkflowModel()
@@ -96,13 +98,15 @@ namespace Emulators.MediaPortal2
             }
         }
 
+        public AbstractProperty HeaderProperty
+        {
+            get { return _headerProperty; }
+        }
+
         public string Header
         {
-            get
-            {
-                NavigationData navigationData = NavigationData;
-                return navigationData != null ? navigationData.DisplayName : null;
-            }
+            get { return (string)_headerProperty.GetValue(); }
+            set { _headerProperty.SetValue(value); }
         }
 
         public AbstractProperty FocusedItemProperty { get { return _focusedItemProperty; } }
@@ -149,7 +153,7 @@ namespace Emulators.MediaPortal2
             foreach (Game game in emulator.Games)
                 items.Add(new GameViewModel(game, this));
 
-            NavigationData navigationData = new NavigationData() { DisplayName = "[Emulators.Games]", ItemsList = items };
+            NavigationData navigationData = new NavigationData() { DisplayName = emulator.Title, ItemsList = items };
             PushTransientState("emuGames", navigationData.DisplayName, navigationData);
         }
 
@@ -198,6 +202,14 @@ namespace Emulators.MediaPortal2
         #endregion
 
         #region Private Methods
+
+        void updateState(NavigationContext context)
+        {
+            currentContext = context;
+            NavigationData navigationData = GetNavigationData(context);
+            if (navigationData != null)
+                Header = navigationData.DisplayName;
+        }
 
         void loadStartupItems()
         {
@@ -271,12 +283,12 @@ namespace Emulators.MediaPortal2
 
         public void ChangeModelContext(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext, bool push)
         {
-            currentContext = newContext;
+            updateState(newContext);
         }
 
         public void EnterModelContext(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext)
         {
-            currentContext = newContext;
+            updateState(newContext);
             if (newContext.WorkflowState.StateId == Guids.StartupState)
             {
                 loadStartupItems();
