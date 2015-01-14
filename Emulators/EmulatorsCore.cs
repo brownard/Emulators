@@ -18,6 +18,10 @@ namespace Emulators
 
     public static class EmulatorsCore
     {
+        static volatile bool optionsInit;
+        static volatile bool dbInit;
+        static object syncRoot = new object();
+
         public static void Init(ISettingsProvider settings)
         {
             //max concurrent web requests, set to 2 by default which throttles the importer
@@ -28,11 +32,9 @@ namespace Emulators
             dataPath = settings.DataPath;
             RomGroup.EmptySubGroupName = settings.EmptySubGroupName;
 
-            EmulatorsCore.options = settings.Options ?? new Options();
-            EmulatorsCore.options.Init();
+            options = settings.Options ?? new Options();
             database = new DB();
             database.DataProvider = settings.DataProvider;
-            database.Init();
 
             if (!string.IsNullOrEmpty(settings.DefaultThumbDirectory))
                 initThumbDir(settings.DefaultThumbDirectory);
@@ -40,20 +42,43 @@ namespace Emulators
 
         public static void DeInit()
         {
-            database.Dispose();
-            options.Save();
+            lock (syncRoot)
+            {
+                database.Dispose();
+                options.Save();
+            }
         }
 
         static DB database;
         public static DB Database
         {
-            get { return database; }
+            get
+            {
+                if (!dbInit)
+                    lock (syncRoot)
+                        if (!dbInit)
+                        {
+                            database.Init();
+                            dbInit = true;
+                        }
+                return database;
+            }
         }
 
         static Options options;
         public static Options Options
         {
-            get { return options; }
+            get
+            {
+                if (!optionsInit)
+                    lock (syncRoot)
+                        if (!optionsInit)
+                        {
+                            options.Init();
+                            optionsInit = true;
+                        }
+                return options;
+            }
         }
 
         static ILog logger;

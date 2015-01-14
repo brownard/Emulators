@@ -73,6 +73,7 @@ namespace Emulators
         object optionSync = new object();
         ReaderWriterLockSlim readWriteLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         List<string> ignoredFiles = null;
+        bool isInit;
 
         #endregion
 
@@ -83,6 +84,7 @@ namespace Emulators
             ignoredFiles = new List<string>();
             setDefaults();
             Load();
+            isInit = true;
         }
 
         void setDefaults()
@@ -101,7 +103,7 @@ namespace Emulators
         public virtual void Load()
         {
             string sourcePath = SavePath;
-            if (string.IsNullOrEmpty(sourcePath))
+            if (string.IsNullOrEmpty(sourcePath) || !System.IO.File.Exists(sourcePath))
                 return;
 
             try
@@ -183,6 +185,9 @@ namespace Emulators
 
         public virtual void Save()
         {
+            if (!isInit)
+                return;
+
             string sourcePath = SavePath;
             if (string.IsNullOrEmpty(sourcePath))
                 return;
