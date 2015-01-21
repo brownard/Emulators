@@ -1,5 +1,5 @@
+using Emulators.AutoConfig;
 using Emulators.Database;
-using Emulators.Import;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +9,8 @@ namespace Emulators
     [DBTable("Games")]
     public class Game : ThumbItem, IComparable<Game>
     {
+        static readonly IGameTitleLookup GameTitleLookup = new MameTitleLookup();
+
         #region Get Games
 
         /// <summary>
@@ -298,9 +300,8 @@ namespace Emulators
         public string GetDefaultTitle()
         {
             string title = System.IO.Path.GetFileNameWithoutExtension(CurrentDisc.Path);
-            if (parentEmulator != null && parentEmulator.Platform == "Arcade")
-                title = MameNameHandler.Instance.GetName(title);
-            return title;
+            string platform = parentEmulator != null ? parentEmulator.Platform : null;
+            return GameTitleLookup.GetTitle(title, platform);
         }
 
         /// <summary>
