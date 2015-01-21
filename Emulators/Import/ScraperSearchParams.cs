@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Emulators.PlatformImporter;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,11 +14,11 @@ namespace Emulators.Import
         static ScraperSearchParams()
         {
             platformIdLookup = new Dictionary<string, string>();
-            foreach (System.Data.DataRow row in Dropdowns.GetSystems().Rows)
+            foreach (Platform platform in Dropdowns.GetPlatformList())
             {
-                string platformId = row[0].ToString();
+                string platformId = platform.Id;
                 if (platformId != "-1")
-                    platformIdLookup[row[1].ToString()] = platformId;
+                    platformIdLookup[platform.Name] = platformId;
             }
         }
 
