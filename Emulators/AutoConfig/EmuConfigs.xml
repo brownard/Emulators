@@ -52,9 +52,6 @@
   <Platform name="Nintendo 64" caseaspect="1.45">
     <Emulator name="Project 64" exe="project64.exe">
       <Filters>*.n64;*.z64;*.v64;*.rom</Filters>
-      <Profile>
-        <UseQuotes>false</UseQuotes>
-      </Profile>
     </Emulator>
   </Platform>
 
