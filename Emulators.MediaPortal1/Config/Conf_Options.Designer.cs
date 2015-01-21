@@ -73,10 +73,6 @@
             this.keyMapLabel = new System.Windows.Forms.Label();
             this.stopEmuCheckBox = new System.Windows.Forms.CheckBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.showGMDialogCheckBox = new System.Windows.Forms.CheckBox();
-            this.goodFiltersTextBox = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.label17 = new System.Windows.Forms.Label();
             this.coversScraperComboBox = new System.Windows.Forms.ComboBox();
@@ -88,14 +84,15 @@
             this.scraperUpButton = new System.Windows.Forms.Button();
             this.scraperListBox = new System.Windows.Forms.CheckedListBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.hashThreadUpDown = new System.Windows.Forms.NumericUpDown();
             this.ignoredFilesButton = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.threadCountUpDown = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
             this.thumbDirTextBox = new System.Windows.Forms.TextBox();
             this.thumbDirButton = new System.Windows.Forms.Button();
+            this.showGMDialogCheckBox = new System.Windows.Forms.CheckBox();
+            this.goodFiltersTextBox = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.prevVidDelayBox)).BeginInit();
@@ -106,10 +103,8 @@
             this.tabPage1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            this.groupBox4.SuspendLayout();
             this.groupBox7.SuspendLayout();
             this.groupBox6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hashThreadUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.threadCountUpDown)).BeginInit();
             this.SuspendLayout();
             // 
@@ -646,7 +641,6 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.groupBox4);
             this.tabPage2.Controls.Add(this.groupBox7);
             this.tabPage2.Controls.Add(this.groupBox6);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
@@ -656,48 +650,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Advanced";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.groupBox4.Controls.Add(this.showGMDialogCheckBox);
-            this.groupBox4.Controls.Add(this.goodFiltersTextBox);
-            this.groupBox4.Controls.Add(this.label12);
-            this.groupBox4.Location = new System.Drawing.Point(6, 186);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(323, 82);
-            this.groupBox4.TabIndex = 8;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "GoodMerge";
-            // 
-            // showGMDialogCheckBox
-            // 
-            this.showGMDialogCheckBox.AutoSize = true;
-            this.showGMDialogCheckBox.Checked = true;
-            this.showGMDialogCheckBox.CheckState = System.Windows.Forms.CheckState.Indeterminate;
-            this.showGMDialogCheckBox.Location = new System.Drawing.Point(10, 49);
-            this.showGMDialogCheckBox.Name = "showGMDialogCheckBox";
-            this.showGMDialogCheckBox.Size = new System.Drawing.Size(205, 17);
-            this.showGMDialogCheckBox.TabIndex = 58;
-            this.showGMDialogCheckBox.Text = "Always show goodmerge select dialog";
-            this.showGMDialogCheckBox.ThreeState = true;
-            this.showGMDialogCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // goodFiltersTextBox
-            // 
-            this.goodFiltersTextBox.Location = new System.Drawing.Point(101, 22);
-            this.goodFiltersTextBox.Name = "goodFiltersTextBox";
-            this.goodFiltersTextBox.Size = new System.Drawing.Size(177, 20);
-            this.goodFiltersTextBox.TabIndex = 57;
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 25);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(92, 13);
-            this.label12.TabIndex = 56;
-            this.label12.Text = "Goodmerge filters:";
             // 
             // groupBox7
             // 
@@ -805,8 +757,9 @@
             // groupBox6
             // 
             this.groupBox6.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.groupBox6.Controls.Add(this.label15);
-            this.groupBox6.Controls.Add(this.hashThreadUpDown);
+            this.groupBox6.Controls.Add(this.showGMDialogCheckBox);
+            this.groupBox6.Controls.Add(this.goodFiltersTextBox);
+            this.groupBox6.Controls.Add(this.label12);
             this.groupBox6.Controls.Add(this.ignoredFilesButton);
             this.groupBox6.Controls.Add(this.label13);
             this.groupBox6.Controls.Add(this.threadCountUpDown);
@@ -815,46 +768,14 @@
             this.groupBox6.Controls.Add(this.thumbDirButton);
             this.groupBox6.Location = new System.Drawing.Point(6, 9);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(323, 157);
+            this.groupBox6.Size = new System.Drawing.Size(323, 224);
             this.groupBox6.TabIndex = 6;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Advanced";
             // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(7, 90);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(91, 13);
-            this.label15.TabIndex = 63;
-            this.label15.Text = "Max hash threads";
-            // 
-            // hashThreadUpDown
-            // 
-            this.hashThreadUpDown.Location = new System.Drawing.Point(101, 88);
-            this.hashThreadUpDown.Maximum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.hashThreadUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.hashThreadUpDown.Name = "hashThreadUpDown";
-            this.hashThreadUpDown.Size = new System.Drawing.Size(35, 20);
-            this.hashThreadUpDown.TabIndex = 62;
-            this.hashThreadUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.hashThreadUpDown.Value = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
-            // 
             // ignoredFilesButton
             // 
-            this.ignoredFilesButton.Location = new System.Drawing.Point(10, 127);
+            this.ignoredFilesButton.Location = new System.Drawing.Point(13, 170);
             this.ignoredFilesButton.Name = "ignoredFilesButton";
             this.ignoredFilesButton.Size = new System.Drawing.Size(83, 23);
             this.ignoredFilesButton.TabIndex = 61;
@@ -873,7 +794,7 @@
             // 
             // threadCountUpDown
             // 
-            this.threadCountUpDown.Location = new System.Drawing.Point(101, 58);
+            this.threadCountUpDown.Location = new System.Drawing.Point(104, 58);
             this.threadCountUpDown.Maximum = new decimal(new int[] {
             10,
             0,
@@ -905,20 +826,49 @@
             // 
             // thumbDirTextBox
             // 
-            this.thumbDirTextBox.Location = new System.Drawing.Point(101, 28);
+            this.thumbDirTextBox.Location = new System.Drawing.Point(104, 28);
             this.thumbDirTextBox.Name = "thumbDirTextBox";
             this.thumbDirTextBox.Size = new System.Drawing.Size(177, 20);
             this.thumbDirTextBox.TabIndex = 54;
             // 
             // thumbDirButton
             // 
-            this.thumbDirButton.Location = new System.Drawing.Point(284, 27);
+            this.thumbDirButton.Location = new System.Drawing.Point(287, 27);
             this.thumbDirButton.Name = "thumbDirButton";
             this.thumbDirButton.Size = new System.Drawing.Size(24, 20);
             this.thumbDirButton.TabIndex = 55;
             this.thumbDirButton.Text = "..";
             this.thumbDirButton.UseVisualStyleBackColor = true;
             this.thumbDirButton.Click += new System.EventHandler(this.thumbDirButton_Click);
+            // 
+            // showGMDialogCheckBox
+            // 
+            this.showGMDialogCheckBox.AutoSize = true;
+            this.showGMDialogCheckBox.Checked = true;
+            this.showGMDialogCheckBox.CheckState = System.Windows.Forms.CheckState.Indeterminate;
+            this.showGMDialogCheckBox.Location = new System.Drawing.Point(13, 127);
+            this.showGMDialogCheckBox.Name = "showGMDialogCheckBox";
+            this.showGMDialogCheckBox.Size = new System.Drawing.Size(205, 17);
+            this.showGMDialogCheckBox.TabIndex = 64;
+            this.showGMDialogCheckBox.Text = "Always show goodmerge select dialog";
+            this.showGMDialogCheckBox.ThreeState = true;
+            this.showGMDialogCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // goodFiltersTextBox
+            // 
+            this.goodFiltersTextBox.Location = new System.Drawing.Point(104, 92);
+            this.goodFiltersTextBox.Name = "goodFiltersTextBox";
+            this.goodFiltersTextBox.Size = new System.Drawing.Size(177, 20);
+            this.goodFiltersTextBox.TabIndex = 63;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(7, 95);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(92, 13);
+            this.label12.TabIndex = 62;
+            this.label12.Text = "Goodmerge filters:";
             // 
             // Conf_Options_New
             // 
@@ -944,13 +894,10 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.tabPage2.ResumeLayout(false);
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hashThreadUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.threadCountUpDown)).EndInit();
             this.ResumeLayout(false);
 
@@ -1002,8 +949,6 @@
         private System.Windows.Forms.TextBox thumbDirTextBox;
         private System.Windows.Forms.Button thumbDirButton;
         private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.NumericUpDown hashThreadUpDown;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button mapKeyButton;
         private System.Windows.Forms.Label keyMapLabel;
@@ -1015,10 +960,6 @@
         private System.Windows.Forms.CheckedListBox scraperListBox;
         private System.Windows.Forms.Button scraperDownButton;
         private System.Windows.Forms.Button scraperUpButton;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.CheckBox showGMDialogCheckBox;
-        private System.Windows.Forms.TextBox goodFiltersTextBox;
-        private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.ComboBox coversScraperComboBox;
         private System.Windows.Forms.Label label18;
@@ -1026,5 +967,8 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.ComboBox fanartScraperComboBox;
         private System.Windows.Forms.CheckBox thoroughThumbCheckBox;
+        private System.Windows.Forms.CheckBox showGMDialogCheckBox;
+        private System.Windows.Forms.TextBox goodFiltersTextBox;
+        private System.Windows.Forms.Label label12;
     }
 }

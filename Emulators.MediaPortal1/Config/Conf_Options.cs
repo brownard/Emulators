@@ -86,8 +86,6 @@ namespace Emulators
             //Advanced options
             thumbDirTextBox.TextChanged += new EventHandler(advancedOptionsChanged);
             threadCountUpDown.ValueChanged += new EventHandler(advancedOptionsChanged);
-            threadCountUpDown.ValueChanged += new EventHandler(threadCountUpDown_ValueChanged);
-            hashThreadUpDown.ValueChanged += new EventHandler(advancedOptionsChanged);
 
             scraperListBox.ItemCheck += new ItemCheckEventHandler(advancedOptionsChanged);
             scraperListBox.SelectedIndexChanged += new EventHandler(scraperListBox_SelectedIndexChanged);
@@ -105,11 +103,6 @@ namespace Emulators
                 scraperUpButton.Enabled = false;
             if (index == scraperListBox.Items.Count - 1)
                 scraperDownButton.Enabled = false;
-        }
-
-        void threadCountUpDown_ValueChanged(object sender, EventArgs e)
-        {
-            hashThreadUpDown.Maximum = threadCountUpDown.Value;
         }
 
         void communityServerOptionsChanged(object sender, EventArgs e)
@@ -219,20 +212,6 @@ namespace Emulators
             }
             threadCountUpDown.Value = threadCount;
 
-            hashThreadUpDown.Maximum = threadCount;
-            int hashThreads = options.HashThreads;
-            if (hashThreads > threadCount)
-            {
-                hashThreads = threadCount;
-                updateAdvanced = true;
-            }
-            else if (hashThreads < 1)
-            {
-                hashThreads = 1;
-                updateAdvanced = true;
-            }
-            hashThreadUpDown.Value = hashThreads;
-
             //scraper checkbox
             List<string> ignoredScripts = new List<string>();
             string[] optStr = options.IgnoredScrapers.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -335,7 +314,6 @@ namespace Emulators
             {
                 options.ImageDirectory = thumbDirTextBox.Text;
                 options.ImportThreads = (int)threadCountUpDown.Value;
-                options.HashThreads = (int)hashThreadUpDown.Value;
 
                 string ignoredScripts = "";
                 string scriptPriorities = "";
