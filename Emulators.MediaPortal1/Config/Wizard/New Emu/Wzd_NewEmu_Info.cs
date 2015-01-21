@@ -1,5 +1,6 @@
 ﻿using Emulators.AutoConfig;
 using Emulators.MediaPortal1;
+using Emulators.PlatformImporter;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,13 +15,17 @@ namespace Emulators
     internal partial class Wzd_NewEmu_Info : WzdPanel
     {
         Wzd_NewEmu_Main parent;
-        public Wzd_NewEmu_Info(Wzd_NewEmu_Main parent)
+        IPlatformImporter platformImporter;
+        public Wzd_NewEmu_Info(Wzd_NewEmu_Main parent, IPlatformImporter platformImporter)
         {
             InitializeComponent();
-            platformComboBox.DisplayMember = "Text";
-            platformComboBox.DataSource = Dropdowns.GetSystems();
+            platformComboBox.DisplayMember = "Name";
+            var platforms = Dropdowns.GetPlatformList();
+            foreach (Platform platform in platforms)
+                platformComboBox.Items.Add(platform);
             txt_Title.Text = "New Emulator";
             this.parent = parent;
+            this.platformImporter = platformImporter;
         }
 
         bool firstLoad = true;
@@ -29,9 +34,10 @@ namespace Emulators
             if (!string.IsNullOrEmpty(parent.NewEmulator.Title))
                 txt_Title.Text = parent.NewEmulator.Title;
 
-            int index = platformComboBox.FindStringExact(parent.NewEmulator.Platform);
-            if (index > -1)
-                platformComboBox.SelectedIndex = index;
+            platformComboBox.Text = parent.NewEmulator.Platform;
+            //int index = platformComboBox.FindStringExact(parent.NewEmulator.Platform);
+            //if (index > -1)
+            //    platformComboBox.SelectedIndex = index;
 
             EmuAutoConfig.SetupAspectDropdown(thumbAspectComboBox, parent.NewEmulator.CaseAspect);
 
@@ -51,7 +57,7 @@ namespace Emulators
             parent.NewEmulator.Description = txt_description.Text;
             parent.NewEmulator.Grade = (int)gradeUpDown.Value;
             parent.NewEmulator.SetCaseAspect(thumbAspectComboBox.Text);
-            
+
             int year;
             if (!int.TryParse(txt_yearmade.Text, out year))
                 year = 0;
@@ -71,9 +77,8 @@ namespace Emulators
 
         void updateEmuInfo()
         {
-            EmulatorInfo lEmuInfo = new EmulatorScraperHandler().UpdateEmuInfo(platformComboBox.Text, (o) =>
+            PlatformInfo platformInfo = PlatformScraperHandler.GetPlatformInfo(platformComboBox.Text, platformImporter, p =>
                 {
-                    EmulatorInfo emuInfo = (EmulatorInfo)o;
                     if (parent.Logo != null)
                     {
                         parent.Logo.Dispose();
@@ -84,20 +89,19 @@ namespace Emulators
                         parent.Fanart.Dispose();
                         parent.Fanart = null;
                     }
-                    parent.Logo = ImageHandler.BitmapFromWeb(emuInfo.LogoUrl);
-                    parent.Fanart = ImageHandler.BitmapFromWeb(emuInfo.FanartUrl);
+                    parent.Logo = ImageHandler.BitmapFromWeb(p.LogoUrl);
+                    parent.Fanart = ImageHandler.BitmapFromWeb(p.FanartUrl);
                     return true;
-                });                      
+                });
 
-            if (lEmuInfo != null)
+            if (platformInfo != null)
             {
-                txt_Title.Text = lEmuInfo.Title;
-                txt_company.Text = lEmuInfo.Developer;
-                txt_description.Text = lEmuInfo.GetDescription();
+                txt_Title.Text = platformInfo.Title;
+                txt_company.Text = platformInfo.Developer;
+                txt_description.Text = platformInfo.GetDescription();
                 int grade;
-                if (int.TryParse(lEmuInfo.Grade, out grade))
+                if (int.TryParse(platformInfo.Grade, out grade))
                     gradeUpDown.Value = grade;
-                return;
             }
         }
     }

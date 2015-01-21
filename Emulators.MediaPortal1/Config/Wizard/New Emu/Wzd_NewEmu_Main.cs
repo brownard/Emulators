@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Emulators.PlatformImporter;
 
 namespace Emulators
 {
@@ -15,11 +16,11 @@ namespace Emulators
         public Image Logo { get; set; }
         public Image Fanart { get; set; }
 
-        public Wzd_NewEmu_Main()
+        public Wzd_NewEmu_Main(IPlatformImporter platformImporter)
         {
             InitializeComponent();
             this.Text = "New Emulator";
-            panels = new List<WzdPanel>(new WzdPanel[] { new Wzd_NewEmu_Start(this), new Wzd_NewEmu_Info(this), new Wzd_NewEmu_Config(this), new Wzd_NewEmu_Config2(this), new Wzd_NewEmu_Roms(this) });
+            panels = new List<WzdPanel>(new WzdPanel[] { new Wzd_NewEmu_Start(this), new Wzd_NewEmu_Info(this, platformImporter), new Wzd_NewEmu_Config(this), new Wzd_NewEmu_Config2(this), new Wzd_NewEmu_Roms(this) });
             panel1.Controls.Add(panels[0]);
             updateButtons();
         }

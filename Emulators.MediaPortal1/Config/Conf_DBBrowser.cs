@@ -445,7 +445,7 @@ namespace Emulators
             if (itemThumbs != null)
                 itemThumbs.Dispose();
             if (thumbRetriever != null)
-                thumbRetriever.close();
+                thumbRetriever.ForceClose();
         }
 
         public override void UpdatePanel()

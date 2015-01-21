@@ -76,7 +76,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Select Platform";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Conf_EmuLookupDialog_FormClosing);
             this.Load += new System.EventHandler(this.Conf_EmuLookupDialog_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

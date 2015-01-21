@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
+using Emulators.PlatformImporter;
+using System.Xml;
 
 namespace Emulators
 {
@@ -24,6 +26,20 @@ namespace Emulators
                 items.Add(new ComboBoxItem(emu));
 
             return items;
+        }
+
+        static List<Platform> platformList;
+        public static List<Platform> GetPlatformList()
+        {
+            if (platformList != null)
+                return platformList;
+
+            platformList = new List<Platform>();
+            XmlDocument doc = new XmlDocument();
+            doc.Load(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("Emulators.Data.PlatformList.xml"));
+            foreach (XmlNode node in doc.SelectNodes("//option"))
+                platformList.Add(new Platform() { Name = node.InnerText, Id = node.Attributes["value"].Value });
+            return platformList;
         }
 
         public static DataTable GetSystems()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Emulators.PlatformImporter;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,17 +12,18 @@ namespace Emulators
 {
     public partial class Conf_EmuLookupDialog : Form
     {
-        Dictionary<string, string> platforms = null;
+        IEnumerable<Platform> platforms = null;
 
-        public string SelectedKey
+        Platform selectedPlatform;
+        public Platform SelectedPlatform
         {
-            get;
-            protected set;
+            get { return selectedPlatform; }
         }
 
-        public Conf_EmuLookupDialog(Dictionary<string, string> platforms)
+        public Conf_EmuLookupDialog(IEnumerable<Platform> platforms)
         {
             InitializeComponent();
+            comboBox1.DisplayMember = "Name";
             this.platforms = platforms;
         }
 
@@ -30,22 +32,16 @@ namespace Emulators
             if (platforms == null)
                 return;
 
-            foreach (KeyValuePair<string, string> platform in platforms)
-            {
-                comboBox1.Items.Add(platform.Key);
-            }
+            foreach (Platform platform in platforms)
+                comboBox1.Items.Add(platform);
             if (comboBox1.Items.Count > 0)
                 comboBox1.SelectedItem = comboBox1.Items[0];
         }
 
-        private void Conf_EmuLookupDialog_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SelectedKey = comboBox1.SelectedItem as string;
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
-            DialogResult = System.Windows.Forms.DialogResult.OK;
+            selectedPlatform = (Platform)comboBox1.SelectedItem;
+            DialogResult = DialogResult.OK;
             Close();
         }
     }

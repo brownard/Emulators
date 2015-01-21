@@ -77,6 +77,10 @@
     <Compile Include="Database\ICriteria.cs" />
     <Compile Include="Database\ISQLProvider.cs" />
     <Compile Include="EmulatorsCore.cs" />
+    <Compile Include="Image Handlers\EmulatorImageDownloader.cs" />
+    <Compile Include="Image Handlers\GameImageDownloader.cs" />
+    <Compile Include="Image Handlers\ImageDownloadHandler.cs" />
+    <Compile Include="Image Handlers\MultiImageDownloader.cs" />
     <Compile Include="Import\IDoWork.cs" />
     <Compile Include="Import\MameNameHandler.cs" />
     <Compile Include="Import\NFOCreator.cs" />
@@ -84,6 +88,10 @@
     <Compile Include="Import\Scraper.cs" />
     <Compile Include="Import\ScraperResultsCache.cs" />
     <Compile Include="Import\ScraperSearchParams.cs" />
+    <Compile Include="PlatformImporter\IPlatformImporter.cs" />
+    <Compile Include="PlatformImporter\Platform.cs" />
+    <Compile Include="PlatformImporter\TheGamesDBImporter.cs" />
+    <Compile Include="PlatformImporter\PlatformInfo.cs" />
     <Compile Include="Utils\BackgroundTaskHandler.cs" />
     <Compile Include="Base\EmulatorProfile.cs" />
     <Compile Include="Base\GameDisc.cs" />
@@ -96,7 +104,6 @@
     <Compile Include="Base\EmulatorsException.cs" />
     <Compile Include="Launcher\ExecutorItem.cs" />
     <Compile Include="Launcher\LaunchCommand.cs" />
-    <Compile Include="Import\EmulatorScraper.cs" />
     <Compile Include="Utils\ControllerHandler.cs" />
     <Compile Include="Hasher\Crc32.cs" />
     <Compile Include="Hasher\Hasher.cs" />
@@ -146,7 +153,6 @@
     <Compile Include="Import\ScraperProvider.cs" />
     <Compile Include="Utils\FuzzyStringComparer.cs" />
     <Compile Include="Image Handlers\ThumbGroup.cs" />
-    <Compile Include="Image Handlers\ThumbRetriever.cs" />
     <Compile Include="Base\ThumbType.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +170,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Data\PlatformList.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="Import\Scripts\MameDB.xml">
       <SubType>Designer</SubType>
     </None>

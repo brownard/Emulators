@@ -239,7 +239,7 @@
     </Compile>
     <Compile Include="Cornerstone.MP\AsyncImageResource.cs" />
     <Compile Include="Cornerstone.MP\ImageSwapper.cs" />
-    <Compile Include="EmulatorScraperHandler.cs" />
+    <Compile Include="PlatformScraperHandler.cs" />
     <Compile Include="LaunchHandler.cs" />
     <Compile Include="MediaPortal GUI\ExtendedGUIListItem.cs" />
     <Compile Include="MediaPortal GUI\GUIImporter.cs">

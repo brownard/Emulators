@@ -40,7 +40,9 @@ namespace Emulators.Import
                 }
             }
         }
+
         public string PlatformId { get; private set; }
+
         string filename = "";
         public string Filename 
         {

@@ -11,6 +11,7 @@ using Emulators.Import;
 using Emulators.MediaPortal1;
 using Emulators.Database;
 using Emulators.AutoConfig;
+using Emulators.PlatformImporter;
 
 namespace Emulators
 {
@@ -19,8 +20,12 @@ namespace Emulators
         public Conf_EmuBrowser()
         {
             InitializeComponent();
-            platformComboBox.DisplayMember = "Text";
-            platformComboBox.DataSource = Dropdowns.GetSystems();
+            platformImporter = new TheGamesDBImporter();
+            platformComboBox.DisplayMember = "Name";  //"Text";
+            platformComboBox.Items.Add("");
+            var platforms = Dropdowns.GetPlatformList();
+            foreach (Platform platform in platforms)
+                platformComboBox.Items.Add(platform); //.GetSystems();
             addEventHandlers();
             setupToolTip();
         }
@@ -38,6 +43,7 @@ namespace Emulators
         bool updateEmuPositions = false;
         bool thumbsLoaded = false;
 
+        IPlatformImporter platformImporter;
         public Importer Importer { get; set; }    
 
         //add changed event handlers to controls
@@ -358,18 +364,15 @@ namespace Emulators
                 return;
 
             allowChangedEvents = false;
-
+                        
             int index = platformComboBox.FindStringExact(dbEmu.Platform);
             if (index < 0)
                 index = 0;
+            platformComboBox.SelectedIndex = index; //.SelectedItem = platformComboBox.Items[index];
 
-            if (index < platformComboBox.Items.Count)
-                platformComboBox.SelectedItem = platformComboBox.Items[index];
-            
             txt_Title.Text = dbEmu.Title;
             romDirTextBox.Text = dbEmu.PathToRoms;
             filterTextBox.Text = dbEmu.Filter;
-            //isArcadeCheckBox.Checked = dbEmu.IsArcade;
             txt_company.Text = dbEmu.Developer;
             txt_yearmade.Text = dbEmu.Year.ToString();
             txt_description.Text = dbEmu.Description;
@@ -424,8 +427,7 @@ namespace Emulators
             saveThumbs = false;
 
             txt_Title.Text = "";
-            if (platformComboBox.Items.Count > 0)
-                platformComboBox.SelectedIndex = 0;
+            platformComboBox.SelectedIndex = 0;
             romDirTextBox.Text = "";
             filterTextBox.Text = "";
             idLabel.Text = "";
@@ -550,7 +552,7 @@ namespace Emulators
                 emuThumbs.Dispose();
 
             if (thumbRetriever != null)
-                thumbRetriever.close();
+                thumbRetriever.ForceClose();
 
             base.ClosePanel();
         }
@@ -688,7 +690,7 @@ namespace Emulators
                 if (!string.IsNullOrEmpty(autoConfig.Filters))
                     updateFilterBox(autoConfig.Filters);
 
-                if (!string.IsNullOrEmpty(autoConfig.Platform) && platformComboBox.Text == "Unspecified")
+                if (!string.IsNullOrEmpty(autoConfig.Platform) && string.IsNullOrEmpty(platformComboBox.Text))
                 {
                     int index = platformComboBox.FindStringExact(autoConfig.Platform);
                     if (index > -1)
@@ -782,7 +784,7 @@ namespace Emulators
         private void newEmuButton_Click(object sender, EventArgs e)
         {
             newEmu = null;
-            using (Wzd_NewEmu_Main wzd = new Wzd_NewEmu_Main())
+            using (Wzd_NewEmu_Main wzd = new Wzd_NewEmu_Main(platformImporter))
             {
                 if (wzd.ShowDialog() == DialogResult.OK)
                     newEmu = wzd.NewEmulator;
@@ -1003,43 +1005,39 @@ The VirtualDrive must be configured and enabled in MediaPortal's Configuration."
         }
 
         private void updateInfoButton_Click(object sender, EventArgs e)
-        {            
+        {
             if (selectedEmulator == null)
                 return;
 
             updateEmulator();
             updateProfile();
 
-            EmulatorInfo lEmuInfo = new EmulatorScraperHandler().UpdateEmuInfo(selectedEmulator.Platform, (o) => 
+            PlatformInfo profileInfo = PlatformScraperHandler.GetPlatformInfo(selectedEmulator.Platform, platformImporter, p =>
             {
-                EmulatorInfo emuInfo = (EmulatorInfo)o;
-                if (emuInfo == null)
-                    return false;
+                if (!string.IsNullOrEmpty(p.Title))
+                    selectedEmulator.Title = p.Title;
 
-                if (!string.IsNullOrEmpty(emuInfo.Title))
-                    selectedEmulator.Title = emuInfo.Title;
-
-                if (!string.IsNullOrEmpty(emuInfo.Developer))
-                    selectedEmulator.Developer = emuInfo.Developer;
+                if (!string.IsNullOrEmpty(p.Developer))
+                    selectedEmulator.Developer = p.Developer;
 
                 int grade;
-                if (!string.IsNullOrEmpty(emuInfo.Grade) && int.TryParse(emuInfo.Grade, out grade))
+                if (!string.IsNullOrEmpty(p.Grade) && int.TryParse(p.Grade, out grade))
                     selectedEmulator.Grade = grade;
 
-                string description = emuInfo.GetDescription();
+                string description = p.GetDescription();
                 if (!string.IsNullOrEmpty(description))
                     selectedEmulator.Description = description;
 
                 using (ThumbGroup thumbGroup = new ThumbGroup(selectedEmulator))
                 {
-                    if (!string.IsNullOrEmpty(emuInfo.LogoUrl))
+                    if (!string.IsNullOrEmpty(p.LogoUrl))
                     {
-                        thumbGroup.Logo.Path = emuInfo.LogoUrl;
+                        thumbGroup.Logo.Path = p.LogoUrl;
                         thumbGroup.SaveThumb(ThumbType.Logo);
                     }
-                    if (!string.IsNullOrEmpty(emuInfo.FanartUrl))
+                    if (!string.IsNullOrEmpty(p.FanartUrl))
                     {
-                        thumbGroup.Fanart.Path = emuInfo.FanartUrl;
+                        thumbGroup.Fanart.Path = p.FanartUrl;
                         thumbGroup.SaveThumb(ThumbType.Fanart);
                     }
                 }
@@ -1048,7 +1046,7 @@ The VirtualDrive must be configured and enabled in MediaPortal's Configuration."
                 return true;
             });
 
-            if (lEmuInfo != null)
+            if (profileInfo != null)
                 setEmulatorToPanel(selectedListItem);
         }
 
@@ -1062,7 +1060,7 @@ The VirtualDrive must be configured and enabled in MediaPortal's Configuration."
             updateProfile();
 
             if (thumbRetriever == null)
-                thumbRetriever = new Conf_EmuThumbRetriever(selectedEmulator);
+                thumbRetriever = new Conf_EmuThumbRetriever(selectedEmulator, platformImporter);
             else
                 thumbRetriever.Reset(selectedEmulator);
 
