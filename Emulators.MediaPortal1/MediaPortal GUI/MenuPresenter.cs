@@ -6,6 +6,7 @@ using System.Linq;
 using MediaPortal.Dialogs;
 using MediaPortal.GUI.Library;
 using Emulators.MediaPortal1;
+using Emulators.Launcher;
 
 namespace Emulators.MediaPortal1
 {
@@ -140,7 +141,7 @@ namespace Emulators.MediaPortal1
                 }
 
                 GUIListItem viewItem = new GUIListItem(Translator.Instance.switchview);
-                dlg.Add(viewItem);                                
+                dlg.Add(viewItem);
                 GUIListItem importItem = new GUIListItem(Translator.Instance.retrieveonlineinfo);
                 dlg.Add(importItem);
                 GUIListItem runImportItem = new GUIListItem(Translator.Instance.runimport);
@@ -161,7 +162,7 @@ namespace Emulators.MediaPortal1
 
                 if (id == playItem.ItemId)
                 {
-                    LaunchHandler.Instance.StartLaunch(game);
+                    presenter.LaunchGame(game);
                     reload = false;
                 }
                 else if (id == profileItem.ItemId)
@@ -212,20 +213,20 @@ namespace Emulators.MediaPortal1
                 }
                 else if (id == goodmergeItem.ItemId)
                 {
-                    int selectedGoodmergeIndex;
                     List<string> games;
                     if (game.CurrentDisc.GoodmergeFiles != null)
                     {
                         games = game.CurrentDisc.GoodmergeFiles;
-                        selectedGoodmergeIndex = Extractor.SelectEntry(games, game.CurrentDisc.LaunchFile, game.CurrentProfile.GetGoodmergeTags());
                     }
                     else
                     {
-                        games = Extractor.Instance.ViewFiles(game, out selectedGoodmergeIndex);
+                        games = SharpCompressExtractor.ViewFiles(game.CurrentDisc.Path);
                         game.CurrentDisc.GoodmergeFiles = games;
                     }
+
                     if (games != null)
                     {
+                        int selectedGoodmergeIndex = GoodmergeHandler.GetFileIndex(game.CurrentDisc.LaunchFile, games, game.CurrentProfile.GetGoodmergeTags());
                         string launchFile = selectedGoodmergeIndex > -1 ? games[selectedGoodmergeIndex] : null;
                         if (ShowGoodmergeSelect(ref launchFile, games, game.CurrentDisc.Filename, windowID))
                         {
@@ -404,7 +405,7 @@ namespace Emulators.MediaPortal1
                 dlg.SelectedLabel = selectedLabel;
                 dlg.DoModal(windowID);
                 selectedLabel = dlg.SelectedLabel;
-
+                
                 if (empty)
                     return false;
 
@@ -479,27 +480,25 @@ namespace Emulators.MediaPortal1
 
                 if (dlg.SelectedId > 0)
                 {
-                    options.EnterWriteLock();
                     switch (dlg.SelectedId)
                     {
                         case 1:
                             if (ShowStringSelect(ref startupValue, startupStates.Select(s => s.Name).ToArray(), Plugin.WINDOW_ID))
-                                options.StartupState = startupStates.Single(s => s.Name == startupValue).Value;
+                                options.WriteOption(o => o.StartupState = startupStates.Single(s => s.Name == startupValue).Value);
                             break;
                         case 2:
                             if (ShowBoolDialog(ref clickToDetails, Plugin.WINDOW_ID))
-                                options.ClickToDetails = clickToDetails;
+                                options.WriteOption(o => o.ClickToDetails = clickToDetails);
                             break;
                         case 3:
                             if (ShowBoolDialog(ref stopMedia, Plugin.WINDOW_ID))
-                                options.StopMediaPlayback = stopMedia;
+                                options.WriteOption(o => o.StopMediaPlayback = stopMedia);
                             break;
                         case 4:
                             if (ShowBoolDialog(ref showSortValue, Plugin.WINDOW_ID))
-                                options.ShowSortValue = showSortValue;
+                                options.WriteOption(o => o.ShowSortValue = showSortValue);
                             break;
                     }
-                    options.ExitWriteLock();
                     ShowSettingsDialog(selectedLabel);
                     return true;
                 }

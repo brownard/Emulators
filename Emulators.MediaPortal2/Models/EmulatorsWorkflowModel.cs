@@ -1,4 +1,5 @@
 ﻿using Emulators.Database;
+using Emulators.Launcher;
 using Emulators.MediaPortal2.Navigation;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
@@ -247,8 +248,8 @@ namespace Emulators.MediaPortal2
         {
             ItemsList items = new ItemsList();
             Game game = selectedGame.Game;
-            int matchIndex;
-            List<string> files = Extractor.Instance.ViewFiles(game, out matchIndex);
+            List<string> files = SharpCompressExtractor.ViewFiles(game.CurrentDisc.Path);
+            int matchIndex = GoodmergeHandler.GetFileIndex(game.CurrentDisc.LaunchFile, files, game.CurrentProfile.GetGoodmergeTags());
             if (files != null)
             {
                 for (int x = 0; x < files.Count; x++)

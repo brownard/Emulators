@@ -32,8 +32,6 @@ namespace Emulators.MediaPortal1
             importer.RomStatusChanged += romStatusChangedHandler;
             EmulatorsCore.Database.OnItemDeleting += Database_OnItemDeleting;
 
-            //pause importer during game execution
-            LaunchHandler.Instance.StatusChanged += launch_StatusChanged;
             if (autoimport != null)
                 importer.Start();
         }
@@ -108,6 +106,16 @@ namespace Emulators.MediaPortal1
                 Logger.LogDebug("Importer action: {0} updated", game.Title);
                 UpdateGame(game);
             }
+        }
+
+        void launchStarted(object sender, EventArgs e)
+        {
+            launch_StatusChanged(true);
+        }
+
+        void launchStopped(object sender, EventArgs e)
+        {
+            launch_StatusChanged(false);
         }
 
         void launch_StatusChanged(bool isRunning)

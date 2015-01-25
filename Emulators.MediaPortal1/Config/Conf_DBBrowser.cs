@@ -27,6 +27,8 @@ namespace Emulators
         ThumbGroup itemThumbs = null;
         BindingSource discBindingSource = null;
 
+        GUILauncher launcher;
+
         public Importer Importer { get; set; }  
 
         public Conf_DBBrowser()
@@ -559,7 +561,8 @@ namespace Emulators
             updateGame();
             if (selectedGame != null)
             {
-                LaunchHandler.Instance.StartLaunch(selectedGame);
+                launcher = new GUILauncher(selectedGame);
+                launcher.Launch();
             }
         }
 

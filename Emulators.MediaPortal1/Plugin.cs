@@ -128,7 +128,6 @@ namespace Emulators.MediaPortal1
             Logger.LogDebug("DeInit()");
             if (guiHandler != null)
                 guiHandler.Dispose();
-            LaunchHandler.Instance.Dispose();
             EmulatorsCore.DeInit();
             base.DeInit();
         }

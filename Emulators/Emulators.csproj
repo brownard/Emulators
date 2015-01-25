@@ -89,6 +89,11 @@
     <Compile Include="Import\Scraper.cs" />
     <Compile Include="Import\ScraperResultsCache.cs" />
     <Compile Include="Import\ScraperSearchParams.cs" />
+    <Compile Include="Launcher\GameLauncher.cs" />
+    <Compile Include="Launcher\GameProcess.cs" />
+    <Compile Include="Launcher\GamePathBuilder.cs" />
+    <Compile Include="Launcher\GoodmergeHandler.cs" />
+    <Compile Include="Launcher\SharpCompressExtractor.cs" />
     <Compile Include="PlatformImporter\IPlatformImporter.cs" />
     <Compile Include="PlatformImporter\Platform.cs" />
     <Compile Include="PlatformImporter\TheGamesDBImporter.cs" />
@@ -103,8 +108,6 @@
     <Compile Include="Data\ComboBoxItem.cs" />
     <Compile Include="Database\DB.cs" />
     <Compile Include="Base\EmulatorsException.cs" />
-    <Compile Include="Launcher\ExecutorItem.cs" />
-    <Compile Include="Launcher\LaunchCommand.cs" />
     <Compile Include="Utils\ControllerHandler.cs" />
     <Compile Include="Hasher\Crc32.cs" />
     <Compile Include="Hasher\Hasher.cs" />
@@ -141,7 +144,6 @@
     <Compile Include="Base\Emulator.cs" />
     <Compile Include="Base\Game.cs" />
     <Compile Include="AutoConfig\EmuAutoConfig.cs" />
-    <Compile Include="Launcher\Extractor.cs" />
     <Compile Include="Image Handlers\ImageHandler.cs" />
     <Compile Include="Import\Importer.cs" />
     <Compile Include="Utils\ITaskProgress.cs" />

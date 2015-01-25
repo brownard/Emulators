@@ -1,4 +1,5 @@
-﻿using MediaPortal.Common;
+﻿using Emulators.Launcher;
+using MediaPortal.Common;
 using MediaPortal.Common.General;
 using MediaPortal.Common.Threading;
 using MediaPortal.UI.Presentation.Models;
@@ -20,10 +21,11 @@ namespace Emulators.MediaPortal2
             _progressProperty = new WProperty(typeof(int), 0);
             _infoProperty = new WProperty(typeof(string), null);
         }
+
         Game game = null;
-        ExecutorItem launchItem = null;
-        object syncRoot = new object();
+        GameLauncher launcher;
         IWork currentBackgroundTask = null;
+
         public void SetGame(Game game)
         {
             this.game = game;
@@ -31,119 +33,37 @@ namespace Emulators.MediaPortal2
 
         void startLaunch(NavigationContext context)
         {
-            if (launchItem != null)
-            {
-                launchItem.Dispose();
-                launchItem = null;
-            }
             if (game == null)
                 return;
-            if (game.CurrentProfile == null)
-            {
-                Logger.LogError("No profile found for '{0}'", game.Title);
-                return;
-            }
 
+            GameLauncher launcher = new GameLauncher(game);
             currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(() =>
             {
                 setProgress("Launching " + game.Title, 0);
-                //string errorStr = null;
-                string path = null;
-                EmulatorProfile profile = game.CurrentProfile;
-                if (game.IsGoodmerge)
+                launcher.ExtractionProgress += (s, e) =>
                 {
-                    try
-                    {
-                        path = Extractor.Instance.ExtractGame(game, profile, setProgress);
-                    }
-                    catch (ArchiveException)
-                    {
-                        //errorStr = Translator.Instance.goodmergearchiveerror;
-                    }
-                    catch (ArchiveEmptyException)
-                    {
-                        //errorStr = Translator.Instance.goodmergeempty;
-                    }
-                    catch (ExtractException)
-                    {
-                        //errorStr = Translator.Instance.goodmergeextracterror;
-                    }
-                }
-                else
-                {
-                    path = game.CurrentDisc.Path;
-                }
-
-                if (path != null)
-                {
-                    setProgress("Launching " + game.Title, 50);
-                    launchItem = createLauncher(path, profile, game.ParentEmulator.IsPc());
-                    launchItem.Launch();
-                    game.PlayCount++;
-                    game.Latestplay = DateTime.Now;
-                    game.Commit();
-                }
-
-            }, (args) => 
+                    setProgress(string.Format("Extracting {0}%", e.Percent), e.Percent);
+                };
+                launcher.Exited += launcher_Exited;
+                launcher.Launch();
+            }, (args) =>
             {
-                //lock (syncRoot)
-                currentBackgroundTask = null; 
+                currentBackgroundTask = null;
                 var screenMgr = ServiceRegistration.Get<IScreenManager>();
                 if (screenMgr.TopmostDialogInstanceId == context.DialogInstanceId)
                     screenMgr.CloseTopmostDialog();
             });
         }
 
+        void launcher_Exited(object sender, EventArgs e)
+        {
+            ((GameLauncher)sender).Game.UpdateAndSaveGamePlayInfo();
+        }
+
         void setProgress(string l, int p)
         {
             Info = l;
             Progress = p;
-        }
-
-        ExecutorItem createLauncher(string path, EmulatorProfile profile, bool isPc)
-        {
-            ExecutorItem launcher = new ExecutorItem(isPc);
-            launcher.Arguments = profile.Arguments;
-            launcher.Suspend = profile.SuspendMP;
-            if (launcher.Suspend && profile.DelayResume && profile.ResumeDelay > 0)
-                launcher.ResumeDelay = profile.ResumeDelay;
-
-            if (isPc)
-            {
-                launcher.Path = path;
-                if (!string.IsNullOrEmpty(profile.LaunchedExe))
-                {
-                    try { launcher.LaunchedExe = Path.GetFileNameWithoutExtension(profile.LaunchedExe); }
-                    catch { launcher.LaunchedExe = profile.LaunchedExe; }
-                }
-            }
-            else
-            {
-                launcher.Path = profile.EmulatorPath;
-                launcher.RomPath = path;
-                launcher.Mount = profile.MountImages; // && DaemonTools.IsImageFile(Path.GetExtension(path));
-                launcher.ShouldReplaceWildcards = !launcher.Mount;
-                launcher.UseQuotes = profile.UseQuotes;
-                launcher.CheckController = profile.CheckController;
-                bool mapKey;
-                if (profile.StopEmulationOnKey.HasValue)
-                    mapKey = profile.StopEmulationOnKey.Value;
-                else
-                    mapKey = EmulatorsCore.Options.ReadOption(o => o.StopOnMappedKey);
-                if (mapKey)
-                {
-                    launcher.MappedExitKeyData = EmulatorsCore.Options.ReadOption(o => o.MappedKey);
-                    launcher.EscapeToExit = profile.EscapeToExit;
-                }
-            }
-            launcher.PreCommand = new LaunchCommand() { Command = profile.PreCommand, WaitForExit = profile.PreCommandWaitForExit, ShowWindow = profile.PreCommandShowWindow };
-            launcher.PostCommand = new LaunchCommand() { Command = profile.PostCommand, WaitForExit = profile.PostCommandWaitForExit, ShowWindow = profile.PostCommandShowWindow };
-
-            //launcher.OnStarting += launcher_OnStarting;
-            //launcher.OnStartFailed += launcher_OnExited;
-            //launcher.OnExited += launcher_OnExited;
-
-            return launcher;
         }
 
         protected AbstractProperty _progressProperty;

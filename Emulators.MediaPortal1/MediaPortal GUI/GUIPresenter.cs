@@ -7,6 +7,7 @@ using Cornerstone.MP;
 using MediaPortal.Player;
 using MediaPortal.Dialogs;
 using Emulators.Database;
+using Emulators.Launcher;
 
 namespace Emulators.MediaPortal1
 {
@@ -54,6 +55,7 @@ namespace Emulators.MediaPortal1
         Emulator startupEmu = null;
         Game startupGame = null;
         RomGroup startupGroup = null;
+        GUILauncher launcher;
 
         bool launchStartupItem = false;
         bool showGoodmergeDialogOnce = true;
@@ -274,7 +276,7 @@ namespace Emulators.MediaPortal1
                 if (launchStartupItem)
                 {
                     launchStartupItem = false; //otherwise continuous loop of rom launch
-                    LaunchHandler.Instance.StartLaunch(startupGame);
+                    LaunchGame(startupGame);
                 }
                 return true;
             }
@@ -374,20 +376,24 @@ namespace Emulators.MediaPortal1
                 if (selectedGame.CurrentDisc.GoodmergeFiles != null)
                 {
                     goodMergeGames = selectedGame.CurrentDisc.GoodmergeFiles;
-                    selectedGoodmerge = Extractor.SelectEntry(goodMergeGames, selectedGame.CurrentDisc.LaunchFile, selectedGame.CurrentProfile.GetGoodmergeTags());
                 }
                 else
                 {
-                    goodMergeGames = Extractor.Instance.ViewFiles(selectedGame, out selectedGoodmerge);
+                    goodMergeGames = SharpCompressExtractor.ViewFiles(selectedGame.CurrentDisc.Path);
                     selectedGame.CurrentDisc.GoodmergeFiles = goodMergeGames;
                 }
 
                 if (goodMergeGames != null)
                 {
                     if (goodMergeGames.Count < 1)
+                    {
                         goodMergeGames = null;
+                    }
                     else
+                    {
+                        selectedGoodmerge = GoodmergeHandler.GetFileIndex(selectedGame.CurrentDisc.LaunchFile, goodMergeGames, selectedGame.CurrentProfile.GetGoodmergeTags());
                         itemCount = goodMergeGames.Count;
+                    }
                 }
             }
 
@@ -421,7 +427,7 @@ namespace Emulators.MediaPortal1
             if (lClickToDetails)
                 toggleDetails(selectedItem);
             else
-                launchGame(selectedGame);
+                LaunchGame(selectedGame);
         }
 
         #endregion
@@ -827,9 +833,9 @@ namespace Emulators.MediaPortal1
             ExtendedGUIListItem item = (ExtendedGUIListItem)facade.SelectedListItem;
             Logger.LogDebug("Opening {0} manual", item.Label);
             if (item.AssociatedEmulator != null)
-                LaunchHandler.LaunchDocument(item.AssociatedEmulator);
+                GUILauncher.LaunchDocument(item.AssociatedEmulator);
             else if (item.AssociatedGame != null)
-                LaunchHandler.LaunchDocument(item.AssociatedGame);
+                GUILauncher.LaunchDocument(item.AssociatedGame);
         }
 
         public void UpdateGame(Game game)
@@ -915,14 +921,14 @@ namespace Emulators.MediaPortal1
             {
                 if (auto)
                     game.CurrentDisc.GoodmergeFiles = null;
-                launchGame(game);
+                LaunchGame(game);
                 return true;
             }
 
             return false;
         }
 
-        void launchGame(Game game)
+        public void LaunchGame(Game game)
         {
             if (game.CurrentDisc.GoodmergeFiles != null && game.CurrentDisc.GoodmergeFiles.Count > 0)
             {
@@ -943,7 +949,10 @@ namespace Emulators.MediaPortal1
                     OnPreviewVideoStatusChanged(null, false);
             }
 
-            LaunchHandler.Instance.StartLaunch(game);
+            launcher = new GUILauncher(game);
+            launcher.Started += launchStarted;
+            launcher.Stopped += launchStopped;
+            launcher.Launch();
         }
 
         ExtendedGUIListItem detailsItem = null;
@@ -991,7 +1000,6 @@ namespace Emulators.MediaPortal1
             }
             GUIMessage msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_SETFOCUS, Plugin.WINDOW_ID, 0, controlId, 0, 0, null);
             GUIGraphicsContext.SendMessage(msg);
-
         }
 
         #endregion
