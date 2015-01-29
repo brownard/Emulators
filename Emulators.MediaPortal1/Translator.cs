@@ -116,7 +116,7 @@ namespace Emulators.MediaPortal1
             try
             {
                 XmlDocument doc = new XmlDocument();
-                doc.Load(transFolder + "\\" + MP1Utils.Options.ReadOption<string, MP1Options>(o => o.Language) + ".xml");
+                doc.Load(transFolder + "\\" + MP1Utils.Options.ReadOption(o => o.Language) + ".xml");
                 XmlNodeList nodes = doc.GetElementsByTagName("translatedstring");
                 Dictionary<string, string> translations = new Dictionary<string, string>();
                 foreach (XmlNode node in nodes)

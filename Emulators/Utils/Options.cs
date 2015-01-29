@@ -289,14 +289,6 @@ namespace Emulators
             return value;
         }
 
-        public T ReadOption<T, T1>(Func<T1, T> reader) where T1 : Options
-        {
-            readWriteLock.EnterReadLock();
-            T value = reader((T1)this);
-            readWriteLock.ExitReadLock();
-            return value;
-        }
-
         public void WriteOption(Action<Options> writer)
         {
             readWriteLock.EnterWriteLock();

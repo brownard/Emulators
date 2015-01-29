@@ -130,7 +130,7 @@ namespace Emulators.MediaPortal1
         public static void ShowMPDialog(string message, params object[] args)
         {
             message = string.Format(message, args);
-            string heading = EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName);
+            string heading = MP1Utils.Options.ReadOption(o => o.PluginDisplayName);
 
             if (IsConfig)
             {

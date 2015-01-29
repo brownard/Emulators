@@ -32,7 +32,7 @@ namespace Emulators.MediaPortal1
                 dlgPrgrs.DisplayProgressBar = true;
                 dlgPrgrs.ShowWaitCursor = false;
                 dlgPrgrs.DisableCancel(true);
-                dlgPrgrs.SetHeading(string.IsNullOrEmpty(handler.TaskName) ? EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName) : handler.TaskName);
+                dlgPrgrs.SetHeading(string.IsNullOrEmpty(handler.TaskName) ? MP1Utils.Options.ReadOption(o => o.PluginDisplayName) : handler.TaskName);
                 dlgPrgrs.SetLine(1, "");
                 dlgPrgrs.StartModal(GUIWindowManager.ActiveWindow);
             }

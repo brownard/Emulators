@@ -23,5 +23,12 @@ namespace Emulators.MediaPortal1
         /// </summary>
         [OptionAttribute(Default = "English")]
         public string Language { get; set; }
+        public T ReadOption<T>(Func<MP1Options, T> reader)
+        {
+            EnterReadLock();
+            T value = reader(this);
+            ExitReadLock();
+            return value;
+        }
     }
 }

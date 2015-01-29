@@ -67,7 +67,7 @@ namespace Emulators.MediaPortal1
             if (dlg != null)
             {
                 dlg.Reset();
-                dlg.SetHeading(EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName));
+                dlg.SetHeading(MP1Utils.Options.ReadOption(o => o.PluginDisplayName));
 
                 dlg.Add(new GUIListItem(Translator.Instance.switchview));
                 dlg.Add(new GUIListItem(Translator.Instance.runimport));
@@ -103,7 +103,7 @@ namespace Emulators.MediaPortal1
             {
                 int windowID = Plugin.WINDOW_ID;
                 dlg.Reset();
-                dlg.SetHeading(EmulatorsCore.Options.ReadOption<string, MP1Options>(o => o.PluginDisplayName));
+                dlg.SetHeading(MP1Utils.Options.ReadOption(o => o.PluginDisplayName));
 
                 GUIListItem playItem = new GUIListItem("Play");
                 dlg.Add(playItem);
