@@ -24,15 +24,21 @@ namespace Emulators.Import
                     //    allScrapers.Add(new OfflineMameScraper());
 
                     string scriptDirectory = Path.Combine(EmulatorsCore.DataPath, "Scripts");
+                    if(!Directory.Exists(scriptDirectory))
+                    {
+                        Logger.LogError("ScraperProvider: Script directory '[0]' does not exist", scriptDirectory);
+                        return;
+                    }
+
                     foreach (string script in Directory.GetFiles(scriptDirectory, "*.xml"))
                     {
                         ScriptScraper scriptScraper = ScriptScraper.TryCreate(script, false);
                         if (scriptScraper != null)
                             allScrapers.Add(scriptScraper);
                         else
-                            Logger.LogDebug("Failed to parse scraper script '{0}'", script);
+                            Logger.LogDebug("ScraperProvider: Failed to parse scraper script '{0}'", script);
                     }
-                    Logger.LogInfo("Loaded {0} scrapers", allScrapers.Count);
+                    Logger.LogInfo("ScraperProvider: Loaded {0} scrapers", allScrapers.Count);
 
                     //foreach (string resource in System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames())
                     //{
