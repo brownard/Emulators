@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Collections.ObjectModel;
 using Emulators.Database;
+using Emulators.Scrapers;
 
 namespace Emulators.Import
 {

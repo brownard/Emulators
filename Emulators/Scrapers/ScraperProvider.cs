@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 
-namespace Emulators.Import
+namespace Emulators.Scrapers
 {
     public class ScraperProvider : IDoWork
     {
@@ -42,7 +42,7 @@ namespace Emulators.Import
 
                     //foreach (string resource in System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames())
                     //{
-                    //    if (!resource.StartsWith("Emulators.Import.Scripts.") || !resource.EndsWith(".xml"))
+                    //    if (!resource.StartsWith("Emulators.Scrapers.Scripts.") || !resource.EndsWith(".xml"))
                     //        continue;
 
                     //    ScriptScraper script = new ScriptScraper(resource, ScriptSource.Resource);

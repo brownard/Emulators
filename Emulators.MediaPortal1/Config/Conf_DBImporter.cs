@@ -2,6 +2,7 @@
 using Emulators.Import;
 using Emulators.MediaPortal1;
 using Emulators.MediaPortal1.Properties;
+using Emulators.Scrapers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

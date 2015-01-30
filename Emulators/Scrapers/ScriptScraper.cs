@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 using Cornerstone.ScraperEngine;
 
-namespace Emulators.Import
+namespace Emulators.Scrapers
 {
     /// <summary>
     /// A wrapper for a specified script, provides

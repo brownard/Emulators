@@ -86,9 +86,9 @@
     <Compile Include="AutoConfig\MameTitleLookup.cs" />
     <Compile Include="Import\NFOCreator.cs" />
     <Compile Include="Import\OfflineMameScraper.cs" />
-    <Compile Include="Import\Scraper.cs" />
-    <Compile Include="Import\ScraperResultsCache.cs" />
-    <Compile Include="Import\ScraperSearchParams.cs" />
+    <Compile Include="Scrapers\Scraper.cs" />
+    <Compile Include="Scrapers\ScraperResultsCache.cs" />
+    <Compile Include="Scrapers\ScraperSearchParams.cs" />
     <Compile Include="Launcher\GameLauncher.cs" />
     <Compile Include="Launcher\GameProcess.cs" />
     <Compile Include="Launcher\GamePathBuilder.cs" />
@@ -102,8 +102,8 @@
     <Compile Include="Base\EmulatorProfile.cs" />
     <Compile Include="Base\GameDisc.cs" />
     <Compile Include="Base\RomGroup.cs" />
-    <Compile Include="Base\ScraperGame.cs" />
-    <Compile Include="Base\ScraperResult.cs" />
+    <Compile Include="Scrapers\ScraperGame.cs" />
+    <Compile Include="Scrapers\ScraperResult.cs" />
     <Compile Include="CommunityServer\client.cs" />
     <Compile Include="Data\ComboBoxItem.cs" />
     <Compile Include="Database\DB.cs" />
@@ -138,7 +138,7 @@
     <Compile Include="Utils\Cornerstone\Tools\AdvancedStringComparer.cs" />
     <Compile Include="Utils\Cornerstone\Tools\WebGrabber.cs" />
     <Compile Include="Utils\ExtensionMethods.cs" />
-    <Compile Include="Import\ScriptScraper.cs" />
+    <Compile Include="Scrapers\ScriptScraper.cs" />
     <Compile Include="Base\DBItem.cs" />
     <Compile Include="Data\Dropdowns.cs" />
     <Compile Include="Base\Emulator.cs" />
@@ -153,13 +153,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Base\RomMatch.cs" />
     <Compile Include="Base\Thumb.cs" />
-    <Compile Include="Import\ScraperProvider.cs" />
+    <Compile Include="Scrapers\ScraperProvider.cs" />
     <Compile Include="Utils\FuzzyStringComparer.cs" />
     <Compile Include="Image Handlers\ThumbGroup.cs" />
     <Compile Include="Base\ThumbType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Import\Scripts\Mobygames.xml">
+    <None Include="Scrapers\Scripts\Mobygames.xml">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
@@ -170,21 +170,21 @@
     <EmbeddedResource Include="Data\PlatformList.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="Import\Scripts\MameDB.xml">
+    <None Include="Scrapers\Scripts\MameDB.xml">
       <SubType>Designer</SubType>
     </None>
     <EmbeddedResource Include="AutoConfig\EmuConfigs.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Data\mamelist.txt" />
-    <None Include="Import\Scripts\TheGamesDB.xml">
+    <None Include="Scrapers\Scripts\TheGamesDB.xml">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Import\Scripts\GameFAQs.xml">
+    <None Include="Scrapers\Scripts\GameFAQs.xml">
       <SubType>Designer</SubType>
     </None>
     <None Include="Properties\DataSources\RomMatch.datasource" />
-    <None Include="Import\Scripts\Maws.xml">
+    <None Include="Scrapers\Scripts\Maws.xml">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>

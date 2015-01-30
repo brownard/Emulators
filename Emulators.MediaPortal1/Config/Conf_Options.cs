@@ -1,5 +1,6 @@
 ﻿using Emulators.Import;
 using Emulators.MediaPortal1;
+using Emulators.Scrapers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
