@@ -1337,28 +1337,20 @@ namespace Emulators.Import
         {
             if (string.IsNullOrEmpty(url))
                 return null;
-            Bitmap img = null;
             BitmapDownloadResult result = ImageHandler.BeginBitmapFromWeb(url);
-            if (result != null)
+            if (result == null)
+                return null;
+
+            while (!result.IsCompleted)
             {
-                bool cancel = false;
-                while (!result.IsCompleted)
-                {
-                    if (!doWork || !romMatch.OwnedByThread())
-                    {
-                        cancel = true;
-                        break;
-                    }
-                    System.Threading.Thread.Sleep(100);
-                }
-                if (cancel)
+                if (!doWork || !romMatch.OwnedByThread())
                 {
                     result.Cancel();
                     return null;
                 }
-                img = result.Bitmap;
+                Thread.Sleep(100);
             }
-            return img;
+            return result.Bitmap;
         }
 
         //update and commit game
