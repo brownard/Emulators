@@ -18,6 +18,7 @@ namespace Emulators
 
     public static class EmulatorsCore
     {
+        public const string USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; rv:6.0.1) Gecko/20100101 Firefox/6.0.1";
         static volatile bool optionsInit;
         static volatile bool dbInit;
         static object syncRoot = new object();

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Xml;
 using System.Net;
+using System.Drawing.Drawing2D;
 
 namespace Emulators
 {
@@ -13,74 +14,66 @@ namespace Emulators
     {
         public static Image NewImage(Image input)
         {
-            if (input == null)
-                return null;
-
-            Image output = new Bitmap(input.Width, input.Height, PixelFormat.Format32bppPArgb);
-
-            using (Graphics graphics = Graphics.FromImage(output))
-                graphics.DrawImage(input, 0, 0, input.Width, input.Height);
-
-            return output;
+            if (input != null)
+                return newImage(input, input.Width, input.Height);
+            return null;
         }
 
-        public static Image ResizeImage(Image input, double ratio, double maxThumbDimension = 0)
+        public static Image ResizeImage(Image input, double ratio, int maxThumbDimension = 0)
         {
             if (input == null)
                 return null;
 
             int newWidth = input.Width;
             int newHeight = input.Height;
-
-            if (input.Width > input.Height)
+            if (newWidth > newHeight)
             {
                 if (ratio > 0)
-                {
-                    newWidth = input.Width;
-                    newHeight = Convert.ToInt32(input.Width / ratio);
-                }
-                if (maxThumbDimension > 0 && newWidth > maxThumbDimension)
-                {
-                    double factor = maxThumbDimension / newWidth;
-                    newWidth = Convert.ToInt32(maxThumbDimension);
-                    newHeight = Convert.ToInt32(newHeight * factor);
-                }
+                    newHeight = (int)(input.Width / ratio);
+                resizeDimensions(ref newWidth, ref newHeight, maxThumbDimension);
             }
             else
             {
                 if (ratio > 0)
-                {
-                    newWidth = Convert.ToInt32(input.Height * ratio);
-                    newHeight = input.Height;
-                }
-                if (maxThumbDimension > 0 && newHeight > maxThumbDimension)
-                {
-                    double factor = maxThumbDimension / newHeight;
-                    newHeight = Convert.ToInt32(maxThumbDimension);
-                    newWidth = Convert.ToInt32(newWidth * factor);
-                }
+                    newWidth = (int)(input.Height * ratio);
+                resizeDimensions(ref newHeight, ref newWidth, maxThumbDimension);
             }
 
-            return getNewImage(input, newWidth, newHeight);
+            return newImage(input, newWidth, newHeight);
+        }
+
+        static Image newImage(Image input, int width, int height)
+        {
+            Image output = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
+            using (Graphics graphics = Graphics.FromImage(output))
+            {
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.DrawImage(input, 0, 0, width, height);
+            }
+            return output;
+        }
+
+        static void resizeDimensions(ref int largeDimension, ref int smallDimension, int max)
+        {
+            if (max > 0 && largeDimension > max)
+            {
+                double factor = (double)max / largeDimension;
+                largeDimension = max;
+                smallDimension = (int)(smallDimension * factor);
+            }
         }
 
         public static Bitmap BitmapFromWeb(string url)
         {
             try
             {
-                // create a web request to the url of the image
-                HttpWebRequest myRequest = (HttpWebRequest)WebRequest.Create(url);
-                // set the method to GET to get the image
-                myRequest.Method = "GET";
-                myRequest.UserAgent = "Mozilla/5.0 (Windows NT 6.1; rv:6.0.1) Gecko/20100101 Firefox/6.0.1";
-                // get the response from the webpage
-                HttpWebResponse myResponse = (HttpWebResponse)myRequest.GetResponse();
-                // create a bitmap from the stream of the response
-                Bitmap bmp = new Bitmap(myResponse.GetResponseStream());
-                // close off the stream and the response
-                myResponse.Close();
-                // return the Bitmap of the image
-                return bmp;
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.UserAgent = EmulatorsCore.USER_AGENT;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    return new Bitmap(response.GetResponseStream());
             }
             catch (Exception ex)
             {
@@ -95,17 +88,14 @@ namespace Emulators
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "GET";
-                request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; rv:6.0.1) Gecko/20100101 Firefox/6.0.1";
+                request.UserAgent = EmulatorsCore.USER_AGENT;
                 request.BeginGetResponse((asyncRes) =>
                 {
                     Bitmap bitmap = null;
                     try
                     {
                         using (HttpWebResponse response = request.EndGetResponse(asyncRes) as HttpWebResponse)
-                        {
                             bitmap = new Bitmap(response.GetResponseStream());
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -123,42 +113,6 @@ namespace Emulators
                 return null;
             }
             return result;
-        }
-
-        public static bool CheckImageUrl(string url)
-        {
-            try
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "HEAD";
-                request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; rv:6.0.1) Gecko/20100101 Firefox/6.0.1";
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    bool result = response.ContentType.ToLower().StartsWith("image");
-                    if (!result)
-                        Logger.LogDebug("Ignoring invalid thumb url {0}", url);
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("Error checking thumb url {0} - {1}", url, ex.Message);
-                return false;
-            }
-        }
-
-        static Image getNewImage(Image input, int width, int height)
-        {
-            Image output = new Bitmap(width, height, PixelFormat.Format32bppPArgb);
-            using (Graphics graphics = Graphics.FromImage(output))
-            {
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                graphics.DrawImage(input, 0, 0, width, height);
-            }
-            return output;
         }
     }
 
