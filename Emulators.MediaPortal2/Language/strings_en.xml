@@ -3,5 +3,7 @@
   <string name="Emulators.Emulators">Emulators</string>
   <string name="Emulators.Groups">Groups</string>
   <string name="Emulators.Games">Games</string>
+  <string name="Emulators.PCGames">PC Games</string>
+  <string name="Emulators.Favourites">Favourites</string>
   <string name="Emulators.SelectGoodmerge">Select Goodmerge</string>
 </resources>

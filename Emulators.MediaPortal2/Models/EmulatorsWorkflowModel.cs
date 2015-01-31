@@ -218,30 +218,40 @@ namespace Emulators.MediaPortal2
             if (startupState == StartupState.LASTUSED)
                 startupState = EmulatorsCore.Options.ReadOption(o => o.LastStartupState);
 
-            Guid stateId;
             NavigationData navigationData = new NavigationData();
             ItemsList items = new ItemsList();
             switch (startupState)
             {
                 case StartupState.GROUPS:
-                    stateId = Guids.WorkflowSatesGroups;
+                    navigationData.DisplayName = "[Emulators.Groups]";
                     var groups = RomGroup.GetAll();
                     foreach (RomGroup g in groups)
                         items.Add(new GroupViewModel(g, this));
-                    navigationData.DisplayName = "[Emulators.Groups]";
+                    break;
+                case StartupState.PCGAMES:
+                    navigationData.DisplayName = "[Emulators.PCGames]";
+                    var games = Emulator.GetPC().Games;
+                    foreach (Game game in games)
+                        items.Add(new GameViewModel(game, this));
+                    break;
+                case StartupState.FAVOURITES:
+                    navigationData.DisplayName = "[Emulators.Favourites]";
+                    BaseCriteria favCriteria = new BaseCriteria(DBField.GetField(typeof(Game), "Favourite"), "=", true);
+                    var favourites = EmulatorsCore.Database.Get<Game>(favCriteria);
+                    foreach (Game favourite in favourites)
+                        items.Add(new GameViewModel(favourite, this));
                     break;
                 case StartupState.EMULATORS:
                 default:
-                    stateId = Guids.WorkflowSatesEmulators;
+                    navigationData.DisplayName = "[Emulators.Emulators]";
                     var emulators = Emulator.GetAll(true);
                     foreach (Emulator e in emulators)
                         items.Add(new EmulatorViewModel(e, this));
-                    navigationData.DisplayName = "[Emulators.Emulators]";
                     break;
             }
 
             navigationData.ItemsList = items;
-            PushState(stateId, navigationData);
+            PushState(Guids.WorkflowSatesEmulators, navigationData);
         }
 
         void showGoodmergeDialog(GameViewModel selectedGame)
@@ -289,11 +299,10 @@ namespace Emulators.MediaPortal2
 
         public void EnterModelContext(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext)
         {
-            updateState(newContext);
             if (newContext.WorkflowState.StateId == Guids.StartupState)
-            {
                 loadStartupItems();
-            }
+            else
+                updateState(newContext);
         }
 
         public void ExitModelContext(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext)
