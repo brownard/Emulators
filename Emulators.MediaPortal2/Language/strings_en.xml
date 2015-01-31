@@ -5,5 +5,15 @@
   <string name="Emulators.Games">Games</string>
   <string name="Emulators.PCGames">PC Games</string>
   <string name="Emulators.Favourites">Favourites</string>
+
+  <string name="Emulators.NewEmulator">New Emulator</string>
+  <string name="Emulators.Name">Name</string>
+  <string name="Emulators.Platform">Platform</string>
+  <string name="Emulators.Filters">Filters</string>
+  <string name="Emulators.EmulatorPath">Emulator Path</string>
+  <string name="Emulators.Arguments">Arguments</string>
+  <string name="Emulators.RomDirectory">Rom Directory</string>
+  <string name="Emulators.SelectPlatform">Select Platform</string>
+  
   <string name="Emulators.SelectGoodmerge">Select Goodmerge</string>
 </resources>

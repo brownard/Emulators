@@ -72,10 +72,10 @@
     <Compile Include="Models\BaseDialogModel.cs" />
     <Compile Include="Models\EmulatorsWorkflowModel.cs" />
     <Compile Include="Models\GameLaunchWorkflowModel.cs" />
-    <Compile Include="Models\GoodmergeSelectModel.cs" />
     <Compile Include="MP2Logger.cs" />
     <Compile Include="Navigation\NavigationData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\CreateEmulatorSetting.cs" />
     <Compile Include="Settings\PluginSettings.cs" />
     <Compile Include="View Models\GroupViewModel.cs" />
     <Compile Include="View Models\ItemViewModel.cs" />
@@ -112,19 +112,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Skin\default\screens\DialogGoodmergeSelect.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Skin\default\screens\DialogLaunchGame.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Skin\default\screens\NewEmulator.xaml">
+    <Content Include="Skin\default\screens\new_emulator.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Content>
@@ -138,6 +132,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\Titanium\screens\new_emulator.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

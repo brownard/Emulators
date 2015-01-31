@@ -36,7 +36,7 @@ namespace Emulators.MediaPortal2
             if (game == null)
                 return;
 
-            GameLauncher launcher = new GameLauncher(game);
+            launcher = new GameLauncher(game);
             currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(() =>
             {
                 setProgress("Launching " + game.Title, 0);
@@ -44,6 +44,7 @@ namespace Emulators.MediaPortal2
                 {
                     setProgress(string.Format("Extracting {0}%", e.Percent), e.Percent);
                 };
+                launcher.Starting += launcher_Starting;
                 launcher.Exited += launcher_Exited;
                 launcher.Launch();
             }, (args) =>
@@ -53,6 +54,11 @@ namespace Emulators.MediaPortal2
                 if (screenMgr.TopmostDialogInstanceId == context.DialogInstanceId)
                     screenMgr.CloseTopmostDialog();
             });
+        }
+
+        void launcher_Starting(object sender, EventArgs e)
+        {
+            setProgress("Launching...", 50);
         }
 
         void launcher_Exited(object sender, EventArgs e)

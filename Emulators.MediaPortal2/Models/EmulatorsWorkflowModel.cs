@@ -160,6 +160,7 @@ namespace Emulators.MediaPortal2
 
         public void GroupSelected(RomGroup group)
         {
+            group.Refresh();
             ItemsList items = new ItemsList();
             foreach (DBItem item in group.GroupItems)
             {
