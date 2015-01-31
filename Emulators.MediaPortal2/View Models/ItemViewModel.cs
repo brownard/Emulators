@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Emulators.MediaPortal2
 {
-    public abstract class ItemViewModel : ListItem
+    public class ItemViewModel : ListItem
     {
         protected AbstractProperty _nameProperty;
         protected AbstractProperty _frontCoverProperty;
