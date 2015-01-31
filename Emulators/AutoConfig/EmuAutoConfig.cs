@@ -94,10 +94,13 @@ namespace Emulators.AutoConfig
 
         public EmulatorConfig CheckForSettings(string emuPath)
         {
-            emuPath = getExeName(emuPath);
-            foreach (string key in autoConfigDictionary.Keys)
-                if (Regex.IsMatch(emuPath, key, RegexOptions.IgnoreCase))
-                    return autoConfigDictionary[key];
+            if (!string.IsNullOrEmpty(emuPath))
+            {
+                emuPath = getExeName(emuPath);
+                foreach (string key in autoConfigDictionary.Keys)
+                    if (Regex.IsMatch(emuPath, key, RegexOptions.IgnoreCase))
+                        return autoConfigDictionary[key];
+            }
             return null;
         }
 
