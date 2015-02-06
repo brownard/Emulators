@@ -103,7 +103,7 @@ namespace Emulators
             }
             else if (!System.IO.Directory.Exists(location))
             {
-                Logger.LogError("Unable to locate thumb folder '{0}', reverting to default thumb location", location);
+                Logger.LogWarn("Unable to locate thumb folder '{0}', reverting to default thumb location", location);
                 location = defaultThumbDirectory;
             }
             else
