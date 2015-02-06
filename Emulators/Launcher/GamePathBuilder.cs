@@ -17,6 +17,7 @@ namespace Emulators.Launcher
 
         public static GamePath CreateRomPath(string emulatorPath, string arguments, string romPath, bool replaceWildcards, bool useQuotes)
         {
+            arguments = arguments ?? "";
             if (replaceWildcards)
             {
                 arguments = arguments.Replace(ROM_DIRECTORY_WILDCARD, Path.GetDirectoryName(romPath));
