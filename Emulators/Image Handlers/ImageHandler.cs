@@ -68,6 +68,9 @@ namespace Emulators
 
         public static Bitmap BitmapFromWeb(string url)
         {
+            if (string.IsNullOrEmpty(url))
+                return null;
+
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
