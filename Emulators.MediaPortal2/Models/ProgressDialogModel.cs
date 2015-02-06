@@ -1,75 +1,78 @@
-﻿using Emulators.Launcher;
-using MediaPortal.Common;
+﻿using MediaPortal.Common;
 using MediaPortal.Common.General;
 using MediaPortal.Common.Threading;
 using MediaPortal.UI.Presentation.Models;
 using MediaPortal.UI.Presentation.Screens;
-using MediaPortal.UI.Presentation.SkinResources;
 using MediaPortal.UI.Presentation.Workflow;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.Models
 {
-    class GameLaunchWorkflowModel : IWorkflowModel
+    public class ProgressDialogModel : IWorkflowModel
     {
-        public GameLaunchWorkflowModel()
+        Action<ProgressDialogModel> taskDelegate;
+        IWork currentBackgroundTask;
+
+        public ProgressDialogModel()
         {
             _progressProperty = new WProperty(typeof(int), 0);
             _infoProperty = new WProperty(typeof(string), null);
+            _headerProperty = new WProperty(typeof(string), null);
         }
 
-        Game game = null;
-        GameLauncher launcher;
-        IWork currentBackgroundTask = null;
-
-        public void SetGame(Game game)
+        public static void ShowDialog(string header, Action<ProgressDialogModel> taskDelegate)
         {
-            this.game = game;
+            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+            ProgressDialogModel progressModel = (ProgressDialogModel)workflowManager.GetModel(Guids.ProgressDialogModel);
+            progressModel.showDialog(header, taskDelegate);
         }
 
-        void startLaunch(NavigationContext context)
+        void showDialog(string header, Action<ProgressDialogModel> taskDelegate)
         {
-            if (game == null)
+            if (taskDelegate == null)
                 return;
 
-            launcher = new GameLauncher(game);
-            currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(() =>
-            {
-                setProgress("Launching " + game.Title, 0);
-                launcher.ExtractionProgress += (s, e) =>
-                {
-                    setProgress(string.Format("Extracting {0}%", e.Percent), e.Percent);
-                };
-                launcher.Starting += launcher_Starting;
-                launcher.Exited += launcher_Exited;
-                launcher.Launch();
-            }, (args) =>
-            {
-                currentBackgroundTask = null;
-                var screenMgr = ServiceRegistration.Get<IScreenManager>();
-                if (screenMgr.TopmostDialogInstanceId == context.DialogInstanceId)
-                    screenMgr.CloseTopmostDialog();
-            });
+            this.taskDelegate = taskDelegate;
+            Header = header;
+            var workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+            workflowManager.NavigatePushTransientAsync(
+                new WorkflowState(Guid.NewGuid(), "emulators_progress_dialog", header, true, "dialog_progress", false, false, ModelId, WorkflowType.Dialog),
+                new NavigationContextConfig()
+                );
         }
 
-        void launcher_Starting(object sender, EventArgs e)
+        void onEnterContext(NavigationContext context)
         {
-            setProgress("Launching...", 50);
+            currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(
+                () => { taskDelegate(this); },
+            (args) => { closeDialog(context); });
         }
 
-        void launcher_Exited(object sender, EventArgs e)
+        void closeDialog(NavigationContext context)
         {
-            ((GameLauncher)sender).Game.UpdateAndSaveGamePlayInfo();
+            taskDelegate = null;
+            currentBackgroundTask = null;
+            var screenMgr = ServiceRegistration.Get<IScreenManager>();
+            if (screenMgr.TopmostDialogInstanceId == context.DialogInstanceId)
+                screenMgr.CloseTopmostDialog();
         }
 
-        void setProgress(string l, int p)
+        public void SetProgress(string info, int percent)
         {
-            Info = l;
-            Progress = p;
+            Info = info;
+            Progress = percent;
+        }
+
+        protected AbstractProperty _headerProperty;
+        public AbstractProperty HeaderProperty { get { return _headerProperty; } }
+        public string Header
+        {
+            get { return (string)_headerProperty.GetValue(); }
+            set { _headerProperty.SetValue(value); }
         }
 
         protected AbstractProperty _progressProperty;
@@ -106,7 +109,7 @@ namespace Emulators.MediaPortal2
 
         public void EnterModelContext(NavigationContext oldContext, NavigationContext newContext)
         {
-            startLaunch(newContext);
+            onEnterContext(newContext);
         }
 
         public void ExitModelContext(NavigationContext oldContext, NavigationContext newContext)
@@ -115,10 +118,7 @@ namespace Emulators.MediaPortal2
                 System.Threading.Thread.Sleep(100);
         }
 
-        public Guid ModelId
-        {
-            get { return Guids.LaunchGameDialogWorkflow; }
-        }
+        public Guid ModelId { get { return Guids.ProgressDialogModel; } }
 
         public void Reactivate(NavigationContext oldContext, NavigationContext newContext)
         {
@@ -134,6 +134,5 @@ namespace Emulators.MediaPortal2
             return ScreenUpdateMode.AutoWorkflowManager;
         }
         #endregion
-
     }
 }

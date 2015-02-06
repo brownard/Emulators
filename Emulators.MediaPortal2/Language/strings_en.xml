@@ -16,4 +16,7 @@
   <string name="Emulators.SelectPlatform">Select Platform</string>
   
   <string name="Emulators.SelectGoodmerge">Select Goodmerge</string>
+
+  <string name="Emulators.Dialogs.PlatformImporter">Platform Importer</string>
+  <string name="Emulators.Dialogs.LaunchGame">Launch Game</string>
 </resources>

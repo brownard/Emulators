@@ -110,7 +110,7 @@ namespace Emulators.MediaPortal2
                     });
             }
 
-            var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogWorkflow);
+            var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
             dialog.ShowDialog("[Emulators.SelectPlatform]", items);
         }
 
@@ -138,6 +138,8 @@ namespace Emulators.MediaPortal2
             newEmulator.Commit();
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
             workflowManager.NavigatePopToState(Guids.NewEmulatorState, true);
+            var platformLookup = new Models.PlatformDetailsDialog(newEmulator.Platform, newEmulator);
+            platformLookup.GetPlatformInfo();
         }
 
         void doPathSelect(string displayLabel, string initialPath, bool fileSelect, Func<string, bool> validate, Action<string> completed)

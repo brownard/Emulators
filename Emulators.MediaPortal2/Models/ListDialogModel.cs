@@ -12,7 +12,7 @@ namespace Emulators.MediaPortal2
     {
         public override Guid DialogGuid
         {
-            get { return Guids.ListDialogWorkflow; }
+            get { return Guids.ListDialogModel; }
         }
 
         public string Header { get; private set; }

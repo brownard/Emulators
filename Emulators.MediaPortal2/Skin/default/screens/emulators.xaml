@@ -13,7 +13,7 @@
         <!-- Header_Text resource has to be added by including screen -->
         <!--{Binding Source={StaticResource EmulatorsModel}, Path=Header}-->
         <ResourceWrapper x:Key="Header_Text" EnableBindings="True"
-        Resource="{Binding Source={StaticResource EmulatorsModel},Path=Header,Mode=OneTime}"/>
+        Resource="{Binding Source={StaticResource EmulatorsModel},Path=Header}"/>
 
         <!-- Contents -->
         <ControlTemplate x:Key="Contents_Template">
@@ -69,9 +69,8 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!--<Control HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Template="{Binding Source={DynamicResource Emulators_List_Template}}"></Control>-->
-
-                        <ListView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{ThemeResource emuItemsListViewStyle}" DataContext="{Binding Source={StaticResource EmulatorsModel}}" CurrentItem="{Binding Path=FocusedItem, Mode=OneWayToSource}" ItemsSource="{Binding Items}">
+                        <!--<Control HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Template="{Binding Source={DynamicResource Emulators_List_Template}}"></Control>DataContext="{Binding Source={StaticResource EmulatorsModel}}" -->
+                        <ListView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{ThemeResource emuItemsListViewStyle}" CurrentItem="{Binding Path=FocusedItem, Mode=OneWayToSource}" ItemsSource="{Binding Items}">
                             <ListView.Resources>
                                 <Command x:Key="Menu_Command" Source="{StaticResource EmulatorsModel}" Path="SelectItem"
                     Parameters="{LateBoundValue BindingValue={Binding}}"/>

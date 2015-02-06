@@ -24,33 +24,23 @@
 
   <Register Location="/Models">
     <Model Id="3C370162-2586-416A-963C-F34DDDE184D4" Name="EmulatorsWorkflowModel" ClassName="Emulators.MediaPortal2.EmulatorsWorkflowModel"/>
+    <Model Id="C27FA8F9-500C-4AA3-83CB-93427ED1B2EA" Name="ImporterModel" ClassName="Emulators.MediaPortal2.Models.ImporterModel"/>
     <Model Id="03F534A5-4495-4223-A7EB-0FC8D477CF4B" Name="NewEmulatorModel" ClassName="Emulators.MediaPortal2.NewEmulatorModel"/>
-    <Model Id="2471F9F2-CAE1-4AEE-96BD-6647FF191F6E" Name="GameLaunchModel" ClassName="Emulators.MediaPortal2.GameLaunchWorkflowModel"/>
     <Model Id="F140F32F-9F24-47D2-99B1-09A3A58D69FB" Name="ListDialogModel" ClassName="Emulators.MediaPortal2.ListDialogModel"/>
+    <Model Id="A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4" Name="ProgressDialogModel" ClassName="Emulators.MediaPortal2.Models.ProgressDialogModel"/>
+    <Model Id="7541BF0F-C225-4518-8128-385B583582C3" Name="SwitchViewContributorModel" ClassName="Emulators.MediaPortal2.Actions.SwitchViewAction"/>
   </Register>
 
   <Register Location="/Workflow/States">
-    <WorkflowState Id="F1F446EC-03FD-4A22-BA04-7C45E6D72E06"
-        Name="StartupView"
-        WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
-        MainScreen="emulators"
-        DisplayLabel="Startup"
-        Temporary="true" />
 
     <WorkflowState Id="97F9A2D9-B857-4890-9EF2-5E2BC66A53BB"
         Name="EmulatorsView" MainScreen="emulators" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
         DisplayLabel="[Emulators.Emulators]"/>
 
     <WorkflowState Id="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
-            Name="NewEmulatorView" MainScreen="new_emulator" WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
-            DisplayLabel="[Emulators.NewEmulator]"/>
-
-    <DialogState Id="95639608-6CCC-4604-921C-AC34C4BFEFC5"
-        Name="LaunchGame"
-        DialogScreen="DialogLaunchGame"
-        DisplayLabel="Launch"
-        Temporary="true"
-        WorkflowModel="2471F9F2-CAE1-4AEE-96BD-6647FF191F6E"/>
+          Name="NewEmulatorView" MainScreen="new_emulator" WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
+          DisplayLabel="[Emulators.NewEmulator]"/>
+    
   </Register>
 
   <!-- Registration of our skin directory -->

@@ -32,9 +32,17 @@
         DisplayCategory="z-Emulators"
         SortOrder="a"
         SourceStates="7F702D9C-F2DD-42da-9ED8-0BA92F07787F"
-        TargetState="F1F446EC-03FD-4A22-BA04-7C45E6D72E06"
+        TargetState="97F9A2D9-B857-4890-9EF2-5E2BC66A53BB"
         DisplayTitle="Emulators"/>
 
+      <WorkflowContributorAction Id="10531B3E-28CB-4793-8D00-369CD9CAE447"
+        Name="Emulators->SwitchView"
+        DisplayCategory="z-Emulators"
+        SortOrder="a"
+        SourceStates="*"
+        ContributorModelId="7541BF0F-C225-4518-8128-385B583582C3"
+        DisplayTitle="[Emulators.SwitchView]"/>
+      
         <!--<WorkflowContributorAction Id="C1AD49D6-28F3-493E-94B8-886E90A119DA"
         Name="OnlineVideos->Search"
         DisplayCategory="z-OnlineVideos"

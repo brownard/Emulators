@@ -21,9 +21,8 @@ namespace Emulators.MediaPortal2
     {
         #region Static Methods
         
-        static NavigationData GetNavigationData(NavigationContext currentContext)
+        public static NavigationData GetNavigationData(NavigationContext context)
         {
-            NavigationContext context = currentContext;
             return context == null ? null : context.GetContextVariable(NavigationData.NAVIGATION_DATA, false) as NavigationData;
         }
 
@@ -54,6 +53,12 @@ namespace Emulators.MediaPortal2
             workflowManager.NavigatePushTransient(newState, GetContextConfig(navigationData));
         }
 
+        public static EmulatorsWorkflowModel Instance()
+        {
+            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+            return (EmulatorsWorkflowModel)workflowManager.GetModel(Guids.WorkflowSatesMain);
+        }
+
         #endregion
 
         #region Members
@@ -62,7 +67,8 @@ namespace Emulators.MediaPortal2
         protected AbstractProperty _layoutTypeProperty;
         protected AbstractProperty _headerProperty;
 
-        NavigationContext currentContext;
+        NavigationData navigationData;
+        GameLauncherDialog currentLauncher;
 
         #endregion
 
@@ -74,6 +80,7 @@ namespace Emulators.MediaPortal2
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
             _focusedItemProperty = new WProperty(typeof(ItemViewModel), null);
             _headerProperty = new WProperty(typeof(string));
+            Items = new ItemsList();
         }
 
         ~EmulatorsWorkflowModel()
@@ -87,23 +94,16 @@ namespace Emulators.MediaPortal2
 
         public NavigationData NavigationData
         {
-            get { return GetNavigationData(currentContext); }
+            get { return navigationData; }
         }
 
         public ItemsList Items
         {
-            get
-            {
-                NavigationData navigationData = NavigationData;
-                return navigationData != null ? navigationData.ItemsList : null;
-            }
+            get;
+            private set;
         }
 
-        public AbstractProperty HeaderProperty
-        {
-            get { return _headerProperty; }
-        }
-
+        public AbstractProperty HeaderProperty { get { return _headerProperty; } }
         public string Header
         {
             get { return (string)_headerProperty.GetValue(); }
@@ -130,6 +130,13 @@ namespace Emulators.MediaPortal2
             set { _layoutTypeProperty.SetValue(value); }
         }
 
+        StartupState startupState = StartupState.LASTUSED;
+        public StartupState StartupState
+        {
+            get { return startupState; }
+            set { startupState = value; }
+        }
+
         #endregion
 
         #region Public Methods
@@ -150,10 +157,7 @@ namespace Emulators.MediaPortal2
 
         public void EmulatorSelected(Emulator emulator)
         {
-            ItemsList items = new ItemsList();
-            foreach (Game game in emulator.Games)
-                items.Add(new GameViewModel(game, this));
-
+            List<ListItem> items = emulator.Games.Select(g => (ListItem)new GameViewModel(g, this)).ToList();
             NavigationData navigationData = new NavigationData() { DisplayName = emulator.Title, ItemsList = items };
             PushTransientState("emuGames", navigationData.DisplayName, navigationData);
         }
@@ -161,7 +165,7 @@ namespace Emulators.MediaPortal2
         public void GroupSelected(RomGroup group)
         {
             group.Refresh();
-            ItemsList items = new ItemsList();
+            List<ListItem> items = new List<ListItem>();
             foreach (DBItem item in group.GroupItems)
             {
                 Game game = item as Game;
@@ -189,10 +193,8 @@ namespace Emulators.MediaPortal2
 
         public void GameSelected(Game game)
         {
-            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            GameLaunchWorkflowModel launchDlg = (GameLaunchWorkflowModel)workflowManager.GetModel(Guids.LaunchGameDialogWorkflow);
-            launchDlg.SetGame(game);
-            workflowManager.NavigatePush(Guids.LaunchGameDialogState);
+            currentLauncher = new GameLauncherDialog(game);
+            currentLauncher.Launch();
         }
 
         public void ShowEmulatorContext(EmulatorViewModel emulator)
@@ -207,52 +209,68 @@ namespace Emulators.MediaPortal2
 
         void updateState(NavigationContext context)
         {
-            currentContext = context;
-            NavigationData navigationData = GetNavigationData(context);
+            bool updateList = false;
+            navigationData = GetNavigationData(context);
+            if (context.WorkflowState.StateId == Guids.WorkflowSatesEmulators && (navigationData == null || navigationData.StartupState != startupState))
+            {
+                updateList = true;
+                navigationData = getStartupNavigationData();
+                context.SetContextVariable(NavigationData.NAVIGATION_DATA, navigationData);
+            }
+
             if (navigationData != null)
+            {
                 Header = navigationData.DisplayName;
+                if (updateList)
+                {
+                    ItemsList items = Items;
+                    items.Clear();
+                    foreach (ListItem item in navigationData.ItemsList)
+                        items.Add(item);
+                    items.FireChange();
+                }
+                else
+                {
+                    ItemsList items = new ItemsList();
+                    foreach (ListItem item in navigationData.ItemsList)
+                        items.Add(item);
+                    Items = items;
+                }
+            }
         }
 
-        void loadStartupItems()
+        NavigationData getStartupNavigationData()
         {
-            StartupState startupState = EmulatorsCore.Options.ReadOption(o => o.StartupState);
-            if (startupState == StartupState.LASTUSED)
-                startupState = EmulatorsCore.Options.ReadOption(o => o.LastStartupState);
-
             NavigationData navigationData = new NavigationData();
-            ItemsList items = new ItemsList();
+            List<ListItem> items;
             switch (startupState)
             {
                 case StartupState.GROUPS:
                     navigationData.DisplayName = "[Emulators.Groups]";
                     var groups = RomGroup.GetAll();
-                    foreach (RomGroup g in groups)
-                        items.Add(new GroupViewModel(g, this));
+                    items = groups.Select(g => (ListItem)new GroupViewModel(g, this)).ToList();
                     break;
                 case StartupState.PCGAMES:
                     navigationData.DisplayName = "[Emulators.PCGames]";
                     var games = Emulator.GetPC().Games;
-                    foreach (Game game in games)
-                        items.Add(new GameViewModel(game, this));
+                    items = games.Select(g => (ListItem)new GameViewModel(g, this)).ToList();
                     break;
                 case StartupState.FAVOURITES:
                     navigationData.DisplayName = "[Emulators.Favourites]";
                     BaseCriteria favCriteria = new BaseCriteria(DBField.GetField(typeof(Game), "Favourite"), "=", true);
                     var favourites = EmulatorsCore.Database.Get<Game>(favCriteria);
-                    foreach (Game favourite in favourites)
-                        items.Add(new GameViewModel(favourite, this));
+                    items = favourites.Select(g => (ListItem)new GameViewModel(g, this)).ToList();
                     break;
                 case StartupState.EMULATORS:
                 default:
                     navigationData.DisplayName = "[Emulators.Emulators]";
                     var emulators = Emulator.GetAll(true);
-                    foreach (Emulator e in emulators)
-                        items.Add(new EmulatorViewModel(e, this));
+                    items = emulators.Select(e => (ListItem)new EmulatorViewModel(e, this)).ToList();
                     break;
             }
-
+            navigationData.StartupState = startupState;
             navigationData.ItemsList = items;
-            PushState(Guids.WorkflowSatesEmulators, navigationData);
+            return navigationData;
         }
 
         void showGoodmergeDialog(GameViewModel selectedGame)
@@ -278,7 +296,7 @@ namespace Emulators.MediaPortal2
                 }
                 if (items.Count > 0)
                 {
-                    var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogWorkflow);
+                    var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
                     dialog.ShowDialog("[Emulators.SelectGoodmerge]", items);
                 }
             }
@@ -300,15 +318,18 @@ namespace Emulators.MediaPortal2
 
         public void EnterModelContext(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext)
         {
-            if (newContext.WorkflowState.StateId == Guids.StartupState)
-                loadStartupItems();
-            else
-                updateState(newContext);
+            if (startupState == StartupState.LASTUSED)
+            {
+                startupState = EmulatorsCore.Options.ReadOption(o => o.StartupState);
+                if (startupState == StartupState.LASTUSED)
+                    startupState = EmulatorsCore.Options.ReadOption(o => o.LastStartupState);
+            }
+            updateState(newContext);
         }
 
         public void ExitModelContext(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext)
         {
-
+            EmulatorsCore.Options.WriteOption(o => o.LastStartupState = startupState);
         }
 
         public void Deactivate(MediaPortal.UI.Presentation.Workflow.NavigationContext oldContext, MediaPortal.UI.Presentation.Workflow.NavigationContext newContext)

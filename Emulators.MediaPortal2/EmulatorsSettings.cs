@@ -15,12 +15,13 @@ namespace Emulators.MediaPortal2
         {
             dataPath = ServiceRegistration.Get<IPathManager>().GetPath(@"<DATA>\Emulators");
 
-            string databasePath = Path.Combine(dataPath, "Emulators2_v2.db3");
             string optionsPath = Path.Combine(dataPath, "Emulators_2.xml");
-            defaultThumbDirectory = Path.Combine(dataPath, "Images");
-
             options = new Emulators.Options() { SavePath = optionsPath };
+            //string databasePath = @"C:\ProgramData\Team MediaPortal\MediaPortal\database\Emulators2_v2.db3";
+            string databasePath = Path.Combine(dataPath, "Emulators2_v2.db3");
             dataProvider = new SQLProvider(databasePath);
+            //defaultThumbDirectory = @"C:\ProgramData\Team MediaPortal\MediaPortal\Thumbs"; // Path.Combine(dataPath, "Images");
+            defaultThumbDirectory = Path.Combine(dataPath, "Images");
             logger = new MP2Logger();
         }
 
