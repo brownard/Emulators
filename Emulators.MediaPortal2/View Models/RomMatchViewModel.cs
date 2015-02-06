@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Emulators.MediaPortal2.View_Models
+namespace Emulators.MediaPortal2
 {
     public class RomMatchViewModel : ListItem
     {
@@ -24,6 +24,16 @@ namespace Emulators.MediaPortal2.View_Models
 
             this.romMatch = romMatch;
             Update();
+        }
+        public RomMatchViewModel()
+        {
+            _statusProperty = new WProperty(typeof(string), null);
+            _nameProperty = new WProperty(typeof(string), null);
+            _currentMatchProperty = new WProperty(typeof(string), null);
+
+            Name = "testName";
+            Status = "testStatus";
+            CurrentMatch = "testMatch";
         }
 
         public void Update()

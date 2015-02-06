@@ -81,6 +81,7 @@
     <Compile Include="Navigation\NavigationData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\CreateEmulatorSetting.cs" />
+    <Compile Include="Settings\ImporterSetting.cs" />
     <Compile Include="Settings\StartupStateSettings.cs" />
     <Compile Include="View Models\GroupViewModel.cs" />
     <Compile Include="View Models\ItemViewModel.cs" />
@@ -153,6 +154,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Skin\default\screens\importer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\themes\default\styles\ImporterStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Content>

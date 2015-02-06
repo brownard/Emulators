@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:emu="clr-namespace:Emulators.MediaPortal2;assembly=Emulators.MediaPortal2"
+    DependsOnStyleResources="Buttons,Colors,Consts">
+
+    <!--List item template-->
+    <DataTemplate DataType="{x:Type emu:RomMatchViewModel}">
+        <Control>
+            <Control.Template>
+                <ControlTemplate>
+                    <Grid x:Name="ItemControl">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="0,0,4,0">
+                            <Image x:Name="ItemTypeLarge" Stretch="Uniform" Source="{Binding FrontCover}" FallbackSource="VideoLarge.png" Width="178" Height="100">
+                            </Image>
+                        </DockPanel>
+                        <Label x:Name="ItemLabel" Grid.Row="0" Grid.Column="1" Content="{Binding Name}"
+                            Color="{ThemeResource TextColor}" FontSize="{ThemeResource SmallFontSize}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Control.Template>
+        </Control>
+    </DataTemplate>
+
+    <Style x:Key="emuImportItemContainerStyle" BasedOn="{ThemeResource DefaultItemContainerStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListViewItem}">                    
+                    <Button Style="{ThemeResource ButtonWideStyle}"
+                        IsEnabled="{Binding Enabled}"
+                        SetFocus="{Binding Path=Selected,Mode=OneTime}"
+                        Command="{DynamicResource ResourceKey=Menu_Command}"
+                        ContextMenuCommand="{DynamicResource ResourceKey=Context_Command}">                        
+                        <Button.Triggers>
+                            <Trigger Property="HasFocus" Value="True">
+                                <Setter TargetName="ItemLabel" Property="Scroll" Value="Auto"/>
+                                <Setter Property="StackPanel.ZIndex" Value="100.0"/>
+                            </Trigger>
+                        </Button.Triggers>                        
+                    </Button>                    
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="emuImporterListViewStyle" TargetType="{x:Type ListView}">
+        <!-- Don't inherit the ItemTemplate from ContentsMenuListViewStyle - It should remain null to make the SkinEngine choose an appropriate template -->
+        <Setter Property="ItemTemplate"/>
+        
+        <Setter Property="DataStringProvider" Value="{ThemeResource DefaultItemDataStringProvider}"/>
+        <Setter Property="ItemContainerStyle" Value="{ThemeResource emuImportItemContainerStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListView}">
+                    <ScrollViewer CanContentScroll="True" Margin="5" HorizontalScrollBarVisibility="Disabled" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <ItemsPresenter VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel x:Name="ListItemsHost" IsItemsHost="True"/>
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

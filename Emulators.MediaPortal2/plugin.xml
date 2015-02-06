@@ -36,6 +36,10 @@
     <WorkflowState Id="97F9A2D9-B857-4890-9EF2-5E2BC66A53BB"
         Name="EmulatorsView" MainScreen="emulators" WorkflowModel="3C370162-2586-416A-963C-F34DDDE184D4"
         DisplayLabel="[Emulators.Emulators]"/>
+    
+    <WorkflowState Id="1782275A-4B3C-4E00-9F97-8B60DFD28F91"
+          Name="ImporterView" MainScreen="importer" WorkflowModel="C27FA8F9-500C-4AA3-83CB-93427ED1B2EA"
+          DisplayLabel="[Emulators.Importer]"/>
 
     <WorkflowState Id="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
           Name="NewEmulatorView" MainScreen="new_emulator" WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
@@ -68,12 +72,17 @@
         Id="Emulators"
         Redundant="true"
         Text="Emulators"/>
+    <ConfigSection
+        Id="Importer"
+        Redundant="true"
+        Text="Importer"/>
     <ConfigSetting
         Id="EmulatorsStartupState"
         Text="Startup View"
         HelpText="View to show on first open"
         ClassName="Emulators.MediaPortal2.Settings.StartupStateSetting"/>
   </Register>
+  
   <Register Location="/Configuration/Settings/Plugins/EmulatorsPlugin/Emulators">
     <CustomConfigSetting
         Id="CreateEmulator"
@@ -81,5 +90,14 @@
         HelpText=""
         ClassName="Emulators.MediaPortal2.Settings.CreateEmulatorSetting"
         AdditionalData="WorkflowState=C69A5500-0059-4E4E-A331-2FD9835C4D0B,ConfAppPanel=..."/>
+  </Register>
+
+<Register Location="/Configuration/Settings/Plugins/EmulatorsPlugin/Importer">
+    <CustomConfigSetting
+        Id="ImporterConfig"
+        Text="Importer"
+        HelpText=""
+        ClassName="Emulators.MediaPortal2.Settings.ImporterSetting"
+        AdditionalData="WorkflowState=1782275A-4B3C-4E00-9F97-8B60DFD28F91,ConfAppPanel=..."/>
   </Register>
 </Plugin>

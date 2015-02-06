@@ -1,5 +1,4 @@
 ﻿using Emulators.Import;
-using Emulators.MediaPortal2.View_Models;
 using MediaPortal.Common.General;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
@@ -26,6 +25,11 @@ namespace Emulators.MediaPortal2.Models
         {
             _statusProperty = new WProperty(typeof(string), null);
             _progressProperty = new WProperty(typeof(int), 0);
+        }
+
+        public void SelectItem(RomMatchViewModel viewModel)
+        {
+            
         }
 
         void initImporter()
@@ -133,6 +137,8 @@ namespace Emulators.MediaPortal2.Models
 
         public void EnterModelContext(NavigationContext oldContext, NavigationContext newContext)
         {
+            //items = new ItemsList();
+            //items.Add(new RomMatchViewModel());
             initImporter();
         }
 

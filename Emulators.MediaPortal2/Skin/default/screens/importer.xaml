@@ -22,7 +22,16 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                                                
+
+                <ListView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{ThemeResource emuImporterListViewStyle}" CurrentItem="{Binding Path=FocusedItem, Mode=OneWayToSource}" ItemsSource="{Binding Items}">
+                    <ListView.Resources>
+                        <Command x:Key="Menu_Command" Source="{StaticResource Model}" Path="SelectItem"
+                            Parameters="{LateBoundValue BindingValue={Binding}}"/>
+                        <Command x:Key="Context_Command" Source="{StaticResource Model}" Path="ShowContext"
+                            Parameters="{LateBoundValue BindingValue={Binding}}"/>
+                    </ListView.Resources>
+                </ListView>
+
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
