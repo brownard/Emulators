@@ -5,6 +5,7 @@
   <string name="Emulators.Games">Games</string>
   <string name="Emulators.PCGames">PC Games</string>
   <string name="Emulators.Favourites">Favourites</string>
+  <string name="Emulators.LastUsed">Last Used</string>
 
   <string name="Emulators.NewEmulator">New Emulator</string>
   <string name="Emulators.Name">Name</string>
@@ -19,4 +20,5 @@
 
   <string name="Emulators.Dialogs.PlatformImporter">Platform Importer</string>
   <string name="Emulators.Dialogs.LaunchGame">Launch Game</string>
+  <string name="Emulators.Dialogs.SwitchView">Switch View</string>
 </resources>

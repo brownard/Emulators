@@ -16,7 +16,7 @@ namespace Emulators.MediaPortal2.Actions
     {
         public IResourceString DisplayTitle
         {
-            get { return LocalizationHelper.CreateResourceString("[Emulators.SwitchView]"); }
+            get { return LocalizationHelper.CreateResourceString("[Emulators.Dialogs.SwitchView]"); }
         }
 
         public void Execute()
@@ -25,6 +25,9 @@ namespace Emulators.MediaPortal2.Actions
             ItemsList items = new ItemsList();
             foreach (string key in startupStates.Keys)
             {
+                if (startupStates[key] == StartupState.LASTUSED)
+                    continue;
+
                 string lKey = key;
                 items.Add(new ListItem(Consts.KEY_NAME, LocalizationHelper.CreateResourceString(key))
                 {
@@ -36,7 +39,7 @@ namespace Emulators.MediaPortal2.Actions
             }
 
             var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
-            dialog.ShowDialog("[Emulators.SelectGoodmerge]", items);
+            dialog.ShowDialog("[Emulators.Dialogs.SwitchView]", items);
         }
 
         public void Initialize()
