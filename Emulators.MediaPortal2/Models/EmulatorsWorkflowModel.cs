@@ -22,7 +22,7 @@ namespace Emulators.MediaPortal2
     public class EmulatorsWorkflowModel : IWorkflowModel, IPluginStateTracker
     {
         #region Static Methods
-        
+
         public static NavigationData GetNavigationData(NavigationContext context)
         {
             return context == null ? null : context.GetContextVariable(NavigationData.NAVIGATION_DATA, false) as NavigationData;
@@ -280,27 +280,23 @@ namespace Emulators.MediaPortal2
             Game game = selectedGame.Game;
             List<string> files = SharpCompressExtractor.ViewFiles(game.CurrentDisc.Path);
             int matchIndex = GoodmergeHandler.GetFileIndex(game.CurrentDisc.LaunchFile, files, game.CurrentProfile.GetGoodmergeTags());
-            if (files != null)
+            if (files == null || files.Count == 0)
+                return;
+
+            for (int x = 0; x < files.Count; x++)
             {
-                for (int x = 0; x < files.Count; x++)
+                string file = files[x];
+                items.Add(new ListItem(Consts.KEY_NAME, file)
                 {
-                    string file = files[x];
-                    items.Add(new ListItem(Consts.KEY_NAME, file)
+                    Selected = x == matchIndex,
+                    Command = new MethodDelegateCommand(() =>
                     {
-                        Selected = x == matchIndex,
-                        Command = new MethodDelegateCommand(() =>
-                        {
-                            game.CurrentDisc.LaunchFile = file;
-                            game.CurrentDisc.Commit();
-                        })
-                    });
-                }
-                if (items.Count > 0)
-                {
-                    var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
-                    dialog.ShowDialog("[Emulators.SelectGoodmerge]", items);
-                }
+                        game.CurrentDisc.LaunchFile = file;
+                        game.CurrentDisc.Commit();
+                    })
+                });
             }
+            ListDialogModel.Instance().ShowDialog("[Emulators.SelectGoodmerge]", items);
         }
 
         #endregion
@@ -360,6 +356,8 @@ namespace Emulators.MediaPortal2
 
         #endregion
 
+        #region IPluginStateTracker
+
         public void Activated(PluginRuntime pluginRuntime)
         {
             EmulatorsCore.Init(new EmulatorsSettings());
@@ -368,11 +366,11 @@ namespace Emulators.MediaPortal2
 
         public void Continue()
         {
-            
+
         }
 
         public bool RequestEnd()
-        {            
+        {
             return true;
         }
 
@@ -384,7 +382,9 @@ namespace Emulators.MediaPortal2
 
         public void Stop()
         {
-            
+
         }
+
+        #endregion
     }
 }

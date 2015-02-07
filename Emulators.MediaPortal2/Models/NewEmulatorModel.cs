@@ -109,9 +109,7 @@ namespace Emulators.MediaPortal2
                         Command = new MethodDelegateCommand(() => { Platform = platformName; })
                     });
             }
-
-            var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
-            dialog.ShowDialog("[Emulators.SelectPlatform]", items);
+            ListDialogModel.Instance().ShowDialog("[Emulators.SelectPlatform]", items);
         }
 
         public void FinishEmulatorConfig()

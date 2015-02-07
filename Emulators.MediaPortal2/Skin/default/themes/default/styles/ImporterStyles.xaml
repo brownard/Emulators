@@ -13,18 +13,29 @@
                     <Grid x:Name="ItemControl">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <DockPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="0,0,4,0">
-                            <Image x:Name="ItemTypeLarge" Stretch="Uniform" Source="{Binding FrontCover}" FallbackSource="VideoLarge.png" Width="178" Height="100">
-                            </Image>
-                        </DockPanel>
-                        <Label x:Name="ItemLabel" Grid.Row="0" Grid.Column="1" Content="{Binding Name}"
+                        
+                        <Image x:Name="ItemTypeLarge" Grid.Row="0" Grid.Column="0" 
+                               Stretch="Uniform" Source="{Binding FrontCover}" Width="40" Height="40" Margin="10">
+                            <Image.Source>
+                                <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} == {RomMatchStatus}.{Committed} ? {1} : ({0} == {RomMatchStatus}.{Approved} ? {2} : ({0} == {RomMatchStatus}.{NeedsInput} ? {3} : {4}))">
+                                    <Binding Path="Status"/>
+                                    <Binding Source="Committed.png"/>
+                                    <Binding Source="Approved.png"/>
+                                    <Binding Source="NeedsInput.png"/>
+                                    <Binding Source="Pending.png"/>
+                                </MultiBinding>
+                            </Image.Source>
+                        </Image>
+                        <Label x:Name="ItemLabel" Grid.Row="0" Grid.Column="1" Content="{Binding Name}" VerticalAlignment="Center"
+                            Color="{ThemeResource TextColor}" FontSize="{ThemeResource SmallFontSize}"/>
+                        <Label x:Name="ItemStatus" Grid.Row="0" Grid.Column="3" Content="{Binding CurrentMatch}" VerticalAlignment="Center"
                             Color="{ThemeResource TextColor}" FontSize="{ThemeResource SmallFontSize}"/>
                     </Grid>
                 </ControlTemplate>
@@ -44,6 +55,7 @@
                         <Button.Triggers>
                             <Trigger Property="HasFocus" Value="True">
                                 <Setter TargetName="ItemLabel" Property="Scroll" Value="Auto"/>
+                                <Setter TargetName="ItemStatus" Property="Scroll" Value="Auto"/>
                                 <Setter Property="StackPanel.ZIndex" Value="100.0"/>
                             </Trigger>
                         </Button.Triggers>                        

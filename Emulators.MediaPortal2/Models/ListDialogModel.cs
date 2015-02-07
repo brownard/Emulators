@@ -18,6 +18,11 @@ namespace Emulators.MediaPortal2
         public string Header { get; private set; }
         public ItemsList Items { get; private set; }
 
+        public static ListDialogModel Instance()
+        {
+            return (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
+        }
+
         public void ShowDialog(string header, ItemsList items)
         {
             Header = header;

@@ -101,6 +101,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Content>
+    <Content Include="Skin\default\themes\default\images\Approved.png" />
+    <Content Include="Skin\default\themes\default\images\Committed.png" />
+    <Content Include="Skin\default\themes\default\images\NeedsInput.png" />
+    <Content Include="Skin\default\themes\default\images\Pending.png" />
     <Content Include="Skin\default\themes\default\styles\EmulatorsStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

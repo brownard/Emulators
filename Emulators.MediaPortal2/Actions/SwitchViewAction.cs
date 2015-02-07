@@ -37,9 +37,7 @@ namespace Emulators.MediaPortal2.Actions
                     })
                 });
             }
-
-            var dialog = (ListDialogModel)ServiceRegistration.Get<IWorkflowManager>().GetModel(Guids.ListDialogModel);
-            dialog.ShowDialog("[Emulators.Dialogs.SwitchView]", items);
+            ListDialogModel.Instance().ShowDialog("[Emulators.Dialogs.SwitchView]", items);
         }
 
         public void Initialize()

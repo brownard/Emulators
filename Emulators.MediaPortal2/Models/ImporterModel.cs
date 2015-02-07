@@ -27,9 +27,10 @@ namespace Emulators.MediaPortal2.Models
             _progressProperty = new WProperty(typeof(int), 0);
         }
 
-        public void SelectItem(RomMatchViewModel viewModel)
+        public void SelectItem(RomMatchViewModel romMatchModel)
         {
-            
+            if (romMatchModel.Command != null)
+                romMatchModel.Command.Execute();
         }
 
         void initImporter()
