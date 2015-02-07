@@ -25,16 +25,6 @@ namespace Emulators.MediaPortal2
             this.romMatch = romMatch;
             Update();
         }
-        public RomMatchViewModel()
-        {
-            _statusProperty = new WProperty(typeof(string), null);
-            _nameProperty = new WProperty(typeof(string), null);
-            _currentMatchProperty = new WProperty(typeof(string), null);
-
-            Name = "testName";
-            Status = "testStatus";
-            CurrentMatch = "testMatch";
-        }
 
         public void Update()
         {
