@@ -13,11 +13,6 @@ namespace Emulators.Scrapers
         public string Title { get; private set; }
         public string System { get; private set; }
         public string Year { get; private set; }
-        public string BoxFrontUrl { get; set; }
-        public string BoxBackUrl { get; set; }
-        public string TitleScreenUrl { get; set; }
-        public string InGameUrl { get; set; }
-        public string FanartUrl { get; set; }
 
         public int SearchDistance { get; set; }
         public ScraperSearchParams SearchParams { get; set; }
