@@ -14,9 +14,9 @@ namespace Emulators.MediaPortal2.Models
     public class ImporterModel : IWorkflowModel
     {
         object syncRoot = new object();
-        Importer importer;
         Dictionary<int, RomMatchViewModel> itemsDictionary;
         ItemsList items;
+        bool importerInit;
 
         AbstractProperty _statusProperty;
         AbstractProperty _progressProperty;
@@ -36,16 +36,21 @@ namespace Emulators.MediaPortal2.Models
         {
             lock (syncRoot)
             {
-                if (importer != null)
+                if (importerInit)
                     return;
 
                 itemsDictionary = new Dictionary<int, RomMatchViewModel>();
                 items = new ItemsList();
-                importer = new Importer();
-                importer.ImportStatusChanged += importer_ImportStatusChanged;
-                importer.ProgressChanged += importer_ProgressChanged;
-                importer.RomStatusChanged += importer_RomStatusChanged;
-                importer.Start();
+                var model = EmulatorsWorkflowModel.Instance();
+                if (model != null)
+                {
+                    Importer importer = model.Importer;
+                    importer.ImportStatusChanged += importer_ImportStatusChanged;
+                    importer.ProgressChanged += importer_ProgressChanged;
+                    importer.RomStatusChanged += importer_RomStatusChanged;
+                    importer.Start();
+                    importerInit = true;
+                }
             }
         }
 
@@ -63,7 +68,14 @@ namespace Emulators.MediaPortal2.Models
         void importer_ImportStatusChanged(object sender, ImportStatusEventArgs e)
         {
             if (e.Action == ImportAction.PendingFilesAdded)
+            {
                 rebuildItemsList(e.NewItems);
+            }
+            else if(e.Action == ImportAction.NoFilesFound)
+            {
+                Progress = 100;
+                Status = "[Emulators.Import.NoFilesToImport]";
+            }
         }
 
         void updateItem(RomMatch romMatch)
@@ -137,8 +149,6 @@ namespace Emulators.MediaPortal2.Models
 
         public void EnterModelContext(NavigationContext oldContext, NavigationContext newContext)
         {
-            //items = new ItemsList();
-            //items.Add(new RomMatchViewModel());
             initImporter();
         }
 

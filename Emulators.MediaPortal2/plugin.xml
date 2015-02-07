@@ -20,6 +20,7 @@
   <Runtime>
     <Assembly FileName="Emulators.MediaPortal2.dll"/>
     <Assembly FileName="Emulators.dll"/>
+    <PluginStateTracker ClassName="Emulators.MediaPortal2.EmulatorsWorkflowModel"/>
   </Runtime>
 
   <Register Location="/Models">

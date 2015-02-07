@@ -21,4 +21,6 @@
   <string name="Emulators.Dialogs.PlatformImporter">Platform Importer</string>
   <string name="Emulators.Dialogs.LaunchGame">Launch Game</string>
   <string name="Emulators.Dialogs.SwitchView">Switch View</string>
+
+  <string name="Emulators.Import.NoFilesToImport">No files to import</string>
 </resources>

@@ -1,10 +1,12 @@
 ﻿using Emulators.Database;
+using Emulators.Import;
 using Emulators.Launcher;
 using Emulators.MediaPortal2.Navigation;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using MediaPortal.Common.PathManager;
+using MediaPortal.Common.PluginManager;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
 using MediaPortal.UI.Presentation.Workflow;
@@ -17,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2
 {
-    public class EmulatorsWorkflowModel : IWorkflowModel
+    public class EmulatorsWorkflowModel : IWorkflowModel, IPluginStateTracker
     {
         #region Static Methods
         
@@ -69,6 +71,7 @@ namespace Emulators.MediaPortal2
 
         NavigationData navigationData;
         GameLauncherDialog currentLauncher;
+        Importer importer;
 
         #endregion
 
@@ -76,16 +79,9 @@ namespace Emulators.MediaPortal2
 
         public EmulatorsWorkflowModel()
         {
-            EmulatorsCore.Init(new EmulatorsSettings());
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
             _focusedItemProperty = new WProperty(typeof(ItemViewModel), null);
             _headerProperty = new WProperty(typeof(string));
-            Items = new ItemsList();
-        }
-
-        ~EmulatorsWorkflowModel()
-        {
-            EmulatorsCore.Options.Save();
         }
 
         #endregion
@@ -95,6 +91,11 @@ namespace Emulators.MediaPortal2
         public NavigationData NavigationData
         {
             get { return navigationData; }
+        }
+
+        public Importer Importer
+        {
+            get { return importer; }
         }
 
         public ItemsList Items
@@ -221,9 +222,9 @@ namespace Emulators.MediaPortal2
             if (navigationData != null)
             {
                 Header = navigationData.DisplayName;
-                if (updateList)
+                ItemsList items = Items;
+                if (items != null && updateList)
                 {
-                    ItemsList items = Items;
                     items.Clear();
                     foreach (ListItem item in navigationData.ItemsList)
                         items.Add(item);
@@ -231,7 +232,7 @@ namespace Emulators.MediaPortal2
                 }
                 else
                 {
-                    ItemsList items = new ItemsList();
+                    items = new ItemsList();
                     foreach (ListItem item in navigationData.ItemsList)
                         items.Add(item);
                     Items = items;
@@ -358,5 +359,32 @@ namespace Emulators.MediaPortal2
         }
 
         #endregion
+
+        public void Activated(PluginRuntime pluginRuntime)
+        {
+            EmulatorsCore.Init(new EmulatorsSettings());
+            importer = new Importer();
+        }
+
+        public void Continue()
+        {
+            
+        }
+
+        public bool RequestEnd()
+        {            
+            return true;
+        }
+
+        public void Shutdown()
+        {
+            importer.Stop();
+            EmulatorsCore.Options.Save();
+        }
+
+        public void Stop()
+        {
+            
+        }
     }
 }
