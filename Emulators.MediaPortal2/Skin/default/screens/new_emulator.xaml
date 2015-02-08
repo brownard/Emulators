@@ -36,6 +36,7 @@
                         <RowDefinition Height="20"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Label x:Name="PathLabel" Grid.Row="0" Grid.Column="0"
@@ -62,6 +63,11 @@
                         Content="[Emulators.Filters]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
                     <TextBox x:Name="Filters" Grid.Row="6" Grid.Column="1"
                         Text="{Binding Path=Filters, Mode=TwoWay}" Margin="10,10,10,0"/>
+
+                    <Label x:Name="EnableGoodmergeLabel" Grid.Row="7" Grid.Column="0"
+                        Content="[Emulators.EnableGoodmerge]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
+                    <CheckBox x:Name="EnableGoodmerge" Grid.Row="7" Grid.Column="1"
+                        IsChecked="{Binding Path=EnableGoodmerge, Mode=TwoWay}" Margin="10,10,10,0"/>
 
                 </Grid>
                 <Grid Grid.Row="1">

@@ -25,6 +25,7 @@ namespace Emulators.MediaPortal2
         protected AbstractProperty _platformProperty = new WProperty(typeof(string), null);
         protected AbstractProperty _romDirectoryProperty = new WProperty(typeof(string), null);
         protected AbstractProperty _filtersProperty = new WProperty(typeof(string), null);
+        protected AbstractProperty _enableGoodmergeProperty = new WProperty(typeof(bool), false);
         protected AbstractProperty _isEmulatorValidProperty = new WProperty(typeof(bool), false);
 
         #endregion
@@ -75,6 +76,13 @@ namespace Emulators.MediaPortal2
             set { _filtersProperty.SetValue(value); }
         }
 
+        public AbstractProperty EnableGoodmergeProperty { get { return _enableGoodmergeProperty; } }
+        public bool EnableGoodmerge
+        {
+            get { return (bool)_enableGoodmergeProperty.GetValue(); }
+            set { _enableGoodmergeProperty.SetValue(value); }
+        }
+
         public AbstractProperty IsEmulatorValidProperty { get { return _isEmulatorValidProperty; } }
         public bool IsEmulatorValid
         {
@@ -119,7 +127,9 @@ namespace Emulators.MediaPortal2
             newEmulator.Platform = Platform;
             newEmulator.Filter = Filters;
             newEmulator.PathToRoms = RomDirectory;
+
             newEmulator.DefaultProfile.EmulatorPath = EmulatorPath;
+            newEmulator.DefaultProfile.EnableGoodmerge = EnableGoodmerge;
             if (currentConfig != null)
             {
                 newEmulator.CaseAspect = currentConfig.CaseAspect;
