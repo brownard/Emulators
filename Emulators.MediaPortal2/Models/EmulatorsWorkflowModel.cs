@@ -10,6 +10,7 @@ using MediaPortal.Common.PluginManager;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
 using MediaPortal.UI.Presentation.Workflow;
+using MediaPortal.UI.SkinEngine.MpfElements;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -80,7 +81,7 @@ namespace Emulators.MediaPortal2
         public EmulatorsWorkflowModel()
         {
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
-            _focusedItemProperty = new WProperty(typeof(ItemViewModel), null);
+            _focusedItemProperty = new WProperty(typeof(ListItem), null);
             _headerProperty = new WProperty(typeof(string));
         }
 
@@ -112,16 +113,10 @@ namespace Emulators.MediaPortal2
         }
 
         public AbstractProperty FocusedItemProperty { get { return _focusedItemProperty; } }
-        public ItemViewModel FocusedItem
+        public ListItem FocusedItem
         {
             get { return (ItemViewModel)_focusedItemProperty.GetValue(); }
-            set
-            {
-                if (value != null)
-                {
-                    _focusedItemProperty.SetValue(value);
-                }
-            }
+            set { _focusedItemProperty.SetValue(value); }
         }
 
         public AbstractProperty LayoutTypeProperty { get { return _layoutTypeProperty; } }
@@ -141,6 +136,13 @@ namespace Emulators.MediaPortal2
         #endregion
 
         #region Public Methods
+
+        public void SetFocusedItem(object sender, SelectionChangedEventArgs e)
+        {
+            ListItem item = e.FirstAddedItem as ListItem;
+            if (item != null)
+                FocusedItem = item;
+        }
 
         public void SelectItem(ItemViewModel item)
         {
