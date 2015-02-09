@@ -140,7 +140,7 @@ namespace Emulators
             set;
         }
         
-        RomMatchStatus status = RomMatchStatus.PendingHash;
+        RomMatchStatus status = RomMatchStatus.PendingMatch;
         public RomMatchStatus Status
         {
             get { return status; }
@@ -166,13 +166,11 @@ namespace Emulators
 
     public enum RomMatchStatus
     {
-        PendingHash = 0,
-        PendingServer = 1,
-        PendingMatch = 2,
-        Approved = 3,
-        Committed = 4,
-        NeedsInput = 5,
-        Removed = 6,
-        Ignored = 7
+        PendingMatch = 1,
+        Approved = 2,
+        Committed = 3,
+        NeedsInput = 4,
+        Removed = 5,
+        Ignored = 6
     }
 }

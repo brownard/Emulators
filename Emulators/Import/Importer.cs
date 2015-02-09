@@ -55,28 +55,26 @@ namespace Emulators.Import
     }
     #endregion
 
-    //Scans the file system and attempts to retrieve details for any new items.
-    //The importer is based on code from MovingPictures. Credits to the MovingPictures team!
     public class Importer
     {
-        //CommunityServerWCFServiceClient client = null;
-        //DateTime lastConnectionErrorTime = new DateTime();
         int threadCount = 5;
         int hashThreadCount = 2;
-        /// <summary>
-        /// used to synchronise Start() and Stop()
-        /// </summary>
         readonly object syncRoot = new object();
+
         volatile bool doWork = false;
-        /// <summary>
-        /// Used to store a complete list of roms currently importing
-        /// </summary>
-        Dictionary<int, RomMatch> lookupMatch;
+        ManualResetEventSlim doWorkWaitHandle = new ManualResetEventSlim();
+        volatile bool pause = false;
+        ManualResetEventSlim unPauseWaitHandle = new ManualResetEventSlim(true);
+
         readonly object lookupSync = new object();
+        Dictionary<int, RomMatch> lookupMatch;
 
         List<Thread> importerThreads;
         volatile int percentDone = 0;
-        volatile bool pause = false;
+
+        bool isBackground = false;
+        bool justRefresh = false;
+        ScraperProvider scraperProvider = null;
 
         #region Constructors
 
@@ -84,14 +82,7 @@ namespace Emulators.Import
         {
             init();
         }
-
-        /// <summary>
-        /// Creates a new Importer with the specified background state.
-        /// </summary>
-        /// <param name="isBackground">
-        /// If true the importer will start downloading data immediately, else the importer will
-        /// return a list of files to import and await a call to StartRetrieving()
-        /// </param>
+        
         public Importer(bool isBackground, bool justRefresh = false)
         {
             this.isBackground = isBackground;
@@ -135,7 +126,7 @@ namespace Emulators.Import
         void scanProgress(string message)
         {
             UpdatePercentDone();
-            int processed = lookupMatch.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
+            int processed = lookupMatch.Count - pendingMatches.Count - priorityPendingMatches.Count;
             int total = lookupMatch.Count;
             OnProgressChanged(new ImportProgressEventArgs(percentDone, processed, total, message));
         }
@@ -144,7 +135,7 @@ namespace Emulators.Import
         {
             UpdatePercentDone();
             int total = lookupMatch.Count - matchesNeedingInput.Count;
-            int processed = total - approvedMatches.Count - priorityApprovedMatches.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
+            int processed = total - approvedMatches.Count - priorityApprovedMatches.Count - pendingMatches.Count - priorityPendingMatches.Count;
             OnProgressChanged(new ImportProgressEventArgs(percentDone, processed, total, message));
         }
 
@@ -163,7 +154,7 @@ namespace Emulators.Import
             }
 
             // calculate the number of actions completed so far
-            int mediaScanned = lookupMatch.Count - pendingMatches.Count - priorityPendingMatches.Count - pendingServer.Count - priorityPendingServer.Count - pendingHashes.Count - priorityPendingHashes.Count;
+            int mediaScanned = lookupMatch.Count - pendingMatches.Count - priorityPendingMatches.Count;
             int mediaCommitted = commitedMatches.Count;
 
             percentDone = (int)Math.Round(((double)mediaScanned + mediaCommitted) * 100 / ((double)totalActions));
@@ -176,18 +167,10 @@ namespace Emulators.Import
 
         #region Public Properties
 
-        bool isBackground = false;
-        bool justRefresh = false;
         public bool JustRefresh
         {
             get { return justRefresh; }
             set { justRefresh = value; }
-        }
-
-        ScraperProvider scraperProvider = null;
-        internal ScraperProvider ScraperProvider
-        {
-            get { return scraperProvider; }
         }
 
         object importStatusLock = new object();
@@ -211,35 +194,11 @@ namespace Emulators.Import
             }
         }
 
-        // Matches that have not yet been hashed.
-        ReadOnlyCollection<RomMatch> PendingHashes
-        {
-            get { return pendingHashes.AsReadOnly(); }
-        } private List<RomMatch> pendingHashes;
-
-        // Matches that have not yet been checked with the community server.
-        public ReadOnlyCollection<RomMatch> PendingServer
-        {
-            get { return pendingServer.AsReadOnly(); }
-        } private List<RomMatch> pendingServer;
-
         // Matches that have not yet been scraped.
         public ReadOnlyCollection<RomMatch> PendingMatches
         {
             get { return pendingMatches.AsReadOnly(); }
         } private List<RomMatch> pendingMatches;
-
-        // Same as PendingHashes, but this list gets priority. Used for user based interaction.
-        public ReadOnlyCollection<RomMatch> PriorityPendingHashes
-        {
-            get { return priorityPendingHashes.AsReadOnly(); }
-        } private List<RomMatch> priorityPendingHashes;
-
-        // Same as PendingServer, but this list gets priority. Used for user based interaction.
-        public ReadOnlyCollection<RomMatch> PriorityPendingServer
-        {
-            get { return priorityPendingServer.AsReadOnly(); }
-        } private List<RomMatch> priorityPendingServer;
 
         // Same as PendingMatches, but this list gets priority. Used for user based interaction.
         public ReadOnlyCollection<RomMatch> PriorityPendingMatches
@@ -252,12 +211,6 @@ namespace Emulators.Import
         {
             get { return matchesNeedingInput.AsReadOnly(); }
         } private List<RomMatch> matchesNeedingInput;
-
-        // Matches that the importer is currently pulling details for
-        public ReadOnlyCollection<RomMatch> RetrievingDetailsMatches
-        {
-            get { return retrievingDetailsMatches.AsReadOnly(); }
-        } private List<RomMatch> retrievingDetailsMatches;
 
         // Matches that are accepted and are awaiting details retrieval and commital. 
         public ReadOnlyCollection<RomMatch> ApprovedMatches
@@ -296,16 +249,11 @@ namespace Emulators.Import
                 if (hashThreadCount < 1)
                     hashThreadCount = 1;
 
-                pendingHashes = new List<RomMatch>();
-                pendingServer = new List<RomMatch>();
                 pendingMatches = new List<RomMatch>();
-                priorityPendingHashes = new List<RomMatch>();
-                priorityPendingServer = new List<RomMatch>();
                 priorityPendingMatches = new List<RomMatch>();
                 matchesNeedingInput = new List<RomMatch>();
                 approvedMatches = new List<RomMatch>();
                 priorityApprovedMatches = new List<RomMatch>();
-                retrievingDetailsMatches = new List<RomMatch>();
                 commitedMatches = new List<RomMatch>();
 
                 importerThreads = new List<Thread>();
@@ -320,20 +268,13 @@ namespace Emulators.Import
             lock (syncRoot)
             {
                 ImporterStatus = ImportAction.ImportStarting;
-
-                //if (EmulatorsCore.Options.GetBoolOption("retrieveGameDetials") || EmulatorsCore.Options.GetBoolOption("submitGameDetails"))
-                //{
-                    //var myBinding = new BasicHttpBinding();
-                    //var myEndpoint = new EndpointAddress("http://" + EmulatorsCore.Options.GetStringOption("communityServerAddress") + "/CommunityServerService/service");
-                    //client = new CommunityServerWCFServiceClient(myBinding, myEndpoint);
-                //}
-
                 doWork = true;
+
                 if (importerThreads.Count == 0)
                 {
                     if (!justRefresh) //start retrieving immediately
                     {
-                        ScanRomsDelegate scanMethod;
+                        Action scanMethod;
                         if (isBackground)
                             scanMethod = scanRomsBackground; //retrieve info as soon as match found
                         else
@@ -482,9 +423,9 @@ namespace Emulators.Import
 
                     game.InfoChecked = false;
                     game.SaveInfoCheckedStatus();
-                    setRomStatus(romMatch, RomMatchStatus.PendingHash);
-                    lock (priorityPendingHashes)
-                        priorityPendingHashes.Add(romMatch);
+                    setRomStatus(romMatch, RomMatchStatus.PendingMatch);
+                    lock (priorityPendingMatches)
+                        priorityPendingMatches.Add(romMatch);
 
                 });
 
@@ -511,7 +452,7 @@ namespace Emulators.Import
                 lock (romMatch.SyncRoot)
                 {
                     RemoveFromMatchLists(romMatch);
-                    romMatch.Status = RomMatchStatus.PendingHash;
+                    romMatch.Status = RomMatchStatus.PendingMatch;
                     romMatch.HighPriority = true;
                     romMatch.CurrentThreadId = null;
                     romMatch.GameDetails = null;
@@ -521,9 +462,9 @@ namespace Emulators.Import
             }
             romMatch.Game.InfoChecked = false;
             romMatch.Game.SaveInfoCheckedStatus();
-            setRomStatus(romMatch, RomMatchStatus.PendingHash);
-            lock (priorityPendingHashes)
-                priorityPendingHashes.Add(romMatch);
+            setRomStatus(romMatch, RomMatchStatus.PendingMatch);
+            lock (priorityPendingMatches)
+                priorityPendingMatches.Add(romMatch);
         }
 
         public void Approve(RomMatch romMatch)
@@ -652,71 +593,23 @@ namespace Emulators.Import
 
         #region Scan Logic
         // The main loop that the import threads will run, checks for pending actions and updates status
-        void scanRoms(ScanRomsDelegate scanMethod, bool raiseEvents)
+        void scanRoms(Action scanMethod, bool raiseEvents)
         {
             try
             {
-                bool processHashes = true;
-                bool skippedHash = false;
                 while (doWork)
                 {
-                    if (pause)
-                    {
-                        if (raiseEvents)
-                            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.ImportPaused, null));
-                        while (pause)
-                            if (!checkAndWait(100, 10, true))
-                                return;
-                        if (raiseEvents)
-                            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.ImportResumed, null));
-                    }
-
-                    int previousCommittedCount = commitedMatches.Count;
-                    int previousMatchesCount = lookupMatch.Count;
-                    // if there is nothing to process, then sleep
-                    while (pendingHashes.Count == 0 &&
-                           pendingServer.Count == 0 &&
-                           pendingMatches.Count == 0 &&
-                           approvedMatches.Count == 0 &&
-                           priorityPendingMatches.Count == 0 &&
-                           priorityApprovedMatches.Count == 0 &&
-                           priorityPendingHashes.Count == 0 &&
-                           priorityPendingServer.Count == 0 &&
-                           commitedMatches.Count == previousCommittedCount &&
-                           previousMatchesCount == lookupMatch.Count &&
-                           doWork
-                           )
-                    {
-                        if (!checkAndWait(100, 10, false))
-                            return;
-                    }
-
-                    if (skippedHash)
-                    {
-                        processHashes = true;
-                        skippedHash = false;
-                    }
-                    if (!processHashes)
-                        skippedHash = true;
-
-                    scanMethod.Invoke(ref processHashes);
-
-                    if (!doWork)
+                    checkPauseState(raiseEvents);
+                    if (!checkForPendingItems())
                         return;
-
+                    scanMethod.Invoke();
                     UpdatePercentDone();
+
                     lock (importStatusLock)
                     {
                         if (!doWork)
                             return;
-
-                        // if we are now just waiting on the user, say so
-                        if (pendingHashes.Count == 0 && priorityPendingHashes.Count == 0 &&
-                            pendingServer.Count == 0 && priorityPendingServer.Count == 0 &&
-                            pendingMatches.Count == 0 && approvedMatches.Count == 0 &&
-                            priorityPendingMatches.Count == 0 && priorityApprovedMatches.Count == 0 &&
-                            lookupMatch.Count == commitedMatches.Count + matchesNeedingInput.Count &&
-                            matchesNeedingInput.Count > 0)
+                        if (checkIfWaitingForApprovals())
                         {
                             OnProgressChanged(new ImportProgressEventArgs(percentDone, 0, matchesNeedingInput.Count, "Waiting for Approvals..."));
                             if (isBackground)
@@ -727,25 +620,17 @@ namespace Emulators.Import
                             }
                         }
 
-                        // if we are now just waiting on the user, say so
-                        if (pendingHashes.Count == 0 && priorityPendingHashes.Count == 0 &&
-                            pendingServer.Count == 0 && priorityPendingServer.Count == 0 &&
-                            pendingMatches.Count == 0 && approvedMatches.Count == 0 &&
-                            priorityPendingMatches.Count == 0 && priorityApprovedMatches.Count == 0 &&
-                            matchesNeedingInput.Count == 0)
+                        if (checkIfAllItemsProcessed())
                         {
-                            if (commitedMatches.Count == lookupMatch.Count)
-                            {
-                                UpdatePercentDone();
-                                if (percentDone == 100)
-                                    OnProgressChanged(new ImportProgressEventArgs(100, 0, 0, "Done!"));
+                            UpdatePercentDone();
+                            if (percentDone == 100)
+                                OnProgressChanged(new ImportProgressEventArgs(100, 0, 0, "Done!"));
 
-                                if (isBackground)
-                                {
-                                    doWork = false;
-                                    ImporterStatus = ImportAction.ImportFinished;
-                                    return;
-                                }
+                            if (isBackground)
+                            {
+                                doWork = false;
+                                ImporterStatus = ImportAction.ImportFinished;
+                                return;
                             }
                         }
                     }
@@ -757,23 +642,64 @@ namespace Emulators.Import
             }
         }
 
-        delegate void ScanRomsDelegate(ref bool processHashes);
+        void checkPauseState(bool raiseEvents)
+        {
+            if (pause)
+            {
+                if (raiseEvents)
+                    OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.ImportPaused, null));
+                while (pause)
+                    if (!checkAndWait(100, 10, true))
+                        return;
+                if (raiseEvents)
+                    OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.ImportResumed, null));
+            }
+        }
+
+        bool checkForPendingItems()
+        {
+            int previousCommittedCount = commitedMatches.Count;
+            int previousMatchesCount = lookupMatch.Count;
+            // if there is nothing to process, then sleep
+            while (pendingMatches.Count == 0 &&
+                   approvedMatches.Count == 0 &&
+                   priorityPendingMatches.Count == 0 &&
+                   priorityApprovedMatches.Count == 0 &&
+                   commitedMatches.Count == previousCommittedCount &&
+                   previousMatchesCount == lookupMatch.Count &&
+                   doWork
+                   )
+            {
+                if (!checkAndWait(100, 10, false))
+                    return false;
+            }
+            return true;
+        }
+
+        bool checkIfWaitingForApprovals()
+        {
+            return pendingMatches.Count == 0 && approvedMatches.Count == 0 &&
+                   priorityPendingMatches.Count == 0 && priorityApprovedMatches.Count == 0 &&
+                   lookupMatch.Count == commitedMatches.Count + matchesNeedingInput.Count &&
+                   matchesNeedingInput.Count > 0;
+        }
+
+        bool checkIfAllItemsProcessed()
+        {
+            return pendingMatches.Count == 0 && approvedMatches.Count == 0 &&
+                   priorityPendingMatches.Count == 0 && priorityApprovedMatches.Count == 0 &&
+                   commitedMatches.Count == lookupMatch.Count &&
+                   matchesNeedingInput.Count == 0;
+        }
+
         // The order is to have the user selected roms be done first, and then the standard import order second.
         // The order needs to be Hash, Server, Pending Matches, Approved Matches
-        void scanRomsDefault(ref bool processHashes)
+        void scanRomsDefault()
         {
-            if (processHashes && priorityPendingHashes.Count > 0)
-                processHashes = processNextPendingHash(true);
-            else if (priorityPendingServer.Count > 0)
-                processNextPendingServer(true);
-            else if (priorityPendingMatches.Count > 0)
+            if (priorityPendingMatches.Count > 0)
                 processNextPendingMatch(true);
             else if (priorityApprovedMatches.Count > 0)
                 processNextApprovedMatch(true);
-            else if (processHashes && pendingHashes.Count > 0)
-                processHashes = processNextPendingHash(false);
-            else if (pendingServer.Count > 0)
-                processNextPendingServer(false);
             else if (pendingMatches.Count > 0)
                 processNextPendingMatch(false);
             else if (approvedMatches.Count > 0)
@@ -781,24 +707,16 @@ namespace Emulators.Import
         }
 
         //alternate order when background, get info asap so GUI can be updated
-        void scanRomsBackground(ref bool processHashes)
+        void scanRomsBackground()
         {
             if (priorityApprovedMatches.Count > 0)
                 processNextApprovedMatch(true);
             else if (priorityPendingMatches.Count > 0)
                 processNextPendingMatch(true);
-            else if (priorityPendingServer.Count > 0)
-                processNextPendingServer(true);
-            else if (processHashes && priorityPendingHashes.Count > 0)
-                processHashes = processNextPendingHash(true);
             else if (approvedMatches.Count > 0)
                 processNextApprovedMatch(false);
             else if (pendingMatches.Count > 0)
                 processNextPendingMatch(false);
-            else if (pendingServer.Count > 0)
-                processNextPendingServer(false);
-            else if (processHashes && pendingHashes.Count > 0)
-                processHashes = processNextPendingHash(false);
         }
         #endregion
 
@@ -836,10 +754,8 @@ namespace Emulators.Import
                             if (!lookupMatch.ContainsKey(romMatch.ID))
                             {
                                 lookupMatch[romMatch.ID] = romMatch;
-                                lock (pendingHashes)
-                                {
-                                    pendingHashes.Add(romMatch);
-                                }
+                                lock (pendingMatches)
+                                    pendingMatches.Add(romMatch);
                             }
                         }
                     }
@@ -985,14 +901,6 @@ namespace Emulators.Import
 
         void setListCapacities(int capacity)
         {
-            lock (pendingHashes)
-                pendingHashes.Capacity = capacity;
-            lock (priorityPendingHashes)
-                priorityPendingHashes.Capacity = capacity;
-            lock (pendingServer)
-                pendingServer.Capacity = capacity;
-            lock (priorityPendingServer)
-                priorityPendingServer.Capacity = capacity;
             lock (pendingMatches)
                 pendingMatches.Capacity = capacity;
             lock (priorityPendingMatches)
@@ -1007,157 +915,6 @@ namespace Emulators.Import
                 commitedMatches.Capacity = capacity;
         }
 
-        #endregion
-
-        #region Hash
-        //object hashLock = new object();
-        //int currentHashThreads = 0;
-
-        /// <summary>
-        /// CURRENTLY DISABLED UNTIL COMMUNITY SERVER READY
-        /// Grabs the next game in the list and hashes it.
-        /// </summary>
-        private bool processNextPendingHash(bool priorityOnly)
-        {
-            //lock (hashLock)
-            //{
-            //    if (currentHashThreads >= hashThreadCount)
-            //        return false;
-            //    currentHashThreads++;
-            //}
-
-            RomMatch romMatch = takeFromList(pendingHashes, priorityPendingHashes, priorityOnly);
-            if (romMatch == null)
-                return true;
-
-            //try
-            //{
-            //    Hasher.Hasher.Hashes hashes;
-            //    if (romMatch.Game.Hash.Trim().Length == 0)
-            //    {
-            //        hashes = Hasher.Hasher.CalculateHashes(romMatch.Game.Path, delegate(string fileName, int percentComplete)
-            //        {
-            //            if (romMatch.Ignore || !doWork)
-            //                return 0;
-            //            else
-            //                return OnHashProgress(fileName, percentComplete);
-            //        });
-            //    }
-            //    else
-            //    {
-            //        hashes = new Hasher.Hasher.Hashes();
-            //        hashes.ed2k = romMatch.Game.Hash;
-            //        hashes.crc32 = "";
-            //        hashes.md5 = "";
-            //        hashes.sha1 = "";
-            //    }
-
-            //    // Put hash into game object
-            //    romMatch.Game.Hash = hashes.ed2k;
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    Logger.LogError("Error hashing {0} - {1}", romMatch.Game.Title, ex.Message);
-            //    Logger.LogInfo("Importer: Ignoring {0}", romMatch.Game.Title);
-            //    Ignore(romMatch);
-
-            //    lock (hashLock)
-            //        currentHashThreads--;
-
-            //    return true;
-            //}
-
-            //lock (hashLock)
-            //    currentHashThreads--;
-
-
-            //// Pass game onto Community server queue
-            //if (romMatch.HighPriority)
-            //{
-            //    lock (priorityPendingServer.SyncRoot)
-            //    {
-            //        if (!romMatch.Ignore)
-            //            priorityPendingServer.Add(romMatch);
-            //    }
-            //}
-            //else
-            //{
-            //    lock (pendingServer.SyncRoot)
-            //    {
-            //        if (!romMatch.Ignore)
-            //            pendingServer.Add(romMatch);
-            //    }
-            //}
-
-            //skip straight to pending matches until community server finishes
-            addToList(romMatch, RomMatchStatus.PendingMatch, pendingMatches, priorityPendingMatches);
-            return true;
-        }
-
-        /// <summary>
-        /// Receives current percentage of the hash progress of the specific file
-        /// </summary>
-        /// <param name="fileName">Path of file being hashed</param>
-        /// <param name="percentComplete">Percentage of hash progress completed</param>
-        /// <returns></returns>
-        public int OnHashProgress(string fileName, int percentComplete)
-        {
-            UpdatePercentDone();
-            int processed = lookupMatch.Count - pendingHashes.Count - priorityPendingHashes.Count;
-            int total = lookupMatch.Count;
-            OnProgressChanged(new ImportProgressEventArgs(percentDone, processed, total, "Hashing File: " + fileName + " - " + percentComplete + "%"));
-            if (!doWork)
-                return 0;
-            return 1; //continue hashing (return 0 to abort)
-        }
-        #endregion
-
-        #region Server
-        private void processNextPendingServer(bool priorityOnly)
-        {
-            //RomMatch romMatch = takeFromList(pendingServer, priorityPendingServer, priorityOnly);
-            //if (romMatch == null)
-            //    return;
-
-            //// Get game info from community server.
-            //TimeSpan checkingTime = new TimeSpan(0, EmulatorsCore.Options.GetIntOption("communityServerConnectionRetryTime"), 0);
-            //DateTime checkTime = DateTime.Now.Subtract(checkingTime);
-
-            //myemulators2.v1.GameDetails receivedGameDetails = null;
-
-            //if (lastConnectionErrorTime > checkTime && EmulatorsCore.Options.GetBoolOption("retrieveGameDetials"))
-            //{
-            //    try
-            //    {
-            //        myemulators2.v1.GameDetails sendGameDetails = new myemulators2.v1.GameDetails();
-
-            //        sendGameDetails.Hash = romMatch.Game.Hash;
-            //        sendGameDetails.Filename = romMatch.Path;
-
-            //        receivedGameDetails = client.RequestGameDetials(sendGameDetails);
-
-            //        Logger.LogDebug("{0}", client.State.ToString());
-            //    }
-            //    catch (TimeoutException timeout)
-            //    {
-            //        // Handle the timeout exception.
-            //        Logger.LogError("Community Server Timeout Error: " + timeout.Message);
-            //        lastConnectionErrorTime = DateTime.Now;
-            //        client.Abort();
-            //    }
-            //    catch (CommunicationException commException)
-            //    {
-            //        // Handle the communication exception.
-            //        Logger.LogError("Community Server Error: " + commException.Message);
-            //        lastConnectionErrorTime = DateTime.Now;
-            //        client.Abort();
-            //    }
-            //}
-
-            //// Pass game onto meding matches queue
-            //addToList(romMatch, RomMatchStatus.PendingMatch, pendingMatches, priorityPendingMatches);
-        }
         #endregion
 
         #region Pending Matches
@@ -1393,34 +1150,6 @@ namespace Emulators.Import
         // removes the given match from all pending process lists
         private void RemoveFromMatchLists(RomMatch match)
         {
-            lock (pendingHashes)
-            {
-                if (pendingHashes.Contains(match))
-                    pendingHashes.Remove(match);
-            }
-
-            lock (priorityPendingHashes)
-            {
-                if (priorityPendingHashes.Contains(match))
-                {
-                    priorityPendingHashes.Remove(match);
-                }
-            }
-
-            lock (pendingServer)
-            {
-                if (pendingServer.Contains(match))
-                    pendingServer.Remove(match);
-            }
-
-            lock (priorityPendingServer)
-            {
-                if (priorityPendingServer.Contains(match))
-                {
-                    priorityPendingServer.Remove(match);
-                }
-            }
-
             lock (pendingMatches)
             {
                 if (pendingMatches.Contains(match))
@@ -1458,14 +1187,6 @@ namespace Emulators.Import
                 if (commitedMatches.Contains(match))
                 {
                     commitedMatches.Remove(match);
-                }
-            }
-
-            lock (retrievingDetailsMatches)
-            {
-                if (retrievingDetailsMatches.Contains(match))
-                {
-                    retrievingDetailsMatches.Remove(match);
                 }
             }
 
