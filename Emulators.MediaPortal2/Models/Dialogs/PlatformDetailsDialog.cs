@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Emulators.MediaPortal2.Models
+namespace Emulators.MediaPortal2.Models.Dialogs
 {
     class PlatformDetailsDialog
     {

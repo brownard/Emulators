@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.Models.Dialogs
 {
     public class ListDialogModel : BaseDialogModel
     {

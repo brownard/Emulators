@@ -1,4 +1,5 @@
 ﻿using Emulators.AutoConfig;
+using Emulators.MediaPortal2.Models.Dialogs;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
@@ -146,7 +147,7 @@ namespace Emulators.MediaPortal2
             newEmulator.Commit();
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
             workflowManager.NavigatePopToState(Guids.NewEmulatorState, true);
-            var platformLookup = new Models.PlatformDetailsDialog(newEmulator.Platform, newEmulator);
+            var platformLookup = new PlatformDetailsDialog(newEmulator.Platform, newEmulator);
             platformLookup.GetPlatformInfo();
         }
 

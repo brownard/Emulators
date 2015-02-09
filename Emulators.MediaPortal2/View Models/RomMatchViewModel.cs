@@ -1,4 +1,5 @@
-﻿using Emulators.Scrapers;
+﻿using Emulators.MediaPortal2.Models.Dialogs;
+using Emulators.Scrapers;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using MediaPortal.UI.Presentation.DataObjects;

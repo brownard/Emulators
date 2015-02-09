@@ -1,4 +1,5 @@
-﻿using Emulators.MediaPortal2.Settings;
+﻿using Emulators.MediaPortal2.Models.Dialogs;
+using Emulators.MediaPortal2.Settings;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.Localization;

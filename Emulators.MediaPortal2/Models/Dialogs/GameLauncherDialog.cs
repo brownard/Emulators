@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.Models.Dialogs
 {
     class GameLauncherDialog
     {

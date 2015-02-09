@@ -1,6 +1,7 @@
 ﻿using Emulators.Database;
 using Emulators.Import;
 using Emulators.Launcher;
+using Emulators.MediaPortal2.Models.Dialogs;
 using Emulators.MediaPortal2.Navigation;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
