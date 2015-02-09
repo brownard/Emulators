@@ -1,4 +1,5 @@
 ﻿using Emulators.Import;
+using MediaPortal.Common;
 using MediaPortal.Common.General;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
@@ -42,16 +43,13 @@ namespace Emulators.MediaPortal2.Models
 
                 itemsDictionary = new Dictionary<int, RomMatchViewModel>();
                 items = new ItemsList();
-                var model = EmulatorsWorkflowModel.Instance();
-                if (model != null)
-                {
-                    Importer importer = model.Importer;
-                    importer.ImportStatusChanged += importer_ImportStatusChanged;
-                    importer.ProgressChanged += importer_ProgressChanged;
-                    importer.RomStatusChanged += importer_RomStatusChanged;
-                    importer.Start();
-                    importerInit = true;
-                }
+
+                Importer importer = ServiceRegistration.Get<IEmulatorsService>().Importer;
+                importer.ImportStatusChanged += importer_ImportStatusChanged;
+                importer.ProgressChanged += importer_ProgressChanged;
+                importer.RomStatusChanged += importer_RomStatusChanged;
+                importer.Start();
+                importerInit = true;
             }
         }
 

@@ -7,7 +7,6 @@ using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using MediaPortal.Common.PathManager;
-using MediaPortal.Common.PluginManager;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
 using MediaPortal.UI.Presentation.Workflow;
@@ -21,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2
 {
-    public class EmulatorsWorkflowModel : IWorkflowModel, IPluginStateTracker
+    public class EmulatorsWorkflowModel : IWorkflowModel
     {
         #region Static Methods
 
@@ -73,7 +72,6 @@ namespace Emulators.MediaPortal2
 
         NavigationData navigationData;
         GameLauncherDialog currentLauncher;
-        Importer importer;
 
         #endregion
 
@@ -93,11 +91,6 @@ namespace Emulators.MediaPortal2
         public NavigationData NavigationData
         {
             get { return navigationData; }
-        }
-
-        public Importer Importer
-        {
-            get { return importer; }
         }
 
         public ItemsList Items
@@ -355,37 +348,6 @@ namespace Emulators.MediaPortal2
         public ScreenUpdateMode UpdateScreen(MediaPortal.UI.Presentation.Workflow.NavigationContext context, ref string screen)
         {
             return ScreenUpdateMode.AutoWorkflowManager;
-        }
-
-        #endregion
-
-        #region IPluginStateTracker
-
-        public void Activated(PluginRuntime pluginRuntime)
-        {
-            EmulatorsCore.Init(new EmulatorsSettings());
-            importer = new Importer();
-        }
-
-        public void Continue()
-        {
-
-        }
-
-        public bool RequestEnd()
-        {
-            return true;
-        }
-
-        public void Shutdown()
-        {
-            importer.Stop();
-            EmulatorsCore.Options.Save();
-        }
-
-        public void Stop()
-        {
-
         }
 
         #endregion

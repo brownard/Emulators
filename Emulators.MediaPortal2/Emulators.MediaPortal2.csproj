@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Actions\SwitchViewAction.cs" />
     <Compile Include="Consts.cs" />
+    <Compile Include="EmulatorsService.cs" />
     <Compile Include="EmulatorsSettings.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="LayoutType.cs" />

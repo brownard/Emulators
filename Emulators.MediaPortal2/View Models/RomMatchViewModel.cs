@@ -1,5 +1,6 @@
 ﻿using Emulators.MediaPortal2.Models.Dialogs;
 using Emulators.Scrapers;
+using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using MediaPortal.UI.Presentation.DataObjects;
@@ -77,7 +78,7 @@ namespace Emulators.MediaPortal2
                 ListItem item = new ListItem(Consts.KEY_NAME, match.ToString());
                 item.Command = new MethodDelegateCommand(() =>
                 {
-                    EmulatorsWorkflowModel.Instance().Importer.UpdateSelectedMatch(romMatch, match);
+                    ServiceRegistration.Get<IEmulatorsService>().Importer.UpdateSelectedMatch(romMatch, match);
                 });
                 items.Add(item);
             }
