@@ -14,9 +14,13 @@ namespace Emulators
     {
         public static Image NewImage(Image input)
         {
-            if (input != null)
-                return newImage(input, input.Width, input.Height);
-            return null;
+            if (input == null)
+                return null;
+
+            Image output = new Bitmap(input.Width, input.Height, PixelFormat.Format32bppPArgb);
+            using (Graphics graphics = Graphics.FromImage(output))
+                graphics.DrawImage(input, 0, 0, input.Width, input.Height);
+            return output;
         }
 
         public static Image ResizeImage(Image input, double ratio, int maxThumbDimension = 0)
