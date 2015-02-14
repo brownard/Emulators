@@ -188,8 +188,7 @@ namespace Emulators
                     BeginInvoke(new MethodInvoker(delegate()
                     {
                         importer_Progress(sender, e);
-                    }
-                        ));
+                    }));
                 }
                 catch (ObjectDisposedException) { } //form closed
                 return;
@@ -220,8 +219,7 @@ namespace Emulators
                     BeginInvoke(new MethodInvoker(delegate()
                     {
                         importer_ImportStatusChanged(sender, e);
-                    }
-                    ));
+                    }));
                 }
                 catch (ObjectDisposedException) { } //form closed
                 return;
@@ -264,8 +262,7 @@ namespace Emulators
                     BeginInvoke(new MethodInvoker(delegate()
                     {
                         importer_RomStatusChanged(sender, e);
-                    }
-                    ));
+                    }));
                 }
                 catch (ObjectDisposedException) { } //form closed
                 return;
@@ -275,7 +272,7 @@ namespace Emulators
                 return;
 
             RomMatch romMatch;
-            if (e.Status == RomMatchStatus.PendingHash)
+            if (e.Status == RomMatchStatus.PendingMatch)
             {
                 romMatch = e.RomMatch;
                 if (!checkRow(romMatch)) //if false, add a new row
@@ -295,7 +292,7 @@ namespace Emulators
                 return;
 
             romMatch = e.RomMatch;
-            if (romMatch.Status == RomMatchStatus.Ignored && e.Status != RomMatchStatus.PendingHash && e.Status != RomMatchStatus.Ignored)
+            if (romMatch.Status == RomMatchStatus.Ignored && e.Status != RomMatchStatus.PendingMatch && e.Status != RomMatchStatus.Ignored)
                 return;
 
             refreshRow(rowNum);
@@ -351,15 +348,15 @@ namespace Emulators
             if (rowIndex < 0 || rowIndex >= importGridView.Rows.Count)
                 return;
 
-            Image statusIcon = new Bitmap(1, 1);
-            string statusTxt = "";
             RomMatch romMatch = importGridView.Rows[rowIndex].DataBoundItem as RomMatch;
             if (romMatch == null)
                 return;
 
+            Image statusIcon;
+            string statusTxt;
             switch (romMatch.Status)
             {
-                case RomMatchStatus.PendingHash: //reset match status
+                case RomMatchStatus.PendingMatch: //reset match status
                     statusTxt = "";
                     statusIcon = statusImages[0]; //Emulators.MediaPortal1.Properties.Resources.information;
                     break;
@@ -391,11 +388,9 @@ namespace Emulators
             comboBox.Items.Clear(); //remove any leftovers
 
             bool check = romMatch.GameDetails != null;
-
             foreach (ScraperResult details in romMatch.PossibleGameDetails)
             {
                 int index = comboBox.Items.Add(details); //possible matches
-
                 if (check && romMatch.GameDetails == details)
                     comboBox.Value = comboBox.Items[index];
             }

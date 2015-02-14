@@ -58,13 +58,10 @@ namespace Emulators.Import
     public class Importer
     {
         int threadCount = 5;
-        int hashThreadCount = 2;
         readonly object syncRoot = new object();
 
         volatile bool doWork = false;
-        ManualResetEventSlim doWorkWaitHandle = new ManualResetEventSlim();
         volatile bool pause = false;
-        ManualResetEventSlim unPauseWaitHandle = new ManualResetEventSlim(true);
 
         readonly object lookupSync = new object();
         Dictionary<int, RomMatch> lookupMatch;
@@ -238,16 +235,9 @@ namespace Emulators.Import
         {
             lock (syncRoot)
             {
-                Options options = EmulatorsCore.Options;
-                options.EnterReadLock();
-                threadCount = options.ImportThreads;
-                hashThreadCount = options.HashThreads;
-                options.ExitReadLock();
-
+                threadCount = EmulatorsCore.Options.ReadOption(o => o.ImportThreads);
                 if (threadCount < 1) //0 threads will take a very long time to complete :)
                     threadCount = 1;
-                if (hashThreadCount < 1)
-                    hashThreadCount = 1;
 
                 pendingMatches = new List<RomMatch>();
                 priorityPendingMatches = new List<RomMatch>();
@@ -267,61 +257,59 @@ namespace Emulators.Import
         {
             lock (syncRoot)
             {
+                if (importerThreads.Count != 0)
+                    return;
+
                 ImporterStatus = ImportAction.ImportStarting;
                 doWork = true;
+                if (justRefresh)
+                    doRefreshTasks();
+                else
+                    doImportTasks();
+            }
+        }
 
-                if (importerThreads.Count == 0)
+        void doRefreshTasks()
+        {
+            Thread refreshThread = new Thread(new ThreadStart(delegate()
+            {
+                ImporterStatus = ImportAction.ImportRefreshing;
+                refreshDatabase();
+                ImporterStatus = ImportAction.ImportFinished;
+            })) { Name = "Importer Thread" };
+            importerThreads.Add(refreshThread);
+            refreshThread.Start();
+        }
+
+        void doImportTasks()
+        {
+            Action scanMethod;
+            if (isBackground)
+                scanMethod = scanRomsBackground; //retrieve info as soon as match found
+            else
+                scanMethod = scanRomsDefault; //get all possible matches before retrieving so user can check/edit
+
+            Thread firstThread = new Thread(new ThreadStart(delegate()
+            {
+                refreshDatabase();
+                if (!doWork)
+                    return;
+                getFilesToImport(); //first thread needs to locate games for import
+                if (doWork)
                 {
-                    if (!justRefresh) //start retrieving immediately
-                    {
-                        Action scanMethod;
-                        if (isBackground)
-                            scanMethod = scanRomsBackground; //retrieve info as soon as match found
-                        else
-                            scanMethod = scanRomsDefault; //get all possible matches before retrieving so user can check/edit
-
-                        Thread firstThread = new Thread(new ThreadStart(delegate()
-                        {
-                            getFilesToImport(); //first thread needs to locate games for import
-
-                            if (doWork)
-                            {
-                                ImporterStatus = ImportAction.ImportStarted;
-                                scanRoms(scanMethod, true);
-                            }
-                            ImporterStatus = ImportAction.ImportFinished;
-                        }
-                            ));
-                        firstThread.Name = "Importer Thread";
-                        firstThread.Start();
-                        importerThreads.Add(firstThread);
-
-                        //start rest of threads
-                        for (int x = 0; x < threadCount - 1; x++)
-                        {
-                            Thread thread = new Thread(new ThreadStart(delegate() { scanRoms(scanMethod, false); }));
-                            thread.Name = "Importer Thread";
-                            thread.Start();
-                            importerThreads.Add(thread);
-                        }
-
-                    }
-                    else //just get list of files to import
-                    {
-                        Thread firstThread = new Thread(new ThreadStart(delegate()
-                        {
-                            lock (importStatusLock)
-                                ImporterStatus = ImportAction.ImportRefreshing;
-                            getFilesToImport();
-                            lock (importStatusLock)
-                                ImporterStatus = ImportAction.ImportFinished;
-                        }
-                            ));
-                        firstThread.Name = "Importer Thread";
-                        importerThreads.Add(firstThread);
-                        firstThread.Start();
-                    }
+                    ImporterStatus = ImportAction.ImportStarted;
+                    scanRoms(scanMethod, true);
                 }
+                ImporterStatus = ImportAction.ImportFinished;
+            })) { Name = "Importer Thread 1" };
+            firstThread.Start();
+            importerThreads.Add(firstThread);
+            //start rest of threads
+            for (int x = 2; x <= threadCount; x++)
+            {
+                Thread thread = new Thread(new ThreadStart(delegate() { scanRoms(scanMethod, false); })) { Name = "Importer Thread " + x };
+                thread.Start();
+                importerThreads.Add(thread);
             }
         }
 
@@ -344,7 +332,6 @@ namespace Emulators.Import
                             waiting = waiting || currThread.IsAlive;
                         Thread.Sleep(100);
                     }
-
                     importerThreads.Clear();
                 }
 
@@ -726,79 +713,67 @@ namespace Emulators.Import
         //called first when started
         void getFilesToImport()
         {
-            try
+            List<RomMatch> localMatches = new List<RomMatch>();
+            foreach (Game game in Game.GetAll(false))
             {
-                refreshDatabase();
-                if (justRefresh || !doWork)
-                    return;
+                game.Reset();
+                localMatches.Add(new RomMatch(game));
+            }
 
-                List<RomMatch> localMatches = new List<RomMatch>();
-                foreach (Game game in Game.GetAll(false))
-                {
-                    if (!doWork)
-                        return;
-                    game.Reset();
-                    localMatches.Add(new RomMatch(game));
-                }
+            if (!doWork)
+                return;
 
-                Logger.LogDebug("Adding {0} item{1} to importer", localMatches.Count, localMatches.Count == 1 ? "" : "s");
-                if (localMatches.Count > 0)
+            if (localMatches.Count == 0)
+            {
+                if (isBackground)
+                    doWork = false;
+                else
+                    OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NoFilesFound, null));
+                return;
+            }
+
+            Logger.LogDebug("Adding {0} item{1} to importer", localMatches.Count, localMatches.Count == 1 ? "" : "s");
+            for (int x = 0; x < localMatches.Count; x++)
+            {
+                RomMatch romMatch = localMatches[x];
+                OnProgressChanged(new ImportProgressEventArgs((x * 100) / localMatches.Count, x, localMatches.Count, string.Format("Importing {0}", romMatch.Path)));
+                lock (lookupSync)
                 {
-                    setListCapacities((int)(localMatches.Count * 1.5));
-                    for (int x = 0; x < localMatches.Count; x++)
+                    if (!lookupMatch.ContainsKey(romMatch.ID))
                     {
-                        RomMatch romMatch = localMatches[x];
-                        OnProgressChanged(new ImportProgressEventArgs((x * 100) / localMatches.Count, x, localMatches.Count, string.Format("Importing {0}", romMatch.Path)));
-                        lock (lookupSync)
-                        {
-                            if (!lookupMatch.ContainsKey(romMatch.ID))
-                            {
-                                lookupMatch[romMatch.ID] = romMatch;
-                                lock (pendingMatches)
-                                    pendingMatches.Add(romMatch);
-                            }
-                        }
+                        lookupMatch[romMatch.ID] = romMatch;
+                        lock (pendingMatches)
+                            pendingMatches.Add(romMatch);
                     }
-
-                    OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.PendingFilesAdded, localMatches));
-                    OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Ready"));
-                }
-                else //no files need importing
-                {
-                    if (isBackground)
-                    {
-                        doWork = false;
-                        return;
-                    }
-                    else
-                        OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NoFilesFound, null));
                 }
             }
-            catch (Exception e)
-            {
-                Logger.LogError("Unhandled error in Importer - {0} - {1} - {2}", e, e.Message, e.StackTrace);
-            }
+            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.PendingFilesAdded, localMatches));
+            OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Ready"));
         }
 
         void refreshDatabase()
         {
             Logger.LogDebug("Refreshing database");
             OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Refreshing database"));
-
             List<Game> allGames = Game.GetAll();
-            deleteMissingGames(allGames);
-            if (!doWork) return;
 
-            List<string> dbPaths = EmulatorsCore.Database.GetAll(typeof(GameDisc)).Select(g => ((GameDisc)g).Path).ToList();
+            deleteMissingGames(allGames);
+            if (!doWork) 
+                return;
+
+            List<string> dbPaths = EmulatorsCore.Database.GetAll<GameDisc>().Select(g => g.Path).ToList();
             List<Emulator> emus = Emulator.GetAll();
-            if (!doWork) return;
+            if (!doWork) 
+                return;
 
             List<Game> newGames = new List<Game>();
             int filesFound = 0;
             //loop through each emu
             foreach (Emulator emu in emus)
             {
-                if (!doWork) return;
+                if (!doWork)
+                    return;
+
                 Logger.LogDebug("Getting files for emulator {0}", emu.Title);
                 //check if rom dir exists
                 string romDir = emu.PathToRoms;
@@ -811,16 +786,17 @@ namespace Emulators.Import
                 //get list of files using each filter
                 foreach (string filter in emu.Filter.Split(';'))
                 {
-                    if (!doWork) return;
+                    if (!doWork) 
+                        return;
+
                     string[] gamePaths;
                     try { gamePaths = System.IO.Directory.GetFiles(romDir, filter, System.IO.SearchOption.AllDirectories); }
                     catch
                     {
                         Logger.LogError("Error locating files in {0} rom directory using filter '{1}'", emu.Title, filter);
-                        continue; //error with filter, skip
+                        continue;
                     }
 
-                    //loop through each new file
                     for (int x = 0; x < gamePaths.Length; x++)
                     {
                         if (!doWork) return;
@@ -836,6 +812,7 @@ namespace Emulators.Import
                     }
                 }
             }
+
             Logger.LogDebug("Found {0} new game(s)", filesFound);
             if (filesFound < 1)
                 return;
@@ -894,25 +871,10 @@ namespace Emulators.Import
                     Logger.LogDebug("Updating {0}, disc not found", game.Title);
                     game.Discs.Commit();
                 }
-                if (!doWork) break;
+                if (!doWork) 
+                    break;
             }
             EmulatorsCore.Database.EndTransaction();
-        }
-
-        void setListCapacities(int capacity)
-        {
-            lock (pendingMatches)
-                pendingMatches.Capacity = capacity;
-            lock (priorityPendingMatches)
-                priorityPendingMatches.Capacity = capacity;
-            lock (approvedMatches)
-                approvedMatches.Capacity = capacity;
-            lock (priorityApprovedMatches)
-                priorityApprovedMatches.Capacity = capacity;
-            lock (matchesNeedingInput)
-                matchesNeedingInput.Capacity = capacity;
-            lock (commitedMatches)
-                commitedMatches.Capacity = capacity;
         }
 
         #endregion
@@ -928,10 +890,6 @@ namespace Emulators.Import
             if (romMatch == null)
                 return;
 
-            scanProgress("Retrieving matches: " + romMatch.Path);
-
-            //get possible matches and
-            //update RomMatch
             if (!romMatch.Game.IsMissingInfo())
             {
                 lock (romMatch.SyncRoot)
@@ -950,9 +908,11 @@ namespace Emulators.Import
                 }
                 return;
             }
-
+            
+            scanProgress("Retrieving matches: " + romMatch.Path);
             ScraperResult bestResult; bool approved;
             List<ScraperResult> results = scraperProvider.GetMatches(romMatch, out bestResult, out approved);
+
             RomMatchStatus status;
             List<RomMatch> addList;
             List<RomMatch> priorityAddList;
@@ -981,6 +941,7 @@ namespace Emulators.Import
         #endregion
 
         #region Approved Matches
+
         //Selects next Match from approved match lists.
         //Updates the Game with the specified Match details and commits
         void processNextApprovedMatch(bool priorityOnly)
@@ -1000,15 +961,13 @@ namespace Emulators.Import
 
             if (!doWork)
                 return;
-            retrieveProgress("Updating: " + romMatch.Path);
 
-            //get info
-            ScraperGame scraperGame = scraperProvider.DownloadInfo(selectedMatch); //selectedScraper.DownloadInfo(selectedMatch);
+            retrieveProgress("Updating: " + romMatch.Path);
+            ScraperGame scraperGame = scraperProvider.DownloadInfo(selectedMatch);
             if (!doWork || !romMatch.OwnedByThread())
                 return;
 
             ThumbGroup thumbGroup = new ThumbGroup(romMatch.Game);
-
             using (Bitmap image = getImage(scraperGame.BoxFrontUrl, romMatch))
             {
                 if (!doWork)
@@ -1119,24 +1078,24 @@ namespace Emulators.Import
                 return; //game deleted
 
             ScraperGame details = romMatch.ScraperGame;
-            if (details == null || !doWork)
+            if (details == null)
                 return;
 
             dbGame.Title = details.Title == null ? "" : details.Title;
             dbGame.Developer = details.Company == null ? "" : details.Company;
             dbGame.Description = details.Description == null ? "" : details.Description;
             dbGame.Genre = details.Genre == null ? "" : details.Genre;
+            
             int year;
             if (!int.TryParse(details.Year, out year))
                 year = 0;
             dbGame.Year = year;
+            
             double grade;
             if (!double.TryParse(details.Grade, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out grade))
                 grade = 0;
             while (grade > 10)
-            {
                 grade = grade / 10;
-            }
             dbGame.Grade = (int)Math.Round(grade);
 
             if (!doWork)
@@ -1151,52 +1110,32 @@ namespace Emulators.Import
         private void RemoveFromMatchLists(RomMatch match)
         {
             lock (pendingMatches)
-            {
                 if (pendingMatches.Contains(match))
                     pendingMatches.Remove(match);
-            }
 
             lock (priorityPendingMatches)
-            {
                 if (priorityPendingMatches.Contains(match))
-                {
                     priorityPendingMatches.Remove(match);
-                }
-            }
 
             lock (matchesNeedingInput)
-            {
                 if (matchesNeedingInput.Contains(match))
                     matchesNeedingInput.Remove(match);
-            }
 
             lock (approvedMatches)
-            {
                 if (approvedMatches.Contains(match))
                     approvedMatches.Remove(match);
-            }
 
             lock (priorityApprovedMatches)
-            {
                 if (priorityApprovedMatches.Contains(match))
                     priorityApprovedMatches.Remove(match);
-            }
 
             lock (commitedMatches)
-            {
                 if (commitedMatches.Contains(match))
-                {
                     commitedMatches.Remove(match);
-                }
-            }
 
             lock (lookupSync)
-            {
                 if (lookupMatch.ContainsKey(match.ID))
-                {
                     lookupMatch.Remove(match.ID);
-                }
-            }
         }
 
         RomMatch takeFromList(List<RomMatch> list, List<RomMatch> priorityList, bool priorityOnly)
@@ -1255,7 +1194,6 @@ namespace Emulators.Import
                     return true;
                 Thread.Sleep(interval);
             }
-
             return true;
         }
     }
