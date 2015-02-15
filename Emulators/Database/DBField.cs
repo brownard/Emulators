@@ -194,7 +194,6 @@ namespace Emulators.Database
         {
             try
             {
-
                 // if we were passed a null value, try to set that. 
                 if (value == null)
                 {
@@ -205,13 +204,15 @@ namespace Emulators.Database
                 // if we were passed a matching object, just set it
                 if (value.GetType() == propertyInfo.PropertyType)
                 {
+                    string strVal = value as string;
+                    if (strVal != null)
+                        value = strVal.Trim();
                     propertyInfo.GetSetMethod().Invoke(owner, new object[] { value });
                     return;
                 }
-
+                
                 if (value is string)
                     propertyInfo.GetSetMethod().Invoke(owner, new object[] { ConvertString((string)value) });
-
 
             }
             catch (Exception e)
