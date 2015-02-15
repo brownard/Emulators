@@ -56,8 +56,9 @@ namespace Emulators.MediaPortal1
 
         public void Launch()
         {
+            if (!checkController())
+                return;
             stopMediaPlayback();
-            checkController();
             OnStarted();
             launcher = new GameLauncher(game);
             BackgroundTaskHandler handler = new BackgroundTaskHandler();
@@ -165,10 +166,11 @@ namespace Emulators.MediaPortal1
             }
         }
 
-        void checkController()
+        bool checkController()
         {
             if (emulatorProfile.CheckController && !ControllerHandler.CheckControllerState())
-                MP1Utils.ShowMPDialog(Translator.Instance.nocontrollerconnected);
+                return MP1Utils.ShowYesNoDialog(Translator.Instance.nocontrollerconnected + "\r\n" + Translator.Instance.docontinue);
+            return true;
         }
 
         void mountImage(string path)

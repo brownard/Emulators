@@ -152,6 +152,30 @@ namespace Emulators.MediaPortal1
             }
         }
 
+        public static bool ShowYesNoDialog(string message, params object[] args)
+        {
+            message = string.Format(message, args);
+            string heading = MP1Utils.Options.ReadOption(o => o.PluginDisplayName);
+
+            if (IsConfig)
+                return MessageBox.Show(message, heading, MessageBoxButtons.YesNo) == DialogResult.Yes;
+
+            MediaPortal.Dialogs.GUIDialogYesNo dlg_YesNo = (MediaPortal.Dialogs.GUIDialogYesNo)MediaPortal.GUI.Library.GUIWindowManager.GetWindow
+                ((int)MediaPortal.GUI.Library.GUIWindow.Window.WINDOW_DIALOG_YES_NO);
+            if (dlg_YesNo != null)
+            {
+                dlg_YesNo.Reset();
+                dlg_YesNo.SetHeading(heading);
+
+                string[] lines = message.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                for (int x = 0; x < lines.Length; x++)
+                    dlg_YesNo.SetLine(x + 1, lines[x]);
+                dlg_YesNo.DoModal(MediaPortal.GUI.Library.GUIWindowManager.ActiveWindow);
+                return dlg_YesNo.IsConfirmed;
+            }
+            return true;
+        }
+
         public static void ShowProgressDialog(IBackgroundTask handler)
         {
             if (IsConfig)

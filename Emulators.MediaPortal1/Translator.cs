@@ -51,7 +51,7 @@ namespace Emulators.MediaPortal1
         public string lastused = "Last used";
 
 
-        public string nocontrollerconnected = "Starting game with no controllers connected.";
+        public string nocontrollerconnected = "There are no controllers connected";
 
         public string noitemstodisplay = "No items to display";
 
@@ -83,6 +83,8 @@ namespace Emulators.MediaPortal1
         public string startupview = "Start with";
 
         public string currentprofile = "Current Profile";
+
+        public string docontinue = "Do you want to continue?";
 
         #endregion
 
