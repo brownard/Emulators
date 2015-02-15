@@ -1,4 +1,4 @@
-﻿using Emulators.Image_Handlers;
+﻿using Emulators.ImageHandlers;
 using Emulators.Import;
 using Emulators.MediaPortal1;
 using Emulators.Scrapers;

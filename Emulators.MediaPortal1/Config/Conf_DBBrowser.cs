@@ -10,6 +10,7 @@ using System.Threading;
 using Emulators.Import;
 using Emulators.MediaPortal1;
 using Emulators.Database;
+using Emulators.ImageHandlers;
 
 namespace Emulators
 {

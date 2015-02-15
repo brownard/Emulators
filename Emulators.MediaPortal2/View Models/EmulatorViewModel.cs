@@ -1,4 +1,5 @@
-﻿using MediaPortal.Common.Commands;
+﻿using Emulators.ImageHandlers;
+using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using System;
 using System.Collections.Generic;

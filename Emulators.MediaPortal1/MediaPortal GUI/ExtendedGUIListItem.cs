@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MediaPortal.GUI.Library;
 using Emulators.MediaPortal1;
+using Emulators.ImageHandlers;
 
 namespace Emulators
 {

@@ -82,6 +82,7 @@
     <Compile Include="Image Handlers\GameImageDownloader.cs" />
     <Compile Include="Image Handlers\ImageDownloadHandler.cs" />
     <Compile Include="Image Handlers\MultiImageDownloader.cs" />
+    <Compile Include="Image Handlers\SafeImage.cs" />
     <Compile Include="Import\IDoWork.cs" />
     <Compile Include="AutoConfig\MameTitleLookup.cs" />
     <Compile Include="Import\NFOCreator.cs" />
@@ -152,11 +153,11 @@
     <Compile Include="Utils\Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Base\RomMatch.cs" />
-    <Compile Include="Base\Thumb.cs" />
+    <Compile Include="Image Handlers\Thumb.cs" />
     <Compile Include="Scrapers\ScraperProvider.cs" />
     <Compile Include="Utils\FuzzyStringComparer.cs" />
     <Compile Include="Image Handlers\ThumbGroup.cs" />
-    <Compile Include="Base\ThumbType.cs" />
+    <Compile Include="Image Handlers\ThumbType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scrapers\Scripts\Mobygames.xml">

@@ -816,7 +816,7 @@
             this.pnlFanart.Size = new System.Drawing.Size(261, 140);
             this.pnlFanart.TabIndex = 5;
             this.pnlFanart.ThumbGroup = null;
-            this.pnlFanart.ThumbType = Emulators.ThumbType.Fanart;
+            this.pnlFanart.ThumbType = Emulators.ImageHandlers.ThumbType.Fanart;
             // 
             // label12
             // 
@@ -839,7 +839,7 @@
             this.pnlInGameScreen.Size = new System.Drawing.Size(200, 147);
             this.pnlInGameScreen.TabIndex = 4;
             this.pnlInGameScreen.ThumbGroup = null;
-            this.pnlInGameScreen.ThumbType = Emulators.ThumbType.InGameScreen;
+            this.pnlInGameScreen.ThumbType = Emulators.ImageHandlers.ThumbType.InGameScreen;
             // 
             // label11
             // 
@@ -862,7 +862,7 @@
             this.pnlTitleScreen.Size = new System.Drawing.Size(200, 147);
             this.pnlTitleScreen.TabIndex = 4;
             this.pnlTitleScreen.ThumbGroup = null;
-            this.pnlTitleScreen.ThumbType = Emulators.ThumbType.TitleScreen;
+            this.pnlTitleScreen.ThumbType = Emulators.ImageHandlers.ThumbType.TitleScreen;
             // 
             // label10
             // 
@@ -885,7 +885,7 @@
             this.pnlBoxBack.Size = new System.Drawing.Size(200, 147);
             this.pnlBoxBack.TabIndex = 4;
             this.pnlBoxBack.ThumbGroup = null;
-            this.pnlBoxBack.ThumbType = Emulators.ThumbType.BackCover;
+            this.pnlBoxBack.ThumbType = Emulators.ImageHandlers.ThumbType.BackCover;
             // 
             // label9
             // 
@@ -908,7 +908,7 @@
             this.pnlBoxFront.Size = new System.Drawing.Size(200, 147);
             this.pnlBoxFront.TabIndex = 3;
             this.pnlBoxFront.ThumbGroup = null;
-            this.pnlBoxFront.ThumbType = Emulators.ThumbType.FrontCover;
+            this.pnlBoxFront.ThumbType = Emulators.ImageHandlers.ThumbType.FrontCover;
             // 
             // label8
             // 

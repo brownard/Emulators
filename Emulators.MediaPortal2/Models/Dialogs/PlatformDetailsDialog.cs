@@ -1,4 +1,5 @@
-﻿using Emulators.PlatformImporter;
+﻿using Emulators.ImageHandlers;
+using Emulators.PlatformImporter;
 using MediaPortal.Common;
 using MediaPortal.Common.Threading;
 using MediaPortal.UI.Presentation.Models;

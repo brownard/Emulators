@@ -934,7 +934,7 @@
             this.pnlFanart.Size = new System.Drawing.Size(338, 190);
             this.pnlFanart.TabIndex = 5;
             this.pnlFanart.ThumbGroup = null;
-            this.pnlFanart.ThumbType = Emulators.ThumbType.Fanart;
+            this.pnlFanart.ThumbType = Emulators.ImageHandlers.ThumbType.Fanart;
             // 
             // pnlLogo
             // 
@@ -946,7 +946,7 @@
             this.pnlLogo.Size = new System.Drawing.Size(190, 190);
             this.pnlLogo.TabIndex = 4;
             this.pnlLogo.ThumbGroup = null;
-            this.pnlLogo.ThumbType = Emulators.ThumbType.Logo;
+            this.pnlLogo.ThumbType = Emulators.ImageHandlers.ThumbType.Logo;
             // 
             // label17
             // 

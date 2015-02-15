@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace Emulators
+namespace Emulators.ImageHandlers
 {
     /// <summary>
     /// The underlying thumbs used by ThumbGroup. Setting Path will dispose of Image
@@ -12,7 +12,7 @@ namespace Emulators
     /// Path to null (we don't know the path). Setting Path to "" or either Path or Image to null
     /// will dispose and remove all references to the Image. 
     /// </summary>
-    public class Thumb : IDisposable
+    public class  Thumb : IDisposable
     {
         string friendlyName = "";
         public Thumb(ThumbType thumbType)
@@ -81,6 +81,16 @@ namespace Emulators
                     clearThumb();
                 }
             }
+        }
+
+        public void SetSafeImage(Image safeImage)
+        {
+            clearThumb(); //dispose of old image
+            path = null; //remove reference to old image
+            NeedsUpdate = true;
+            if (safeImage == null)
+                return;
+            image = safeImage;
         }
 
         void loadImage()

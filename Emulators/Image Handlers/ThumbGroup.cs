@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.IO;
 
-namespace Emulators
+namespace Emulators.ImageHandlers
 {
     /// <summary>
     /// Holds all the Thumb info for an Emulator or Game and provides methods
@@ -340,6 +340,27 @@ namespace Emulators
             path = GetThumbPath(thumbType);
             string extension;
             return isValidThumbPath(path, out extension);
+        }
+
+        public Thumb GetThumbObject(ThumbType thumbType)
+        {
+            switch (thumbType)
+            {
+                case ThumbType.Logo:
+                    return logo;
+                case ThumbType.FrontCover:
+                    return frontCover;
+                case ThumbType.BackCover:
+                    return backCover;
+                case ThumbType.TitleScreen:
+                    return titleScreen;
+                case ThumbType.InGameScreen:
+                    return inGame;
+                case ThumbType.Fanart:
+                    return fanart;
+                default:
+                    return null;
+            }
         }
 
         /// <summary>

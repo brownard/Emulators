@@ -12,6 +12,7 @@ using Emulators.MediaPortal1;
 using Emulators.Database;
 using Emulators.AutoConfig;
 using Emulators.PlatformImporter;
+using Emulators.ImageHandlers;
 
 namespace Emulators
 {

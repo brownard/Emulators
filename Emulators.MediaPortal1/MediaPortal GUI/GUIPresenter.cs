@@ -8,6 +8,7 @@ using MediaPortal.Player;
 using MediaPortal.Dialogs;
 using Emulators.Database;
 using Emulators.Launcher;
+using Emulators.ImageHandlers;
 
 namespace Emulators.MediaPortal1
 {

@@ -1,4 +1,5 @@
-﻿using Emulators.Launcher;
+﻿using Emulators.ImageHandlers;
+using Emulators.Launcher;
 using MediaPortal.GUI.Library;
 using MediaPortal.InputDevices;
 using MediaPortal.Player;

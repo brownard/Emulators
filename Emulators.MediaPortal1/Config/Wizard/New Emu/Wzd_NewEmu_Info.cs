@@ -1,4 +1,5 @@
 ﻿using Emulators.AutoConfig;
+using Emulators.ImageHandlers;
 using Emulators.MediaPortal1;
 using Emulators.PlatformImporter;
 using System;

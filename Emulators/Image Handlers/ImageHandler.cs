@@ -8,7 +8,7 @@ using System.Xml;
 using System.Net;
 using System.Drawing.Drawing2D;
 
-namespace Emulators
+namespace Emulators.ImageHandlers
 {
     public class ImageHandler
     {
@@ -98,11 +98,11 @@ namespace Emulators
                 request.UserAgent = EmulatorsCore.USER_AGENT;
                 request.BeginGetResponse((asyncRes) =>
                 {
-                    Bitmap bitmap = null;
+                    SafeImage safeImage = null;
                     try
                     {
                         using (HttpWebResponse response = request.EndGetResponse(asyncRes) as HttpWebResponse)
-                            bitmap = new Bitmap(response.GetResponseStream());
+                            safeImage = new SafeImage(response.GetResponseStream());
                     }
                     catch (Exception ex)
                     {
@@ -110,7 +110,7 @@ namespace Emulators
                     }
                     finally
                     {
-                        result.Complete(bitmap);
+                        result.Complete(safeImage);
                     }
                 }, null);
             }
@@ -127,10 +127,10 @@ namespace Emulators
     {
         object syncRoot = new object();
         volatile bool cancelled = false;
-        Bitmap bitmap = null;
-        public Bitmap Bitmap
+        SafeImage safeImage = null;
+        public SafeImage SafeImage
         {
-            get { return bitmap; }
+            get { return safeImage; }
         }
 
         volatile bool isCompleted = false;
@@ -139,19 +139,19 @@ namespace Emulators
             get { return isCompleted; }
         }
 
-        internal void Complete(Bitmap bitmap)
+        internal void Complete(SafeImage safeImage)
         {
             lock (syncRoot)
             {
                 if (!cancelled)
                 {
-                    this.bitmap = bitmap;
+                    this.safeImage = safeImage;
                 }
-                else if (bitmap != null)
+                else if (safeImage != null)
                 {
                     try 
                     { 
-                        bitmap.Dispose();
+                        safeImage.Dispose();
                     }
                     catch { }
                 }
@@ -174,9 +174,9 @@ namespace Emulators
         {
             lock (syncRoot)
             {
-                if (bitmap != null)
+                if (safeImage != null)
                 {
-                    try { bitmap.Dispose(); }
+                    try { safeImage.Dispose(); }
                     catch { }
                 }
             }

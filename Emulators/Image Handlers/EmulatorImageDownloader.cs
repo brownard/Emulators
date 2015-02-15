@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Emulators.Image_Handlers
+namespace Emulators.ImageHandlers
 {
     public class EmulatorImageDownloader : ImageDownloadHandler
     {

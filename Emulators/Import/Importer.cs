@@ -10,6 +10,7 @@ using System.IO;
 using System.Collections.ObjectModel;
 using Emulators.Database;
 using Emulators.Scrapers;
+using Emulators.ImageHandlers;
 
 namespace Emulators.Import
 {
@@ -967,75 +968,27 @@ namespace Emulators.Import
             if (!doWork || !romMatch.OwnedByThread())
                 return;
 
-            ThumbGroup thumbGroup = new ThumbGroup(romMatch.Game);
-            using (Bitmap image = getImage(scraperGame.BoxFrontUrl, romMatch))
+            using (ThumbGroup thumbGroup = new ThumbGroup(romMatch.Game))
             {
-                if (!doWork)
-                    return;
-                thumbGroup.FrontCover.Image = image;
-            }
-            lock (romMatch.SyncRoot)
-            {
-                if (!romMatch.OwnedByThread())
-                    return;
-                thumbGroup.SaveThumb(ThumbType.FrontCover);
-                thumbGroup.FrontCover.Image = null;
-            }
+                using (SafeImage image = getImage(scraperGame.BoxFrontUrl, romMatch))
+                    if (!saveImage(image, romMatch, thumbGroup, ThumbType.FrontCover))
+                        return;
 
-            using (Bitmap image = getImage(scraperGame.BoxBackUrl, romMatch))
-            {
-                if (!doWork)
-                    return;
-                thumbGroup.BackCover.Image = image;
-            }
-            lock (romMatch.SyncRoot)
-            {
-                if (!romMatch.OwnedByThread())
-                    return;
-                thumbGroup.SaveThumb(ThumbType.BackCover);
-                thumbGroup.BackCover.Image = null;
-            }
+                using (SafeImage image = getImage(scraperGame.BoxBackUrl, romMatch))
+                    if (!saveImage(image, romMatch, thumbGroup, ThumbType.BackCover))
+                        return;
 
-            using (Bitmap image = getImage(scraperGame.TitleScreenUrl, romMatch))
-            {
-                if (!doWork)
-                    return;
-                thumbGroup.TitleScreen.Image = image;
-            }
-            lock (romMatch.SyncRoot)
-            {
-                if (!romMatch.OwnedByThread())
-                    return;
-                thumbGroup.SaveThumb(ThumbType.TitleScreen);
-                thumbGroup.TitleScreen.Image = null;
-            }
+                using (SafeImage image = getImage(scraperGame.TitleScreenUrl, romMatch))
+                    if (!saveImage(image, romMatch, thumbGroup, ThumbType.TitleScreen))
+                        return;
 
-            using (Bitmap image = getImage(scraperGame.InGameUrl, romMatch))
-            {
-                if (!doWork)
-                    return;
-                thumbGroup.InGame.Image = image;
-            }
-            lock (romMatch.SyncRoot)
-            {
-                if (!romMatch.OwnedByThread())
-                    return;
-                thumbGroup.SaveThumb(ThumbType.InGameScreen);
-                thumbGroup.InGame.Image = null;
-            }
+                using (SafeImage image = getImage(scraperGame.InGameUrl, romMatch))
+                    if (!saveImage(image, romMatch, thumbGroup, ThumbType.InGameScreen))
+                        return;
 
-            using (Bitmap image = getImage(scraperGame.FanartUrl, romMatch))
-            {
-                if (!doWork)
-                    return;
-                thumbGroup.Fanart.Image = image;
-            }
-            lock (romMatch.SyncRoot)
-            {
-                if (!romMatch.OwnedByThread())
-                    return;
-                thumbGroup.SaveThumb(ThumbType.Fanart);
-                thumbGroup.Fanart.Image = null;
+                using (SafeImage image = getImage(scraperGame.FanartUrl, romMatch))
+                    if (!saveImage(image, romMatch, thumbGroup, ThumbType.Fanart))
+                        return;
             }
 
             lock (romMatch.SyncRoot)
@@ -1050,7 +1003,24 @@ namespace Emulators.Import
             addToList(romMatch, RomMatchStatus.Committed, commitedMatches, null);
         }
 
-        Bitmap getImage(string url, RomMatch romMatch)
+        bool saveImage(SafeImage image, RomMatch romMatch, ThumbGroup thumbGroup, ThumbType thumbType)
+        {
+            if (!doWork)
+                return false;
+            lock (romMatch.SyncRoot)
+            {
+                if (!romMatch.OwnedByThread())
+                    return false;
+                if (image != null)
+                {
+                    thumbGroup.GetThumbObject(thumbType).SetSafeImage(image.Image);
+                    thumbGroup.SaveThumb(thumbType);
+                }
+            }
+            return true;
+        }
+
+        SafeImage getImage(string url, RomMatch romMatch)
         {
             if (string.IsNullOrEmpty(url))
                 return null;
@@ -1067,7 +1037,7 @@ namespace Emulators.Import
                 }
                 Thread.Sleep(100);
             }
-            return result.Bitmap;
+            return result.SafeImage;
         }
 
         //update and commit game

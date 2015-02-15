@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace Emulators.Image_Handlers
+namespace Emulators.ImageHandlers
 {
     class MultiImageDownloader
     {

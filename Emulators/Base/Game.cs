@@ -1,5 +1,6 @@
 using Emulators.AutoConfig;
 using Emulators.Database;
+using Emulators.ImageHandlers;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -1,4 +1,4 @@
-﻿using Emulators.Image_Handlers;
+﻿using Emulators.ImageHandlers;
 using Emulators.PlatformImporter;
 using System;
 using System.Collections.Generic;
