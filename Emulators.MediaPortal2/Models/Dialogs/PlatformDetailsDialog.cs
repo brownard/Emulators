@@ -48,17 +48,21 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
                     using (ThumbGroup thumbGroup = new ThumbGroup(emulator))
                     {
-                        Bitmap image = ImageHandler.BitmapFromWeb(platformInfo.LogoUrl);
-                        if (image != null)
+                        using (SafeImage image = ImageHandler.SafeImageFromWeb(platformInfo.LogoUrl))
                         {
-                            thumbGroup.Logo.Image = image;
-                            thumbGroup.SaveThumb(ThumbType.Logo);
+                            if (image != null)
+                            {
+                                thumbGroup.Logo.SetSafeImage(image.Image);
+                                thumbGroup.SaveThumb(ThumbType.Logo);
+                            }
                         }
-                        image = ImageHandler.BitmapFromWeb(platformInfo.FanartUrl);
-                        if (image != null)
+                        using (SafeImage image = ImageHandler.SafeImageFromWeb(platformInfo.FanartUrl))
                         {
-                            thumbGroup.Fanart.Image = image;
-                            thumbGroup.SaveThumb(ThumbType.Fanart);
+                            if (image != null)
+                            {
+                                thumbGroup.Fanart.SetSafeImage(image.Image);
+                                thumbGroup.SaveThumb(ThumbType.Fanart);
+                            }
                         }
                     }
                     emulator.Commit();

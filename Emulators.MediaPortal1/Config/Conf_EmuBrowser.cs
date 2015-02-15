@@ -802,12 +802,12 @@ namespace Emulators
                     {
                         if (wzd.Logo != null)
                         {
-                            thumbGroup.Logo.Image = wzd.Logo;
+                            thumbGroup.Logo.SetSafeImage(wzd.Logo.Image);
                             thumbGroup.SaveThumb(ThumbType.Logo);
                         }
                         if (wzd.Fanart != null)
                         {
-                            thumbGroup.Fanart.Image = wzd.Fanart;
+                            thumbGroup.Fanart.SetSafeImage(wzd.Fanart.Image);
                             thumbGroup.SaveThumb(ThumbType.Fanart);
                         }
                     }

@@ -90,8 +90,8 @@ namespace Emulators
                         parent.Fanart.Dispose();
                         parent.Fanart = null;
                     }
-                    parent.Logo = ImageHandler.BitmapFromWeb(p.LogoUrl);
-                    parent.Fanart = ImageHandler.BitmapFromWeb(p.FanartUrl);
+                    parent.Logo = ImageHandler.SafeImageFromWeb(p.LogoUrl);
+                    parent.Fanart = ImageHandler.SafeImageFromWeb(p.FanartUrl);
                     return true;
                 });
 

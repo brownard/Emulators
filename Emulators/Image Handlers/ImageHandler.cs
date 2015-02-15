@@ -71,6 +71,44 @@ namespace Emulators.ImageHandlers
         }
 
         public static Bitmap BitmapFromWeb(string url)
+        {            
+            using (HttpWebResponse response = getWebResponse(url))
+            {
+                if (response != null)
+                {
+                    try
+                    {
+                        return new Bitmap(response.GetResponseStream());
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError("Error creating Bitmap from {0} - {1}", url, ex.Message);
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static SafeImage SafeImageFromWeb(string url)
+        {
+            using (HttpWebResponse response = getWebResponse(url))
+            {
+                if (response != null)
+                {
+                    try
+                    {
+                        return new SafeImage(response.GetResponseStream());
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError("Error creating SafeImage from {0} - {1}", url, ex.Message);
+                    }
+                }
+            }
+            return null;
+        }
+
+        static HttpWebResponse getWebResponse(string url)
         {
             if (string.IsNullOrEmpty(url))
                 return null;
@@ -79,13 +117,12 @@ namespace Emulators.ImageHandlers
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 request.UserAgent = EmulatorsCore.USER_AGENT;
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    return new Bitmap(response.GetResponseStream());
+                return (HttpWebResponse)request.GetResponse();
             }
             catch (Exception ex)
             {
-                Logger.LogError("Error downloading thumb from {0} - {1}", url, ex.Message);
-                return null; // if for some reason we couldn't get to image, we return null
+                Logger.LogError("Error getting web response from {0} - {1}", url, ex.Message);
+                return null;
             }
         }
 

@@ -7,14 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Emulators.PlatformImporter;
+using Emulators.ImageHandlers;
 
 namespace Emulators
 {
     public partial class Wzd_NewEmu_Main : Wzd_Main
     {
         public Emulator NewEmulator { get; set; }
-        public Image Logo { get; set; }
-        public Image Fanart { get; set; }
+        public SafeImage Logo { get; set; }
+        public SafeImage Fanart { get; set; }
 
         public Wzd_NewEmu_Main(IPlatformImporter platformImporter)
         {
