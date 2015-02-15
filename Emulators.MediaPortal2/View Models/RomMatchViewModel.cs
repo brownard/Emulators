@@ -1,4 +1,5 @@
-﻿using Emulators.MediaPortal2.Models.Dialogs;
+﻿using Emulators.Import;
+using Emulators.MediaPortal2.Models.Dialogs;
 using Emulators.Scrapers;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
@@ -16,18 +17,21 @@ namespace Emulators.MediaPortal2
     {
         RomMatch romMatch;
 
-        AbstractProperty _statusProperty;
-        AbstractProperty _nameProperty;
-        AbstractProperty _currentMatchProperty;
+        protected AbstractProperty _statusProperty;
+        protected AbstractProperty _nameProperty;
+        protected AbstractProperty _currentMatchProperty;
+        protected AbstractProperty _contextCommandProperty;
 
         public RomMatchViewModel(RomMatch romMatch)
         {
             _statusProperty = new WProperty(typeof(RomMatchStatus), RomMatchStatus.PendingMatch);
             _nameProperty = new WProperty(typeof(string), null);
             _currentMatchProperty = new WProperty(typeof(string), null);
+            _contextCommandProperty = new WProperty(typeof(ICommand));
 
             this.romMatch = romMatch;
             Command = new MethodDelegateCommand(commandDelegate);
+            ContextCommand = new MethodDelegateCommand(contextCommandDelegate);
             Update();
         }
 
@@ -64,6 +68,13 @@ namespace Emulators.MediaPortal2
             set { _currentMatchProperty.SetValue(value); }
         }
 
+        public AbstractProperty ContextCommandProperty { get { return _contextCommandProperty; } }
+        public ICommand ContextCommand
+        {
+            get { return (ICommand)_contextCommandProperty.GetValue(); }
+            set { _contextCommandProperty.SetValue(value); }
+        }
+
         void commandDelegate()
         {
             var matches = romMatch.PossibleGameDetails;
@@ -83,6 +94,43 @@ namespace Emulators.MediaPortal2
                 items.Add(item);
             }
             ListDialogModel.Instance().ShowDialog("[Emulators.Dialogs.SelectMatch]", items);
+        }
+
+        void contextCommandDelegate()
+        {
+            Importer importer = ServiceRegistration.Get<IEmulatorsService>().Importer;
+            RomMatchStatus status = romMatch.Status;
+            ItemsList items = new ItemsList();
+            if ((status == RomMatchStatus.Approved || status == RomMatchStatus.NeedsInput) && romMatch.PossibleGameDetails != null && romMatch.PossibleGameDetails.Count > 0)
+            {
+                items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.Approve]")
+                {
+                    Command = new MethodDelegateCommand(() => { importer.Approve(romMatch); })
+                });
+            }
+
+            //items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.ManualSearch]")
+            //{
+            //    Command = new MethodDelegateCommand(() => { importer.Approve(romMatch); })
+            //});
+
+            items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.AddAsBlankGame]")
+            {
+                Command = new MethodDelegateCommand(() => { importer.Ignore(romMatch); })
+            });
+
+            items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.Delete]")
+            {
+                Command = new MethodDelegateCommand(() => 
+                {
+                    Game game = romMatch.Game;
+                    foreach (GameDisc disc in game.Discs)
+                        EmulatorsCore.Options.AddIgnoreFile(disc.Path);
+                    game.Delete();
+                })
+            });
+
+            ListDialogModel.Instance().ShowDialog(romMatch.Filename, items);
         }
     }
 }

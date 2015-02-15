@@ -25,4 +25,8 @@
 
   <string name="Emulators.Importer">Importer</string>
   <string name="Emulators.Import.NoFilesToImport">No files to import</string>
+  <string name="Emulators.Import.Approve">Approve</string>
+  <string name="Emulators.Import.ManualSearch">Manual Search</string>
+  <string name="Emulators.Import.AddAsBlankGame">Add As Blank Game</string>
+  <string name="Emulators.Import.Delete">Delete</string>
 </resources>

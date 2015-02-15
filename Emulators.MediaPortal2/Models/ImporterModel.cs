@@ -34,6 +34,12 @@ namespace Emulators.MediaPortal2.Models
                 romMatchModel.Command.Execute();
         }
 
+        public void ShowContext(RomMatchViewModel romMatchModel)
+        {
+            if (romMatchModel.ContextCommand != null)
+                romMatchModel.ContextCommand.Execute();
+        }
+
         void initImporter()
         {
             lock (syncRoot)
@@ -55,7 +61,7 @@ namespace Emulators.MediaPortal2.Models
 
         void importer_RomStatusChanged(object sender, RomStatusEventArgs e)
         {
-            updateItem(e.RomMatch);
+            updateItem(e.RomMatch, e.Status);
         }
 
         void importer_ProgressChanged(object sender, ImportProgressEventArgs e)
@@ -77,19 +83,30 @@ namespace Emulators.MediaPortal2.Models
             }
         }
 
-        void updateItem(RomMatch romMatch)
+        void updateItem(RomMatch romMatch, RomMatchStatus newStatus)
         {
             lock (syncRoot)
             {
                 RomMatchViewModel model;
                 if (itemsDictionary.TryGetValue(romMatch.ID, out model))
                 {
-                    model.Update();
-                    return;
+                    if (newStatus == RomMatchStatus.Ignored || newStatus == RomMatchStatus.Removed)
+                    {
+                        itemsDictionary.Remove(romMatch.ID);
+                        items.Remove(model);
+                    }
+                    else
+                    {
+                        model.Update();
+                        return;
+                    }
                 }
-                model = new RomMatchViewModel(romMatch);
-                itemsDictionary[romMatch.ID] = model;
-                items.Add(model);
+                else
+                {
+                    model = new RomMatchViewModel(romMatch);
+                    itemsDictionary[romMatch.ID] = model;
+                    items.Add(model);
+                }
             }
             items.FireChange();
         }

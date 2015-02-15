@@ -23,12 +23,20 @@ namespace Emulators.MediaPortal2
             get { return importer; }
         }
 
+        void Database_OnItemDeleting(DBItem changedItem)
+        {
+            Game game = changedItem as Game;
+            if (game != null && importer != null)
+                importer.Remove(game.Id);
+        }
+
         #region IPluginStateTracker
 
         public void Activated(PluginRuntime pluginRuntime)
         {
             EmulatorsCore.Init(new EmulatorsSettings());
             importer = new Importer();
+            EmulatorsCore.Database.OnItemDeleting += Database_OnItemDeleting;
             ServiceRegistration.Set<IEmulatorsService>(this);
         }
 
