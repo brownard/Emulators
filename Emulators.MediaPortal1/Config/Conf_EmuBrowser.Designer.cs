@@ -29,7 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("test");
+            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("test");
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Conf_EmuBrowser));
             this.emuToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.updateInfoButton = new System.Windows.Forms.Button();
             this.getEmuArtButton = new System.Windows.Forms.Button();
@@ -112,6 +113,8 @@
             this.loadingListProgressBar = new System.Windows.Forms.ProgressBar();
             this.emulatorListView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.launchedFileTextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.mainTabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gradeUpDown)).BeginInit();
@@ -159,7 +162,7 @@
             "(G)",
             "(B)",
             "(UE)"});
-            this.goodComboBox.Location = new System.Drawing.Point(292, 393);
+            this.goodComboBox.Location = new System.Drawing.Point(292, 420);
             this.goodComboBox.Name = "goodComboBox";
             this.goodComboBox.Size = new System.Drawing.Size(113, 21);
             this.goodComboBox.TabIndex = 37;
@@ -169,7 +172,7 @@
             // stopEmulationCheckBox
             // 
             this.stopEmulationCheckBox.AutoSize = true;
-            this.stopEmulationCheckBox.Location = new System.Drawing.Point(264, 325);
+            this.stopEmulationCheckBox.Location = new System.Drawing.Point(264, 352);
             this.stopEmulationCheckBox.Name = "stopEmulationCheckBox";
             this.stopEmulationCheckBox.Size = new System.Drawing.Size(172, 17);
             this.stopEmulationCheckBox.TabIndex = 43;
@@ -563,6 +566,8 @@
             // 
             // profGroupBox
             // 
+            this.profGroupBox.Controls.Add(this.launchedFileTextBox);
+            this.profGroupBox.Controls.Add(this.label5);
             this.profGroupBox.Controls.Add(this.enableGoodCheckBox);
             this.profGroupBox.Controls.Add(this.label4);
             this.profGroupBox.Controls.Add(this.goodComboBox);
@@ -607,7 +612,7 @@
             // 
             this.enableGoodCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.enableGoodCheckBox.Location = new System.Drawing.Point(264, 357);
+            this.enableGoodCheckBox.Location = new System.Drawing.Point(264, 384);
             this.enableGoodCheckBox.Name = "enableGoodCheckBox";
             this.enableGoodCheckBox.Size = new System.Drawing.Size(138, 17);
             this.enableGoodCheckBox.TabIndex = 48;
@@ -617,7 +622,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(289, 377);
+            this.label4.Location = new System.Drawing.Point(289, 404);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(89, 13);
             this.label4.TabIndex = 47;
@@ -626,7 +631,7 @@
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(214, 322);
+            this.label25.Location = new System.Drawing.Point(214, 349);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(20, 13);
             this.label25.TabIndex = 46;
@@ -639,7 +644,7 @@
             0,
             0,
             0});
-            this.resumeDelayUpDown.Location = new System.Drawing.Point(159, 320);
+            this.resumeDelayUpDown.Location = new System.Drawing.Point(159, 347);
             this.resumeDelayUpDown.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -652,7 +657,7 @@
             // delayResumeCheckBox
             // 
             this.delayResumeCheckBox.AutoSize = true;
-            this.delayResumeCheckBox.Location = new System.Drawing.Point(51, 319);
+            this.delayResumeCheckBox.Location = new System.Drawing.Point(51, 346);
             this.delayResumeCheckBox.Name = "delayResumeCheckBox";
             this.delayResumeCheckBox.Size = new System.Drawing.Size(104, 17);
             this.delayResumeCheckBox.TabIndex = 44;
@@ -662,7 +667,7 @@
             // useQuotesCheckBox
             // 
             this.useQuotesCheckBox.AutoSize = true;
-            this.useQuotesCheckBox.Location = new System.Drawing.Point(25, 267);
+            this.useQuotesCheckBox.Location = new System.Drawing.Point(25, 294);
             this.useQuotesCheckBox.Name = "useQuotesCheckBox";
             this.useQuotesCheckBox.Size = new System.Drawing.Size(120, 17);
             this.useQuotesCheckBox.TabIndex = 42;
@@ -672,7 +677,7 @@
             // checkControllerCheckBox
             // 
             this.checkControllerCheckBox.AutoSize = true;
-            this.checkControllerCheckBox.Location = new System.Drawing.Point(25, 357);
+            this.checkControllerCheckBox.Location = new System.Drawing.Point(25, 384);
             this.checkControllerCheckBox.Name = "checkControllerCheckBox";
             this.checkControllerCheckBox.Size = new System.Drawing.Size(225, 17);
             this.checkControllerCheckBox.TabIndex = 41;
@@ -682,7 +687,7 @@
             // escExitCheckBox
             // 
             this.escExitCheckBox.AutoSize = true;
-            this.escExitCheckBox.Location = new System.Drawing.Point(264, 267);
+            this.escExitCheckBox.Location = new System.Drawing.Point(264, 294);
             this.escExitCheckBox.Name = "escExitCheckBox";
             this.escExitCheckBox.Size = new System.Drawing.Size(122, 17);
             this.escExitCheckBox.TabIndex = 40;
@@ -692,7 +697,7 @@
             // mountImagesCheckBox
             // 
             this.mountImagesCheckBox.AutoSize = true;
-            this.mountImagesCheckBox.Location = new System.Drawing.Point(264, 296);
+            this.mountImagesCheckBox.Location = new System.Drawing.Point(264, 323);
             this.mountImagesCheckBox.Name = "mountImagesCheckBox";
             this.mountImagesCheckBox.Size = new System.Drawing.Size(114, 17);
             this.mountImagesCheckBox.TabIndex = 39;
@@ -702,7 +707,7 @@
             // suspendMPCheckBox
             // 
             this.suspendMPCheckBox.AutoSize = true;
-            this.suspendMPCheckBox.Location = new System.Drawing.Point(25, 296);
+            this.suspendMPCheckBox.Location = new System.Drawing.Point(25, 323);
             this.suspendMPCheckBox.Name = "suspendMPCheckBox";
             this.suspendMPCheckBox.Size = new System.Drawing.Size(152, 17);
             this.suspendMPCheckBox.TabIndex = 38;
@@ -712,7 +717,7 @@
             // postCommandWindowCheck
             // 
             this.postCommandWindowCheck.AutoSize = true;
-            this.postCommandWindowCheck.Location = new System.Drawing.Point(210, 206);
+            this.postCommandWindowCheck.Location = new System.Drawing.Point(210, 230);
             this.postCommandWindowCheck.Name = "postCommandWindowCheck";
             this.postCommandWindowCheck.Size = new System.Drawing.Size(92, 17);
             this.postCommandWindowCheck.TabIndex = 34;
@@ -722,7 +727,7 @@
             // postCommandWaitCheck
             // 
             this.postCommandWaitCheck.AutoSize = true;
-            this.postCommandWaitCheck.Location = new System.Drawing.Point(126, 206);
+            this.postCommandWaitCheck.Location = new System.Drawing.Point(126, 230);
             this.postCommandWaitCheck.Name = "postCommandWaitCheck";
             this.postCommandWaitCheck.Size = new System.Drawing.Size(82, 17);
             this.postCommandWaitCheck.TabIndex = 33;
@@ -741,7 +746,7 @@
             // preCommandWindowCheck
             // 
             this.preCommandWindowCheck.AutoSize = true;
-            this.preCommandWindowCheck.Location = new System.Drawing.Point(210, 161);
+            this.preCommandWindowCheck.Location = new System.Drawing.Point(210, 181);
             this.preCommandWindowCheck.Name = "preCommandWindowCheck";
             this.preCommandWindowCheck.Size = new System.Drawing.Size(92, 17);
             this.preCommandWindowCheck.TabIndex = 32;
@@ -761,7 +766,7 @@
             // preCommandWaitCheck
             // 
             this.preCommandWaitCheck.AutoSize = true;
-            this.preCommandWaitCheck.Location = new System.Drawing.Point(126, 161);
+            this.preCommandWaitCheck.Location = new System.Drawing.Point(126, 181);
             this.preCommandWaitCheck.Name = "preCommandWaitCheck";
             this.preCommandWaitCheck.Size = new System.Drawing.Size(82, 17);
             this.preCommandWaitCheck.TabIndex = 31;
@@ -782,7 +787,7 @@
             // 
             this.postCommandText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.postCommandText.Location = new System.Drawing.Point(126, 182);
+            this.postCommandText.Location = new System.Drawing.Point(126, 204);
             this.postCommandText.Name = "postCommandText";
             this.postCommandText.Size = new System.Drawing.Size(291, 20);
             this.postCommandText.TabIndex = 29;
@@ -801,7 +806,7 @@
             // 
             this.preCommandText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.preCommandText.Location = new System.Drawing.Point(126, 137);
+            this.preCommandText.Location = new System.Drawing.Point(126, 155);
             this.preCommandText.Name = "preCommandText";
             this.preCommandText.Size = new System.Drawing.Size(291, 20);
             this.preCommandText.TabIndex = 27;
@@ -838,7 +843,7 @@
             // 
             this.workingDirTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.workingDirTextBox.Location = new System.Drawing.Point(126, 78);
+            this.workingDirTextBox.Location = new System.Drawing.Point(126, 77);
             this.workingDirTextBox.Name = "workingDirTextBox";
             this.workingDirTextBox.Size = new System.Drawing.Size(291, 20);
             this.workingDirTextBox.TabIndex = 4;
@@ -846,7 +851,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(22, 108);
+            this.label3.Location = new System.Drawing.Point(22, 106);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 13);
             this.label3.TabIndex = 8;
@@ -856,7 +861,7 @@
             // 
             this.argumentsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.argumentsTextBox.Location = new System.Drawing.Point(126, 105);
+            this.argumentsTextBox.Location = new System.Drawing.Point(126, 103);
             this.argumentsTextBox.Name = "argumentsTextBox";
             this.argumentsTextBox.Size = new System.Drawing.Size(291, 20);
             this.argumentsTextBox.TabIndex = 7;
@@ -864,7 +869,7 @@
             // workingDirBrowseButton
             // 
             this.workingDirBrowseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.workingDirBrowseButton.Location = new System.Drawing.Point(423, 76);
+            this.workingDirBrowseButton.Location = new System.Drawing.Point(423, 75);
             this.workingDirBrowseButton.Name = "workingDirBrowseButton";
             this.workingDirBrowseButton.Size = new System.Drawing.Size(29, 23);
             this.workingDirBrowseButton.TabIndex = 6;
@@ -875,7 +880,7 @@
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(22, 185);
+            this.label24.Location = new System.Drawing.Point(22, 207);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(81, 13);
             this.label24.TabIndex = 30;
@@ -884,7 +889,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(22, 81);
+            this.label2.Location = new System.Drawing.Point(22, 80);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(95, 13);
             this.label2.TabIndex = 5;
@@ -893,7 +898,7 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(22, 140);
+            this.label23.Location = new System.Drawing.Point(22, 158);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(76, 13);
             this.label23.TabIndex = 28;
@@ -1008,7 +1013,7 @@
             this.emulatorListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
             this.emulatorListView.HideSelection = false;
             this.emulatorListView.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem1});
+            listViewItem2});
             this.emulatorListView.Location = new System.Drawing.Point(3, 33);
             this.emulatorListView.MultiSelect = false;
             this.emulatorListView.Name = "emulatorListView";
@@ -1020,6 +1025,25 @@
             // columnHeader1
             // 
             this.columnHeader1.Width = 500;
+            // 
+            // launchedFileTextBox
+            // 
+            this.launchedFileTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.launchedFileTextBox.Location = new System.Drawing.Point(126, 129);
+            this.launchedFileTextBox.Name = "launchedFileTextBox";
+            this.launchedFileTextBox.Size = new System.Drawing.Size(291, 20);
+            this.launchedFileTextBox.TabIndex = 53;
+            this.emuToolTip.SetToolTip(this.launchedFileTextBox, resources.GetString("launchedFileTextBox.ToolTip"));
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(22, 132);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(74, 13);
+            this.label5.TabIndex = 54;
+            this.label5.Text = "Launched file:";
             // 
             // Conf_EmuBrowser
             // 
@@ -1138,5 +1162,7 @@
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Button emuPathBrowseButton;
         private System.Windows.Forms.CheckBox enableGoodCheckBox;
+        private System.Windows.Forms.TextBox launchedFileTextBox;
+        private System.Windows.Forms.Label label5;
     }
 }

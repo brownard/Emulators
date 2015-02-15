@@ -14,6 +14,7 @@ namespace Emulators.Launcher
         List<int> ignoredProcessIds;
         KeyboardHook keyHook;
         int mappedKeyData;
+        string launchedExe;
 
         public event EventHandler Starting;
         protected virtual void OnStarting()
@@ -64,7 +65,11 @@ namespace Emulators.Launcher
             runCommand(emulatorProfile.PreCommand, emulatorProfile.PreCommandWaitForExit, emulatorProfile.PreCommandShowWindow);
 
             if (!string.IsNullOrEmpty(emulatorProfile.LaunchedExe))
-                ignoredProcessIds = Process.GetProcessesByName(emulatorProfile.LaunchedExe).Select(p => p.Id).ToList();
+            {
+                try { launchedExe = System.IO.Path.GetFileNameWithoutExtension(emulatorProfile.LaunchedExe); }
+                catch { launchedExe = emulatorProfile.LaunchedExe; }
+                ignoredProcessIds = Process.GetProcessesByName(launchedExe).Select(p => p.Id).ToList();
+            }
 
             if (!tryStartProcess())
             {
@@ -113,7 +118,7 @@ namespace Emulators.Launcher
 
         void waitForLaunchedProcess()
         {
-            foreach (Process proc in System.Diagnostics.Process.GetProcessesByName(emulatorProfile.LaunchedExe))
+            foreach (Process proc in System.Diagnostics.Process.GetProcessesByName(launchedExe))
             {
                 if (!ignoredProcessIds.Contains(proc.Id))
                 {

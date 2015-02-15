@@ -75,6 +75,7 @@ namespace Emulators
             emuPathTextBox.TextChanged += new EventHandler(emuPathTextBox_TextChanged);
             workingDirTextBox.TextChanged += new EventHandler(onProfileChanged);
             argumentsTextBox.TextChanged += new EventHandler(onProfileChanged);
+            launchedFileTextBox.TextChanged += new EventHandler(onProfileChanged);
             useQuotesCheckBox.CheckedChanged += new EventHandler(onProfileChanged);
 
             suspendMPCheckBox.CheckedChanged += new EventHandler(suspendMPCheckBox_CheckedChanged);
@@ -137,6 +138,7 @@ namespace Emulators
             emuPathTextBox.Text = selectedProfile.EmulatorPath;
             workingDirTextBox.Text = selectedProfile.WorkingDirectory;
             argumentsTextBox.Text = selectedProfile.Arguments;
+            launchedFileTextBox.Text = selectedProfile.LaunchedExe;
             useQuotesCheckBox.Checked = selectedProfile.UseQuotes;
             //suspend
             suspendMPCheckBox.Checked = selectedProfile.SuspendMP;
@@ -204,6 +206,7 @@ namespace Emulators
             selectedProfile.EmulatorPath = emuPathTextBox.Text;
             selectedProfile.WorkingDirectory = workingDirTextBox.Text;
             selectedProfile.Arguments = argumentsTextBox.Text;
+            selectedProfile.LaunchedExe = launchedFileTextBox.Text;
             selectedProfile.UseQuotes = useQuotesCheckBox.Checked;
             selectedProfile.SuspendMP = suspendMPCheckBox.Checked;
             selectedProfile.DelayResume = delayResumeCheckBox.Checked;
@@ -459,6 +462,7 @@ namespace Emulators
             emuPathTextBox.Text = "";
             workingDirTextBox.Text = "";
             argumentsTextBox.Text = "";
+            launchedFileTextBox.Text = "";
             preCommandText.Text = "";
             preCommandWaitCheck.Checked = false;
             preCommandWindowCheck.Checked = false;
@@ -820,6 +824,7 @@ namespace Emulators
                         selectedListItem.Selected = true;
                     else if (emulatorListView.Items.Count > 0)
                         emulatorListView.Items[0].Selected = true;
+                    updateEmuPositions = true;
                 }
             }
         }
