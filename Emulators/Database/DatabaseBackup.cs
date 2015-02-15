@@ -476,7 +476,7 @@ namespace Emulators.Database
             DBField field = DBField.GetField(owner.GetType(), propertyNode.Name);
             if (field != null)
             {
-                object val = null; ;
+                object val = null;
                 if (field.DBType == DBDataType.DB_OBJECT)
                 {
                     int id;
