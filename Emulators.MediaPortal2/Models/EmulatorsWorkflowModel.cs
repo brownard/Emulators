@@ -53,7 +53,7 @@ namespace Emulators.MediaPortal2
         {
             WorkflowState newState = WorkflowState.CreateTransientState(name, displayLabel, false, "emulators", true, WorkflowType.Workflow);
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            workflowManager.NavigatePushTransient(newState, GetContextConfig(navigationData));
+            workflowManager.NavigatePushTransientAsync(newState, GetContextConfig(navigationData));
         }
 
         public static EmulatorsWorkflowModel Instance()
