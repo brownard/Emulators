@@ -38,11 +38,8 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
             this.taskDelegate = taskDelegate;
             Header = header;
-            var workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            workflowManager.NavigatePushTransientAsync(
-                new WorkflowState(Guid.NewGuid(), "emulators_progress_dialog", header, true, "dialog_progress", false, false, ModelId, WorkflowType.Dialog),
-                new NavigationContextConfig()
-                );
+            IScreenManager screenManager = ServiceRegistration.Get<IScreenManager>();
+            screenManager.ShowDialog(Consts.DIALOG_PROGRESS);
         }
 
         void onEnterContext(NavigationContext context)

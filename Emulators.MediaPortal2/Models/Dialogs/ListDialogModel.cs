@@ -1,5 +1,6 @@
 ﻿using MediaPortal.Common;
 using MediaPortal.UI.Presentation.DataObjects;
+using MediaPortal.UI.Presentation.Screens;
 using MediaPortal.UI.Presentation.Workflow;
 using System;
 using System.Collections.Generic;
@@ -28,11 +29,8 @@ namespace Emulators.MediaPortal2.Models.Dialogs
             Header = header;
             Items = items;
 
-            var workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            workflowManager.NavigatePushTransientAsync(
-                new WorkflowState(Guid.NewGuid(), "emulators_list_dialog", header, true, "DialogList", true, true, DialogGuid, WorkflowType.Dialog),
-                new NavigationContextConfig()
-                );
+            IScreenManager screenManager = ServiceRegistration.Get<IScreenManager>();
+            screenManager.ShowDialog(Consts.DIALOG_LIST);
         }
     }
 }

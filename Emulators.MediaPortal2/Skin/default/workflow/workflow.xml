@@ -37,10 +37,17 @@
 
       <WorkflowContributorAction Id="10531B3E-28CB-4793-8D00-369CD9CAE447"
         Name="Emulators->SwitchView"
-        DisplayCategory="z-Emulators"
+        DisplayCategory="a-Emulators"
         SortOrder="a"
         SourceStates="*"
         ContributorModelId="7541BF0F-C225-4518-8128-385B583582C3"/>
+
+      <WorkflowContributorAction Id="EF03798D-0223-4D6E-AD0A-B76CDEFD52DB"
+        Name="Emulators->ChangeLayoutView"
+        DisplayCategory="a-Emulators"
+        SortOrder="b"
+        SourceStates="*"
+        ContributorModelId="58CAC6A5-DBAC-4E31-ACD0-A85216FDFFF4"/>
       
         <!--<WorkflowContributorAction Id="C1AD49D6-28F3-493E-94B8-886E90A119DA"
         Name="OnlineVideos->Search"

@@ -124,7 +124,19 @@ namespace Emulators.MediaPortal2
         public StartupState StartupState
         {
             get { return startupState; }
-            set { startupState = value; }
+            set
+            {
+                if (value != startupState)
+                {
+                    startupState = value;
+                    var workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+                    var currentContext = workflowManager.CurrentNavigationContext;
+                    if (currentContext.WorkflowState.StateId == Guids.WorkflowSatesEmulators)
+                        updateState(currentContext);
+                    else if (currentContext.WorkflowModelId == Guids.WorkflowSatesMain)
+                        workflowManager.NavigatePopToState(Guids.WorkflowSatesEmulators, false);
+                }
+            }
         }
 
         #endregion
