@@ -31,6 +31,7 @@
     <Model Id="A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4" Name="ProgressDialogModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.ProgressDialogModel"/>
     <Model Id="7541BF0F-C225-4518-8128-385B583582C3" Name="SwitchViewContributorModel" ClassName="Emulators.MediaPortal2.Actions.SwitchViewAction"/>
     <Model Id="58CAC6A5-DBAC-4E31-ACD0-A85216FDFFF4" Name="ChangeLayoutContributorModel" ClassName="Emulators.MediaPortal2.Actions.ChangeLayoutAction"/>
+    <Model Id="5233A665-7F51-4F2D-A169-65C931DAED54" Name="ImporterContributorModel" ClassName="Emulators.MediaPortal2.Actions.ImporterAction"/>
   </Register>
 
   <Register Location="/Workflow/States">

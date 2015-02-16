@@ -49,6 +49,13 @@
         SourceStates="*"
         ContributorModelId="58CAC6A5-DBAC-4E31-ACD0-A85216FDFFF4"/>
       
+      <WorkflowContributorAction Id="1DDB3707-C01A-45AA-99AC-17822F2E3E4B"
+        Name="Emulators->Importer"
+        DisplayCategory="a-Emulators"
+        SortOrder="c"
+        SourceStates="*"
+        ContributorModelId="5233A665-7F51-4F2D-A169-65C931DAED54"/>
+      
         <!--<WorkflowContributorAction Id="C1AD49D6-28F3-493E-94B8-886E90A119DA"
         Name="OnlineVideos->Search"
         DisplayCategory="z-OnlineVideos"
