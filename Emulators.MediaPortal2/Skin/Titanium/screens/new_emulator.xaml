@@ -30,44 +30,40 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="20"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="20"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     
                     <Label x:Name="PathLabel" Grid.Row="0" Grid.Column="0"
-                        Content="[Emulators.EmulatorPath]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
-                    <Button x:Name="Path" Grid.Row="0" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
-                        Content="{Binding EmulatorPath}" Command="{Command ChooseEmulatorPath}" SetFocusPrio="Default" Margin="10,10,10,0"/>
+                        Content="[Emulators.EmulatorPath]" Color="{ThemeResource EmphasisTextColor}" VerticalAlignment="Center" Margin="10,10,10,10"/>
+                    <Button x:Name="Path" Height="52" Grid.Row="0" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
+                        Content="{Binding EmulatorPath}" Command="{Command ChooseEmulatorPath}" SetFocusPrio="Default" Margin="10,10,10,10"/>
 
-                    <Label x:Name="NameLabel" Grid.Row="2" Grid.Column="0"
-                        Content="[Emulators.Name]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
-                    <TextBox x:Name="Name" Grid.Row="2" Grid.Column="1"
-                        Text="{Binding Path=Name, Mode=TwoWay}" Margin="10,10,10,0"/>
+                    <Label x:Name="NameLabel" Grid.Row="1" Grid.Column="0"
+                        Content="[Emulators.Name]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,10"/>
+                    <TextBox x:Name="Name" Grid.Row="1" Grid.Column="1"
+                        Text="{Binding Path=Name, Mode=TwoWay}" Margin="10,10,10,10"/>
 
-                    <Label x:Name="PlatformLabel" Grid.Row="3" Grid.Column="0"
-                        Content="[Emulators.Platform]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
-                    <Button x:Name="Platform" Grid.Row="3" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
-                        Content="{Binding Platform}" Command="{Command ChoosePlatform}" Margin="10,10,10,0"/>
+                    <Label x:Name="PlatformLabel" Grid.Row="2" Grid.Column="0"
+                        Content="[Emulators.Platform]" Color="{ThemeResource EmphasisTextColor}" VerticalAlignment="Center" Margin="10,10,10,10"/>
+                    <Button x:Name="Platform" Height="52" Grid.Row="2" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
+                        Content="{Binding Platform}" Command="{Command ChoosePlatform}" Margin="10,10,10,10"/>
 
-                    <Label x:Name="RomDirectoryLabel" Grid.Row="5" Grid.Column="0"
-                        Content="[Emulators.RomDirectory]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
-                    <Button x:Name="RomDirectory" Grid.Row="5" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
-                        Content="{Binding RomDirectory}" Command="{Command ChooseRomDirectory}" Margin="10,10,10,0"/>
+                    <Label x:Name="RomDirectoryLabel" Grid.Row="3" Grid.Column="0"
+                        Content="[Emulators.RomDirectory]" Color="{ThemeResource EmphasisTextColor}" VerticalAlignment="Center" Margin="10,10,10,10"/>
+                    <Button x:Name="RomDirectory" Height="52" Grid.Row="3" Grid.Column="1" Style="{ThemeResource ButtonWideStyle}"
+                        Content="{Binding RomDirectory}" Command="{Command ChooseRomDirectory}" Margin="10,10,10,10"/>
 
-                    <Label x:Name="FiltersLabel" Grid.Row="6" Grid.Column="0"
-                        Content="[Emulators.Filters]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
-                    <TextBox x:Name="Filters" Grid.Row="6" Grid.Column="1"
-                        Text="{Binding Path=Filters, Mode=TwoWay}" Margin="10,10,10,0"/>
+                    <Label x:Name="FiltersLabel" Grid.Row="4" Grid.Column="0"
+                        Content="[Emulators.Filters]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,10"/>
+                    <TextBox x:Name="Filters" Grid.Row="4" Grid.Column="1"
+                        Text="{Binding Path=Filters, Mode=TwoWay}" Margin="10,10,10,10"/>
 
-                    <Label x:Name="EnableGoodmergeLabel" Grid.Row="7" Grid.Column="0"
-                        Content="[Emulators.EnableGoodmerge]" Color="{ThemeResource EmphasisTextColor}" Margin="10,10,10,0"/>
-                    <CheckBox x:Name="EnableGoodmerge" Grid.Row="7" Grid.Column="1"
-                        IsChecked="{Binding Path=EnableGoodmerge, Mode=TwoWay}" Margin="10,10,10,0"/>
+                    <CheckBox x:Name="EnableGoodmerge" Grid.Row="5" Grid.Column="1" Content="[Emulators.EnableGoodmerge]"
+                        IsChecked="{Binding Path=EnableGoodmerge, Mode=TwoWay}" Margin="10,10,10,10"/>
 
                 </Grid>
                 <Grid Grid.Row="1">

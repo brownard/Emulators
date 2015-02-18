@@ -15,6 +15,7 @@
   <string name="Emulators.Arguments">Arguments</string>
   <string name="Emulators.RomDirectory">Rom Directory</string>
   <string name="Emulators.SelectPlatform">Select Platform</string>
+  <string name="Emulators.EnableGoodmerge">Enable Goodmerge Support</string>
   
   <string name="Emulators.SelectGoodmerge">Select Goodmerge</string>
 
