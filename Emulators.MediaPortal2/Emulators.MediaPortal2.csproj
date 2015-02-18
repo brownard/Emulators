@@ -104,6 +104,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Skin\Titanium\images\99D23164-5761-4F1C-A16B-F4301DB43C3A.jpg" />
     <Content Include="Skin\default\screens\emulators.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
