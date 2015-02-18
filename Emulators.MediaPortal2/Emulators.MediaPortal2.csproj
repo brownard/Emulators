@@ -75,6 +75,7 @@
     <Compile Include="EmulatorsSettings.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="LayoutType.cs" />
+    <Compile Include="Models\Dialogs\TextInputModel.cs" />
     <Compile Include="Models\ImporterModel.cs" />
     <Compile Include="Models\Dialogs\ListDialogModel.cs" />
     <Compile Include="Models\NewEmulatorModel.cs" />
@@ -176,6 +177,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Skin\Titanium\screens\importer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_text_input.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Content>

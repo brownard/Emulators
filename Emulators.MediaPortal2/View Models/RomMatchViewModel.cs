@@ -109,10 +109,20 @@ namespace Emulators.MediaPortal2
                 });
             }
 
-            //items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.ManualSearch]")
-            //{
-            //    Command = new MethodDelegateCommand(() => { importer.Approve(romMatch); })
-            //});
+            items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.ManualSearch]")
+            {
+                Command = new MethodDelegateCommand(() => 
+                {
+                    TextInputModel.Instance().ShowDialog("[Emulators.Import.Search]", romMatch.Filename, "[Emulators.Import.Search]", t => 
+                    {
+                        if (t != romMatch.SearchTitle)
+                        {
+                            romMatch.SearchTitle = t;
+                            importer.ReProcess(romMatch);
+                        }
+                    });
+                })
+            });
 
             items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Import.AddAsBlankGame]")
             {

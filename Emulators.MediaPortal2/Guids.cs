@@ -20,6 +20,7 @@ namespace Emulators.MediaPortal2
                         
         public static readonly Guid ListDialogModel = new Guid("F140F32F-9F24-47D2-99B1-09A3A58D69FB");
         public static readonly Guid ProgressDialogModel = new Guid("A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4");
+        public static readonly Guid TextInputDialogModel = new Guid("6410D85B-D8AC-456F-83F4-2F10057D424A");
 
     }
 }

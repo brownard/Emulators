@@ -10,5 +10,6 @@ namespace Emulators.MediaPortal2
         public const string KEY_NAME = "Name";
         public const string DIALOG_LIST = "dialog_list";
         public const string DIALOG_PROGRESS = "dialog_progress";
+        public const string DIALOG_TEXT_INPUT = "dialog_text_input";
     }
 }
