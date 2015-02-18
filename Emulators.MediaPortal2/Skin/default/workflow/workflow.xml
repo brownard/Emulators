@@ -29,7 +29,7 @@
          The DisplayTitle will be shown in the main menu for this action. -->
         <PushNavigationTransition Id="99D23164-5761-4F1C-A16B-F4301DB43C3A"
         Name="Home->Emulators"
-        DisplayCategory="z-Emulators"
+        DisplayCategory="b-Emulators"
         SortOrder="a"
         SourceStates="7F702D9C-F2DD-42da-9ED8-0BA92F07787F"
         TargetState="97F9A2D9-B857-4890-9EF2-5E2BC66A53BB"
