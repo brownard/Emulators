@@ -19,8 +19,12 @@ namespace Emulators.MediaPortal2
             this.model = model;
             Game = game;
             Name = game.Title;
+            Description = game.Description;
             using (ThumbGroup thumbs = new ThumbGroup(game))
+            {
                 FrontCover = thumbs.FrontCoverDefaultPath;
+                Fanart = thumbs.FanartDefaultPath;
+            }
 
             Command = new MethodDelegateCommand(() =>
                 {

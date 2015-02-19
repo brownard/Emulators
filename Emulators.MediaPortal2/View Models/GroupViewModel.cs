@@ -22,7 +22,10 @@ namespace Emulators.MediaPortal2
             Name = group.Title;
             ThumbGroup thumbGroup = group.ThumbGroup;
             if (thumbGroup != null)
+            {
                 FrontCover = thumbGroup.FrontCoverDefaultPath;
+                Fanart = thumbGroup.FanartDefaultPath;
+            }
 
             Command = new MethodDelegateCommand(() =>
             {
