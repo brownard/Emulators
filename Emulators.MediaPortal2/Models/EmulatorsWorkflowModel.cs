@@ -69,6 +69,7 @@ namespace Emulators.MediaPortal2
         protected AbstractProperty _focusedItemProperty;
         protected AbstractProperty _layoutTypeProperty;
         protected AbstractProperty _headerProperty;
+        protected AbstractProperty _currentFanartProperty;
 
         NavigationData navigationData;
         GameLauncherDialog currentLauncher;
@@ -82,6 +83,7 @@ namespace Emulators.MediaPortal2
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
             _focusedItemProperty = new WProperty(typeof(ListItem), null);
             _headerProperty = new WProperty(typeof(string));
+            _currentFanartProperty = new WProperty(typeof(string));
         }
 
         #endregion
@@ -111,6 +113,13 @@ namespace Emulators.MediaPortal2
         {
             get { return (ItemViewModel)_focusedItemProperty.GetValue(); }
             set { _focusedItemProperty.SetValue(value); }
+        }
+
+        public AbstractProperty CurrentFanartProperty { get { return _currentFanartProperty; } }
+        public string CurrentFanart
+        {
+            get { return (string)_currentFanartProperty.GetValue(); }
+            set { _currentFanartProperty.SetValue(value); }
         }
 
         public AbstractProperty LayoutTypeProperty { get { return _layoutTypeProperty; } }
@@ -145,9 +154,12 @@ namespace Emulators.MediaPortal2
 
         public void SetFocusedItem(object sender, SelectionChangedEventArgs e)
         {
-            ListItem item = e.FirstAddedItem as ListItem;
+            ItemViewModel item = e.FirstAddedItem as ItemViewModel;
             if (item != null)
+            {
                 FocusedItem = item;
+                CurrentFanart = item.Fanart;
+            }
         }
 
         public void SelectItem(ItemViewModel item)
