@@ -45,9 +45,17 @@
           Name="ImporterView" MainScreen="importer" WorkflowModel="C27FA8F9-500C-4AA3-83CB-93427ED1B2EA"
           DisplayLabel="[Emulators.Importer]"/>
 
-    <WorkflowState Id="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
-          Name="NewEmulatorView" MainScreen="new_emulator" WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
+    <DialogState Id="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
+          Name="NewEmulatorView"
+          DialogScreen="new_emulator"
+          WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
           DisplayLabel="[Emulators.NewEmulator]"/>
+    
+    <DialogState Id="39B0CFEF-7AB8-4FD8-B080-15DF5C21A0A4"
+          Name="ProgressDialog"
+          DialogScreen="dialog_progress"
+          WorkflowModel="A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4"
+          DisplayLabel="[Emulators.Progress]"/>
     
   </Register>
 

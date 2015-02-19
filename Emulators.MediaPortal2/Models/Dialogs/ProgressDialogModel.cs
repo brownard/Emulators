@@ -38,8 +38,8 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
             this.taskDelegate = taskDelegate;
             Header = header;
-            IScreenManager screenManager = ServiceRegistration.Get<IScreenManager>();
-            screenManager.ShowDialog(Consts.DIALOG_PROGRESS);
+            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+            workflowManager.NavigatePush(new Guid("39B0CFEF-7AB8-4FD8-B080-15DF5C21A0A4"));
         }
 
         void onEnterContext(NavigationContext context)
