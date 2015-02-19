@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:emu="clr-namespace:Emulators.MediaPortal2;assembly=Emulators.MediaPortal2"
+    DependsOnStyleResources="Buttons,Colors,Consts">
+
+    <Model x:Key="EmulatorsModel" Id="3C370162-2586-416A-963C-F34DDDE184D4"/>
+
+    <ControlTemplate x:Key="EmulatorCoverTemplate">
+        <Grid>
+            <Image Width="175" Height="{StaticResource MEDIA_POSTER_HEIGHT}" Stretch="Uniform" FallbackSource="VideoLarge.png"
+                Source="{Binding FrontCover}" OpacityMask="{ThemeResource MediaItemsOpacityBrush}" />
+        </Grid>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="GridViewEmulatorItemTemplate">
+        <Grid>
+            <Control Template="{ThemeResource EmulatorCoverTemplate}"/>
+        </Grid>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="ListViewEmulatorItemTemplate">
+        <Grid x:Name="ItemControl" Margin="8,0,8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label x:Name="ItemLabel" Grid.Row="0" Grid.Column="1" Content="{Binding Name}" FontSize="{ThemeResource SmallFontSize}" Color="{ThemeResource TextColor}" FontFamily="DefaultBold">
+                <Label.Opacity>
+                    <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} ? {1} : {2}">
+                        <!--<Binding Path="PlayCount"/>-->
+                        <Binding RelativeSource="{RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}}" Path="HasFocus"/>
+                        <Binding Source="1.0"/>
+                        <Binding Source="0.4"/>
+                    </MultiBinding>
+                </Label.Opacity>
+            </Label>
+
+            <Control x:Name="ListViewCover" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="10,0,15,0"
+               Template="{ThemeResource EmulatorCoverTemplate}" RenderTransformOrigin="0.5,0.5"
+               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}},Path=HasFocus}">
+                <Control.LayoutTransform>
+                    <ScaleTransform ScaleX="0.5" ScaleY="0.5" />
+                </Control.LayoutTransform>
+            </Control>
+
+            <Grid x:Name="FocusDetails" Grid.Row="1" Grid.Column="1" Margin="0,0,0,0"
+                HorizontalAlignment="Stretch" 
+                IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Button}},Path=HasFocus}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label x:Name="Genre" Grid.Row="0" Grid.Column="0" Content="{Binding Game.Genre}" Color="{ThemeResource TextColor}" FontSize="{ThemeResource SmallerFontSize}" FontFamily="DefaultBold" Margin="0,0,0,0"/>
+
+                </Grid>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0">
+
+                    <StarRatingPanel x:Name="RatingReadOnly" IsReadOnly="True" StarReadOnlyTemplate="{StaticResource StarReadOnlyTemplate}"
+                               Maximum="10"
+                               Value="{Binding Game.Grade}">
+                        <StarRatingPanel.LayoutTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="1.6" ScaleY="1.4"/>
+                            </TransformGroup>
+                        </StarRatingPanel.LayoutTransform>
+                    </StarRatingPanel>
+                    
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </ControlTemplate>
+
+    <DataTemplate DataType="{x:Type emu:ItemViewModel}">
+        <Control>
+            <Control.Template>
+                <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} == {LayoutType}.{List} ? {1} : ({0} == {LayoutType}.{Icons} ? {2} : {3})">
+                    <Binding Source="{StaticResource EmulatorsModel}" Path="LayoutType"/>
+                    <Binding Source="{StaticResource ListViewEmulatorItemTemplate}"/>
+                    <Binding Source="{StaticResource GridViewEmulatorItemTemplate}"/>
+                    <!--<Binding Source="{StaticResource CoverViewMovieItemTemplate}"/>-->
+                </MultiBinding>
+            </Control.Template>
+        </Control>
+    </DataTemplate>
+
+    <Style x:Key="EmulatorItemWithContextMenuContainerStyle" BasedOn="{ThemeResource DefaultItemContainerStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                    <Button Style="{ThemeResource MediaItemButtonWideStyle}"
+                        Command="{DynamicResource ResourceKey=Menu_Command}"
+                        IsEnabled="{Binding Enabled}" SetFocus="{Binding Path=Selected,Mode=OneTime}">
+                        <Button.Triggers>
+                            <Trigger Property="HasFocus" Value="True">
+                                <Setter TargetName="ItemLabel" Property="Scroll" Value="Auto"/>
+                                <Setter Property="StackPanel.ZIndex" Value="100.0"/>
+                            </Trigger>
+                        </Button.Triggers>
+                        <Button.ContextMenuCommand>
+                            <Command Source="{StaticResource EmulatorsModel}" Path="ShowContext" Parameters="{LateBoundValue BindingValue={Binding}}"/>
+                        </Button.ContextMenuCommand>
+                    </Button>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="EmulatorItemCoverWithContextMenuContainerStyle" BasedOn="{ThemeResource DefaultItemContainerStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                    <Button Style="{ThemeResource MediaItemButtonCoverStyle}"
+                        Command="{DynamicResource ResourceKey=Menu_Command}"
+                        IsEnabled="{Binding Enabled}" SetFocus="{Binding Path=Selected,Mode=OneTime}">
+                        <Button.Triggers>
+                            <Trigger Property="HasFocus" Value="True">
+                                <Setter TargetName="ItemLabel" Property="Scroll" Value="Auto"/>
+                                <Setter Property="StackPanel.ZIndex" Value="100.0"/>
+                            </Trigger>
+                        </Button.Triggers>
+                        <Button.ContextMenuCommand>
+                            <Command Source="{StaticResource EmulatorsModel}" Path="ShowContext" Parameters="{LateBoundValue BindingValue={Binding}}"/>
+                        </Button.ContextMenuCommand>
+                    </Button>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="emuItemsListListViewStyle" BasedOn="{ThemeResource ContentsMenuListViewStyle}">
+        <EventSetter Event="SelectionChanged" Handler="{CommandStencil Source={StaticResource EmulatorsModel}, Path=SetFocusedItem}"/>
+        <Setter Property="ItemTemplate"/>
+        <!-- Don't inherit the ItemTemplate from ContentsMenuListViewStyle - It should remain null to make the SkinEngine choose an appropriate template -->
+        <Setter Property="DataStringProvider" Value="{ThemeResource MediaItemDataStringProvider}"/>
+        <BindingSetter Property="ItemContainerStyle">
+            <BindingSetter.BindingWrapper>
+                <BindingWrapper>
+                    <BindingWrapper.Binding>
+                        <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} == {LayoutType}.{List} ? {1} : {2}">
+                            <Binding Source="{StaticResource EmulatorsModel}" Path="LayoutType"/>
+                            <Binding Source="{ThemeResource EmulatorItemWithContextMenuContainerStyle}"/>
+                            <Binding Source="{ThemeResource EmulatorItemCoverWithContextMenuContainerStyle}"/>
+                        </MultiBinding>
+                    </BindingWrapper.Binding>
+                </BindingWrapper>
+            </BindingSetter.BindingWrapper>
+        </BindingSetter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListView}">
+                    <ScrollViewer CanContentScroll="True" Margin="5" Style="{ThemeResource LeftSideScrollViewerStyle}"
+                        HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <ItemsPresenter VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <BindingSetter Property="ItemsPanel">
+            <BindingSetter.BindingWrapper>
+                <BindingWrapper>
+                    <BindingWrapper.Binding>
+                        <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} == {LayoutType}.{List} ? {1} : ({0} == {LayoutType}.{Icons} ? {2} : {3})">
+                            <Binding Source="{StaticResource EmulatorsModel}" Path="LayoutType"/>
+                            <!-- List layout -->
+                            <Binding>
+                                <Binding.Source>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel x:Name="ListItemsHost" IsItemsHost="True"/>
+                                    </ItemsPanelTemplate>
+                                </Binding.Source>
+                            </Binding>
+                            <!-- Grid layout -->
+                            <Binding>
+                                <Binding.Source>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingWrapPanel x:Name="GridItemsHost" IsItemsHost="True"/>
+                                    </ItemsPanelTemplate>
+                                </Binding.Source>
+                            </Binding>
+                            <!-- Cover layout -->
+                            <Binding>
+                                <Binding.Source>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel x:Name="CoverListItemsHost" IsItemsHost="True" Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </Binding.Source>
+                            </Binding>
+                        </MultiBinding>
+                    </BindingWrapper.Binding>
+                </BindingWrapper>
+            </BindingSetter.BindingWrapper>
+        </BindingSetter>
+    </Style>
+</ResourceDictionary>

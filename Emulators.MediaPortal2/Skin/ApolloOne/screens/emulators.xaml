@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This screen acts as a simple base screen for each special screen which shows media items and which
+     doesn't bring in special images/controls/etc. -->
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_menu.xaml"
+    >
+    <Include.Resources>
+
+        <Model x:Key="EmulatorsModel" Id="3C370162-2586-416A-963C-F34DDDE184D4"/>
+
+        <ResourceWrapper x:Key="Header_Text" EnableBindings="True"
+            Resource="{Binding Source={StaticResource EmulatorsModel},Path=Header}"/>
+
+        <!-- Contents -->
+        <ControlTemplate x:Key="Contents_Template">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Control Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Control.TemplateControl>
+                        <Include Source="screens\EmulatorItemsList.inc"/>
+                    </Control.TemplateControl>
+                </Control>
+
+                <Control Grid.Column="1" VerticalAlignment="Stretch" Width="720"
+                    Template="{Binding Source={DynamicResource Media_Details_Template}}">
+                    <Control.IsVisible>
+                        <Binding Source="{StaticResource EmulatorsModel}" Path="LayoutType" Converter="{StaticResource ExpressionValueConverter}" ConverterParameter="{}{0} != {LayoutType}.{Cover}"/>
+                    </Control.IsVisible>
+                </Control>
+
+                <!--<Control Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0,0,0,10">
+                    <Control.TemplateControl>
+                        <Include Source="screens\EmulatorItemsListHeader.inc"/>
+                    </Control.TemplateControl>
+                    <Control.LayoutTransform>
+                        <RotateTransform Angle="270" CenterX="0.5" CenterY="0.5"/>
+                    </Control.LayoutTransform>
+                </Control>-->
+            </Grid>
+        </ControlTemplate>
+
+        <!-- Control template for the MediaItem details (cover, thumbs, duration, genres...)-->
+        <ControlTemplate x:Key="Media_Details_Template">
+            <Include Source="screens\EmulatorItemFanArt.inc"/>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="Alternative_Footer_Template">
+            <Include Source="screens\EmulatorMultiDetails.inc"/>
+        </ControlTemplate>
+
+    </Include.Resources>
+</Include>

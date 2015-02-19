@@ -104,6 +104,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Skin\ApolloOne\images\99D23164-5761-4F1C-A16B-F4301DB43C3A.jpg" />
+    <Content Include="Skin\ApolloOne\screens\EmulatorItemsList.inc" />
+    <Content Include="Skin\ApolloOne\screens\EmulatorMultiDetails.inc" />
+    <Content Include="Skin\ApolloOne\screens\EmulatorItemFanArt.inc" />
+    <Content Include="Skin\ApolloOne\screens\EmulatorItemDetails.inc" />
     <Content Include="Skin\Titanium\images\99D23164-5761-4F1C-A16B-F4301DB43C3A.jpg" />
     <Content Include="Skin\default\screens\emulators.xaml">
       <SubType>Designer</SubType>
@@ -184,6 +189,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Skin\default\screens\dialog_text_input.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\ApolloOne\screens\emulators.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Skin\ApolloOne\themes\default\styles\EmulatorsStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Content>
