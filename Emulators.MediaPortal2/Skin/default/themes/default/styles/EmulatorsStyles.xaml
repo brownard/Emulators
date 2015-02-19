@@ -141,7 +141,7 @@
                     <Label x:Name="TitleLabel" Grid.Row="0" Grid.Column="0"
               Content="Title" Color="{ThemeResource EmphasisTextColor}"/>
                     <Label x:Name="Title" Grid.Row="0" Grid.Column="1"
-              Content="{Binding Emulator.Title}" Color="{ThemeResource TextColor}"/>
+              Content="{Binding Name}" Color="{ThemeResource TextColor}"/>
 
                     <Label x:Name="YearLabel" Grid.Row="1" Grid.Column="0"
               Content="Year" Color="{ThemeResource EmphasisTextColor}"/>
@@ -152,7 +152,7 @@
 
                 <Label x:Name="Description" Wrap="True" Scroll="Auto" ScrollSpeed="5" Margin="0,10,0,0" Height="320"
             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-            Content="{Binding Emulator.Description}"
+            Content="{Binding Description}"
             Color="{ThemeResource TextColor}" FontSize="{ThemeResource SmallFontSize}"/>
             </StackPanel>
 
@@ -188,7 +188,7 @@
                     <Label x:Name="TitleLabel" Grid.Row="0" Grid.Column="0"
                         Content="Title" Color="{ThemeResource EmphasisTextColor}"/>
                     <Label x:Name="Title" Grid.Row="0" Grid.Column="1"
-                        Content="{Binding Game.Title}" Color="{ThemeResource TextColor}"/>
+                        Content="{Binding Name}" Color="{ThemeResource TextColor}"/>
 
                     <Label x:Name="RatingLabel" Grid.Row="1" Grid.Column="0"
                         Content="[Media.Rating]" Color="{ThemeResource EmphasisTextColor}"/>
@@ -215,7 +215,7 @@
 
                 <Label x:Name="Description" Wrap="True" Scroll="Auto" ScrollSpeed="5" Margin="0,10,0,0" Height="320"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    Content="{Binding Game.Description}"
+                    Content="{Binding Description}"
                     Color="{ThemeResource TextColor}" FontSize="{ThemeResource SmallFontSize}"/>
             </StackPanel>
 
