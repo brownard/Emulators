@@ -3,7 +3,7 @@
 <Include
     xmlns="www.team-mediaportal.com/2008/mpf/directx"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Source="screens\simple_dialog_menu.xaml"
+    Source="screens\dialog_selectable.xaml"
     >
     <Include.Resources>
 
@@ -12,8 +12,5 @@
         <ResourceWrapper x:Key="Dialog_Header_Text" EnableBindings="True" Resource="{Binding Source={StaticResource ListDialogModel},Path=Header,Mode=OneTime}"/>
 
         <ResourceWrapper x:Key="Menu_Items" EnableBindings="True" Resource="{Binding Source={StaticResource ListDialogModel},Path=Items,Mode=OneTime}"/>
-
-        <!-- Command -->
-        <CommandStencil x:Key="Execute_Command_Stencil" Source="{StaticResource ListDialogModel}" Path="Select"/>
     </Include.Resources>
 </Include>

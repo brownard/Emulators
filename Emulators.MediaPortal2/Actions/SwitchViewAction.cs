@@ -1,9 +1,6 @@
-﻿using Emulators.MediaPortal2.Models.Dialogs;
-using Emulators.MediaPortal2.Settings;
-using MediaPortal.Common;
-using MediaPortal.Common.Commands;
+﻿using MediaPortal.Common;
 using MediaPortal.Common.Localization;
-using MediaPortal.UI.Presentation.DataObjects;
+using MediaPortal.UI.Presentation.Screens;
 using MediaPortal.UI.Presentation.Workflow;
 using System;
 using System.Collections.Generic;
@@ -22,24 +19,8 @@ namespace Emulators.MediaPortal2.Actions
 
         public void Execute()
         {
-            var model = EmulatorsWorkflowModel.Instance();
-            StartupState currentState = model.StartupState;
-
-            ItemsList items = new ItemsList();
-            var startupStates = StartupStateSetting.StartupStates;
-            foreach (string key in startupStates.Keys)
-            {
-                StartupState state = startupStates[key];
-                if (state == StartupState.LASTUSED)
-                    continue;
-
-                items.Add(new ListItem(Consts.KEY_NAME, LocalizationHelper.CreateResourceString(key))
-                {
-                    Command = new MethodDelegateCommand(() => { model.StartupState = state; }),
-                    Selected = state == currentState
-                });
-            }
-            ListDialogModel.Instance().ShowDialog("[Emulators.Dialogs.SwitchView]", items);
+            IScreenManager screenManager = ServiceRegistration.Get<IScreenManager>();
+            screenManager.ShowDialog(Consts.DIALOG_VIEW_MODE);
         }
 
         public void Initialize()

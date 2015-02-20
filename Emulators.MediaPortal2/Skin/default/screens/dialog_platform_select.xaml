@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\dialog_selectable.xaml"
+    >
+    <Include.Resources>
+
+        <Model x:Key="PlatformModel" Id="D68F7D3A-464B-43F4-B072-2605EBE26755"/>
+        <!-- Dialog title -->
+        <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.SelectPlatform]"/>
+
+        <ResourceWrapper x:Key="Menu_Items" EnableBindings="True" Resource="{Binding Source={StaticResource PlatformModel},Path=Items,Mode=OneTime}"/>
+    </Include.Resources>
+</Include>

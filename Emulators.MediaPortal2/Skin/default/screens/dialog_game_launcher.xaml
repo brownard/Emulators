@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\dialog_progress.xaml"
+    >
+    <Include.Resources>
+
+        <Model x:Key="Model" Id="B7450369-957B-429C-96B1-CA41CABAC8B4"/>
+
+        <!-- Header -->
+        <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.Dialogs.LaunchGame]"/>        
+        
+        <!-- Contents -->
+        <ControlTemplate x:Key="Contents_Template">
+            <Control DataContext="{Binding Source={StaticResource Model}}" Template="{DynamicResource ResourceKey=Progress_Template}"></Control>
+        </ControlTemplate>
+
+    </Include.Resources>
+</Include>

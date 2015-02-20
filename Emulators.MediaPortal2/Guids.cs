@@ -22,5 +22,10 @@ namespace Emulators.MediaPortal2
         public static readonly Guid ProgressDialogModel = new Guid("A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4");
         public static readonly Guid TextInputDialogModel = new Guid("6410D85B-D8AC-456F-83F4-2F10057D424A");
 
+        public static readonly Guid PlatformDetailsModel = new Guid("C89ED37E-8F20-486C-AD47-803366A57B00");
+        public static readonly Guid PlatformDetailsState = new Guid("9EB96B6C-D94D-4C29-9CBF-E41E31BF2797");
+
+        public static readonly Guid GameLauncherDialogModel = new Guid("B7450369-957B-429C-96B1-CA41CABAC8B4");
+        public static readonly Guid GameLauncherDialogState = new Guid("5FCB7437-6A5B-42D3-B75B-51DD413BDA13");
     }
 }

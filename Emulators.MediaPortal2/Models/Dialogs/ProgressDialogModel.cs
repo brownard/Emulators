@@ -14,7 +14,10 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 {
     public class ProgressDialogModel : IWorkflowModel
     {
-        Action<ProgressDialogModel> taskDelegate;
+        protected AbstractProperty _headerProperty;
+        protected AbstractProperty _progressProperty;
+        protected AbstractProperty _infoProperty;
+
         IWork currentBackgroundTask;
 
         public ProgressDialogModel()
@@ -24,47 +27,31 @@ namespace Emulators.MediaPortal2.Models.Dialogs
             _headerProperty = new WProperty(typeof(string), null);
         }
 
-        public static void ShowDialog(string header, Action<ProgressDialogModel> taskDelegate)
+        protected virtual void DoTask()
         {
-            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            ProgressDialogModel progressModel = (ProgressDialogModel)workflowManager.GetModel(Guids.ProgressDialogModel);
-            progressModel.showDialog(header, taskDelegate);
+
         }
 
-        void showDialog(string header, Action<ProgressDialogModel> taskDelegate)
+        protected void SetProgress(string info, int percent)
         {
-            if (taskDelegate == null)
-                return;
-
-            this.taskDelegate = taskDelegate;
-            Header = header;
-            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            workflowManager.NavigatePush(new Guid("39B0CFEF-7AB8-4FD8-B080-15DF5C21A0A4"));
+            Info = info;
+            Progress = percent;
         }
 
         void onEnterContext(NavigationContext context)
         {
             currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(
-                () => { taskDelegate(this); },
-            (args) => { closeDialog(context); });
+                DoTask, a => closeDialog(context));
         }
 
         void closeDialog(NavigationContext context)
         {
-            taskDelegate = null;
             currentBackgroundTask = null;
             var screenMgr = ServiceRegistration.Get<IScreenManager>();
             if (screenMgr.TopmostDialogInstanceId == context.DialogInstanceId)
                 screenMgr.CloseTopmostDialog();
         }
 
-        public void SetProgress(string info, int percent)
-        {
-            Info = info;
-            Progress = percent;
-        }
-
-        protected AbstractProperty _headerProperty;
         public AbstractProperty HeaderProperty { get { return _headerProperty; } }
         public string Header
         {
@@ -72,7 +59,6 @@ namespace Emulators.MediaPortal2.Models.Dialogs
             set { _headerProperty.SetValue(value); }
         }
 
-        protected AbstractProperty _progressProperty;
         public AbstractProperty ProgressProperty { get { return _progressProperty; } }
         public int Progress
         {
@@ -80,7 +66,6 @@ namespace Emulators.MediaPortal2.Models.Dialogs
             set { _progressProperty.SetValue(value); }
         }
 
-        protected AbstractProperty _infoProperty;
         public AbstractProperty InfoProperty { get { return _infoProperty; } }
         public string Info
         {
@@ -115,7 +100,7 @@ namespace Emulators.MediaPortal2.Models.Dialogs
                 System.Threading.Thread.Sleep(100);
         }
 
-        public Guid ModelId { get { return Guids.ProgressDialogModel; } }
+        public virtual Guid ModelId { get { return Guid.Empty; } }
 
         public void Reactivate(NavigationContext oldContext, NavigationContext newContext)
         {

@@ -6,6 +6,7 @@ using MediaPortal.Common.General;
 using MediaPortal.Common.ResourceAccess;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
+using MediaPortal.UI.Presentation.Screens;
 using MediaPortal.UI.Presentation.Utilities;
 using MediaPortal.UI.Presentation.Workflow;
 using MediaPortal.Utilities;
@@ -19,6 +20,16 @@ namespace Emulators.MediaPortal2
 {
     public class NewEmulatorModel : IWorkflowModel
     {
+        #region Static Methods
+
+        public static NewEmulatorModel Instance()
+        {
+            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+            return (NewEmulatorModel)workflowManager.GetModel(Guids.NewEmulatorWorkflow);
+        }
+
+        #endregion
+
         #region Protected Members
 
         protected AbstractProperty _emulatorPathProperty = new WProperty(typeof(string), null);
@@ -107,18 +118,8 @@ namespace Emulators.MediaPortal2
 
         public void ChoosePlatform()
         {
-            ItemsList items = new ItemsList();
-            var platforms = Dropdowns.GetPlatformList();
-            for (int i = -1; i < platforms.Count; i++)
-            {
-                string platformName = i < 0 ? "" : platforms[i].Name;
-                items.Add(new ListItem(Consts.KEY_NAME, platformName)
-                    {
-                        Selected = Platform == platformName,
-                        Command = new MethodDelegateCommand(() => { Platform = platformName; })
-                    });
-            }
-            ListDialogModel.Instance().ShowDialog("[Emulators.SelectPlatform]", items);
+            IScreenManager screenManager = ServiceRegistration.Get<IScreenManager>();
+            screenManager.ShowDialog(Consts.DIALOG_PLATFORM_SELECT);
         }
 
         public void FinishEmulatorConfig()
@@ -147,8 +148,9 @@ namespace Emulators.MediaPortal2
             newEmulator.Commit();
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
             workflowManager.NavigatePopToState(Guids.NewEmulatorState, true);
-            var platformLookup = new PlatformDetailsDialog(newEmulator.Platform, newEmulator);
-            platformLookup.GetPlatformInfo();
+            PlatformDetailsModel.GetPlatformInfo(newEmulator.Platform, newEmulator);
+            //var platformLookup = new PlatformDetailsModel(newEmulator.Platform, newEmulator);
+            //platformLookup.GetPlatformInfo();
         }
 
         void doPathSelect(string displayLabel, string initialPath, bool fileSelect, Func<string, bool> validate, Action<string> completed)

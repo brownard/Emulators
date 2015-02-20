@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_dialog_menu.xaml"
+    >
+    <Include.Resources>
+        <!-- Command -->
+        <CommandList x:Key="Menu_Command">
+            <CommandBridge Command="{Binding Command}"/>
+            <Command Source="{Service ScreenManager}" Path="CloseTopmostDialog"/>
+        </CommandList>
+    </Include.Resources>
+</Include>

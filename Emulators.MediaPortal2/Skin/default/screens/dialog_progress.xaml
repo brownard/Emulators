@@ -6,18 +6,11 @@
     >
     <Include.Resources>
 
-        <Model x:Key="Model" Id="A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4"/>
-
-        <!-- Header -->
-        <ResourceWrapper x:Key="Dialog_Header_Text" EnableBindings="True"
-            Resource="{Binding Source={StaticResource Model},Path=Header}"/>
-        
-        <!-- Contents -->
-        <ControlTemplate x:Key="Contents_Template">
-            <DockPanel Width="600" Height="200" DataContext="{Binding Source={StaticResource Model}}" LastChildFill="true" Margin="10">
+        <ControlTemplate x:Key="Progress_Template">
+            <DockPanel Width="600" Height="80" LastChildFill="true" Margin="10">
                 <ProgressBar x:Name="ProgressBar" DockPanel.Dock="Top" Height="15" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                  Value="{Binding Path=Progress}" Margin="0,0,0,10"/>
-                <Label Content="{Binding Path=Info}" FontSize="{ThemeResource SmallFontSize}" Color="{ThemeResource TextColor}" Wrap="true"/>
+                  Value="{Binding Progress}" Margin="0,0,0,10"/>
+                <Label Content="{Binding Info}" FontSize="{ThemeResource SmallFontSize}" Color="{ThemeResource TextColor}"/>
             </DockPanel>
         </ControlTemplate>
 

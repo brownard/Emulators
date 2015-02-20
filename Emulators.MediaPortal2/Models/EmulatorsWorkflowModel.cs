@@ -72,7 +72,6 @@ namespace Emulators.MediaPortal2
         protected AbstractProperty _currentFanartProperty;
 
         NavigationData navigationData;
-        GameLauncherDialog currentLauncher;
 
         #endregion
 
@@ -214,8 +213,7 @@ namespace Emulators.MediaPortal2
 
         public void GameSelected(Game game)
         {
-            currentLauncher = new GameLauncherDialog(game);
-            currentLauncher.Launch();
+            GameLauncherDialog.Launch(game);
         }
 
         public void ShowEmulatorContext(EmulatorViewModel emulator)

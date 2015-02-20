@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\dialog_selectable.xaml"
+    >
+    <Include.Resources>
+
+        <Model x:Key="ViewModeModel" Id="CF101764-00FA-48A0-8AC2-E6227D1FAAD1"/>
+        <!-- Dialog title -->
+        <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.Dialogs.ChangeLayout]"/>
+
+        <ResourceWrapper x:Key="Menu_Items" EnableBindings="True" Resource="{Binding Source={StaticResource ViewModeModel},Path=Items,Mode=OneTime}"/>
+    </Include.Resources>
+</Include>

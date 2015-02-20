@@ -27,9 +27,16 @@
     <Model Id="3C370162-2586-416A-963C-F34DDDE184D4" Name="EmulatorsWorkflowModel" ClassName="Emulators.MediaPortal2.EmulatorsWorkflowModel"/>
     <Model Id="C27FA8F9-500C-4AA3-83CB-93427ED1B2EA" Name="ImporterModel" ClassName="Emulators.MediaPortal2.Models.ImporterModel"/>
     <Model Id="03F534A5-4495-4223-A7EB-0FC8D477CF4B" Name="NewEmulatorModel" ClassName="Emulators.MediaPortal2.NewEmulatorModel"/>
+    
     <Model Id="F140F32F-9F24-47D2-99B1-09A3A58D69FB" Name="ListDialogModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.ListDialogModel"/>
-    <Model Id="A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4" Name="ProgressDialogModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.ProgressDialogModel"/>
     <Model Id="6410D85B-D8AC-456F-83F4-2F10057D424A" Name="TextInputDialogModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.TextInputModel"/>
+
+    <Model Id="98D3FD9B-A902-4072-8558-3B60EF6F4B47" Name="ViewModeModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.ViewModeModel"/>
+    <Model Id="CF101764-00FA-48A0-8AC2-E6227D1FAAD1" Name="LayoutTypeModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.LayoutTypeModel"/>
+    <Model Id="D68F7D3A-464B-43F4-B072-2605EBE26755" Name="PlatformSelectModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.PlatformSelectModel"/>
+    <Model Id="C89ED37E-8F20-486C-AD47-803366A57B00" Name="PlatformDetailsModel" ClassName="Emulators.MediaPortal2.Models.Dialogs.PlatformDetailsModel"/>
+    <Model Id="B7450369-957B-429C-96B1-CA41CABAC8B4" Name="GameLauncherDialog" ClassName="Emulators.MediaPortal2.Models.Dialogs.GameLauncherDialog"/>
+    
     <Model Id="7541BF0F-C225-4518-8128-385B583582C3" Name="SwitchViewContributorModel" ClassName="Emulators.MediaPortal2.Actions.SwitchViewAction"/>
     <Model Id="58CAC6A5-DBAC-4E31-ACD0-A85216FDFFF4" Name="ChangeLayoutContributorModel" ClassName="Emulators.MediaPortal2.Actions.ChangeLayoutAction"/>
     <Model Id="5233A665-7F51-4F2D-A169-65C931DAED54" Name="ImporterContributorModel" ClassName="Emulators.MediaPortal2.Actions.ImporterAction"/>
@@ -51,11 +58,17 @@
           WorkflowModel="03F534A5-4495-4223-A7EB-0FC8D477CF4B"
           DisplayLabel="[Emulators.NewEmulator]"/>
     
-    <DialogState Id="39B0CFEF-7AB8-4FD8-B080-15DF5C21A0A4"
-          Name="ProgressDialog"
-          DialogScreen="dialog_progress"
-          WorkflowModel="A0E1D770-EBBB-4DD9-93FB-2D1CD901EDC4"
-          DisplayLabel="[Emulators.Progress]"/>
+    <DialogState Id="9EB96B6C-D94D-4C29-9CBF-E41E31BF2797"
+          Name="PlatformProgressDialog"
+          DialogScreen="dialog_platform_progress"
+          WorkflowModel="C89ED37E-8F20-486C-AD47-803366A57B00"
+          DisplayLabel="[Emulators.Dialogs.PlatformImporter]"/>
+
+    <DialogState Id="5FCB7437-6A5B-42D3-B75B-51DD413BDA13"
+          Name="GameLauncherDialog"
+          DialogScreen="dialog_game_launcher"
+          WorkflowModel="B7450369-957B-429C-96B1-CA41CABAC8B4"
+          DisplayLabel="[Emulators.Dialogs.LaunchGame]"/>
     
   </Register>
 

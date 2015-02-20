@@ -9,13 +9,8 @@ using System.Text;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    public class ListDialogModel : BaseDialogModel
+    public class ListDialogModel
     {
-        public override Guid DialogGuid
-        {
-            get { return Guids.ListDialogModel; }
-        }
-
         public string Header { get; private set; }
         public ItemsList Items { get; private set; }
 

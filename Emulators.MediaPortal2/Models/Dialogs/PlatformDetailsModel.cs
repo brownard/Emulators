@@ -3,6 +3,7 @@ using Emulators.PlatformImporter;
 using MediaPortal.Common;
 using MediaPortal.Common.Threading;
 using MediaPortal.UI.Presentation.Models;
+using MediaPortal.UI.Presentation.Workflow;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,36 +13,51 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    class PlatformDetailsDialog
+    class PlatformDetailsModel : ProgressDialogModel
     {
-        const string HEADER = "[Emulators.Dialogs.PlatformImporter]";
-
-        IPlatformImporter importer = new TheGamesDBImporter();
+        IPlatformImporter importer;
         string platformStr;
         Emulator emulator;
 
-        public PlatformDetailsDialog(string platformStr, Emulator emulator)
+        public PlatformDetailsModel()
         {
-            this.platformStr = platformStr;
-            this.emulator = emulator;
+            importer = new TheGamesDBImporter();
         }
 
-        public void GetPlatformInfo()
+        public static void GetPlatformInfo(string platformStr, Emulator emulator)
         {
-            ProgressDialogModel.ShowDialog(HEADER, taskDelegate);
+            IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
+            PlatformDetailsModel instance = (PlatformDetailsModel)workflowManager.GetModel(Guids.PlatformDetailsModel);
+            instance.Platform = platformStr;
+            instance.Emulator = emulator;
+            workflowManager.NavigatePushAsync(Guids.PlatformDetailsState);
         }
 
-        void taskDelegate(ProgressDialogModel progressDlg)
+        public string Platform
         {
-            progressDlg.SetProgress(string.Format("Looking up {0}", platformStr), 0);
+            get { return platformStr; }
+            set { platformStr = value; }
+        }
+
+        public Emulator Emulator
+        {
+            get { return emulator; }
+            set { emulator = value; }
+        }
+
+        public override Guid ModelId { get { return Guids.PlatformDetailsModel; } }
+
+        protected override void DoTask()
+        {
+            SetProgress(string.Format("Looking up {0}", platformStr), 0);
             var platform = importer.GetPlatformByName(platformStr);
             if (platform != null)
             {
-                progressDlg.SetProgress(string.Format("Retrieving info for {0}", platform.Name), 33);
+                SetProgress(string.Format("Retrieving info for {0}", platform.Name), 33);
                 var platformInfo = importer.GetPlatformInfo(platform.Id);
                 if (platformInfo != null)
                 {
-                    progressDlg.SetProgress(string.Format("Updating {0}", emulator.Title), 67);
+                    SetProgress(string.Format("Updating {0}", emulator.Title), 67);
                     emulator.Title = platformInfo.Title;
                     emulator.Developer = platformInfo.Developer;
                     emulator.Description = platformInfo.GetDescription();

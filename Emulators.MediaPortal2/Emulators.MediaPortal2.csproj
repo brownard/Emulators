@@ -75,14 +75,16 @@
     <Compile Include="EmulatorsSettings.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="LayoutType.cs" />
+    <Compile Include="Models\Dialogs\LayoutTypeModel.cs" />
+    <Compile Include="Models\Dialogs\PlatformSelectModel.cs" />
     <Compile Include="Models\Dialogs\TextInputModel.cs" />
+    <Compile Include="Models\Dialogs\ViewModeModel.cs" />
     <Compile Include="Models\ImporterModel.cs" />
     <Compile Include="Models\Dialogs\ListDialogModel.cs" />
     <Compile Include="Models\NewEmulatorModel.cs" />
-    <Compile Include="Models\Dialogs\BaseDialogModel.cs" />
     <Compile Include="Models\EmulatorsWorkflowModel.cs" />
     <Compile Include="Models\Dialogs\GameLauncherDialog.cs" />
-    <Compile Include="Models\Dialogs\PlatformDetailsDialog.cs" />
+    <Compile Include="Models\Dialogs\PlatformDetailsModel.cs" />
     <Compile Include="Models\Dialogs\ProgressDialogModel.cs" />
     <Compile Include="MP2Logger.cs" />
     <Compile Include="Navigation\NavigationData.cs" />
@@ -193,6 +195,42 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Skin\ApolloOne\themes\default\styles\EmulatorsStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_view_mode.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_selectable.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_layout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_platform_select.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_platform_progress.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Skin\default\screens\dialog_game_launcher.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Content>
