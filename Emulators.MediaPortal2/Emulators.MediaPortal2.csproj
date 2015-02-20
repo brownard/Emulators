@@ -138,12 +138,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Skin\default\screens\DialogLaunchGame.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Skin\default\screens\dialog_list.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
