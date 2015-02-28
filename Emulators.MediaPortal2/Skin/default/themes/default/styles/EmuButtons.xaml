@@ -1,0 +1,11 @@
+﻿<ResourceDictionary
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    DependsOnStyleResources="Buttons,Colors,Consts">
+
+    <Style x:Key="EmulatorsTabButtonStyle" BasedOn="{ThemeResource ButtonWideStyle}" TargetType="{x:Type Button}">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+
+</ResourceDictionary>

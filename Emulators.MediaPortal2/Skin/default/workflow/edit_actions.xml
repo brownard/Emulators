@@ -44,24 +44,6 @@
       TargetState="FCDF2FC6-AF61-40E1-8022-CB9C32398C78"
       DisplayTitle="[Emulators.Profiles]"
       NavigationContextDisplayLabel="[Emulators.Profiles]"/>
-      
-      <PushNavigationTransition Id="655B6514-65E2-4EBE-9566-09C2A15172B7"
-      Name="Edit_Profile->AdvancedSettings"
-      DisplayCategory="a-Emulators"
-      SortOrder="a"
-      SourceStates="B6DA5181-293B-4ADB-82D9-020D985F353C"
-      TargetState="8B10CB9D-A13F-4E59-9DF0-CF8EA59EB041"
-      DisplayTitle="[Emulators.Advanced]"
-      NavigationContextDisplayLabel="[Emulators.Advanced]"/>
-
-      <PushNavigationTransition Id="A19023DA-5F1F-44FC-B65A-DCA8948AF95C"
-      Name="Edit_Profile->GoodmergeSettings"
-      DisplayCategory="a-Emulators"
-      SortOrder="b"
-      SourceStates="B6DA5181-293B-4ADB-82D9-020D985F353C"
-      TargetState="BA597FFA-8BA3-4AD9-8425-9D85D89EE50C"
-      DisplayTitle="[Emulators.Goodmerge]"
-      NavigationContextDisplayLabel="[Emulators.Goodmerge]"/>
 
     </MenuActions>
 </Workflow>

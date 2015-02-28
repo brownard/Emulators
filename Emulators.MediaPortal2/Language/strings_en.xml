@@ -17,7 +17,8 @@
   <string name="Emulators.EditEmulators.Help">Add and configure emulators</string>
   <string name="Emulators.EditProfile">Edit Profile</string>
   <string name="Emulators.Profiles">Profiles</string>
-  
+
+  <string name="Emulators.General">General</string>
   <string name="Emulators.Advanced">Advanced</string>
   <string name="Emulators.Goodmerge">Goodmerge</string>
   <string name="Emulators.Name">Name</string>
