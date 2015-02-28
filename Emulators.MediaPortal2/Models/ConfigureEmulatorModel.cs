@@ -32,7 +32,7 @@ namespace Emulators.MediaPortal2.Models
         public static ConfigureEmulatorModel Instance()
         {
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            return (ConfigureEmulatorModel)workflowManager.GetModel(Guids.NewEmulatorWorkflow);
+            return (ConfigureEmulatorModel)workflowManager.GetModel(Guids.ConfigureEmulatorModel);
         }
 
         public static void ShowProfileSelectDialog(Emulator emulator)
@@ -522,7 +522,7 @@ namespace Emulators.MediaPortal2.Models
 
         public Guid ModelId
         {
-            get { return Guids.NewEmulatorWorkflow; }
+            get { return Guids.ConfigureEmulatorModel; }
         }
 
         public void Reactivate(NavigationContext oldContext, NavigationContext newContext)
