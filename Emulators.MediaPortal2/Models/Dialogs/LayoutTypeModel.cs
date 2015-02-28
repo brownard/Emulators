@@ -8,11 +8,9 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    public class LayoutTypeModel
+    public class LayoutTypeModel : ListDialogBase
     {
         const string KEY_LAYOUT_TYPE = "LayoutType";
-
-        ItemsList items;
 
         public LayoutTypeModel()
         {
@@ -42,28 +40,19 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
         protected void UpdateLayout(LayoutType layoutType)
         {
-            var model = EmulatorsWorkflowModel.Instance();
+            var model = EmulatorsMainModel.Instance();
             model.LayoutType = layoutType;
         }
 
-        protected void UpdateSelectedFlag()
+        protected override void UpdateSelectedFlag()
         {
-            var model = EmulatorsWorkflowModel.Instance();
+            var model = EmulatorsMainModel.Instance();
             LayoutType currentLayout = model.LayoutType;
             foreach (ListItem item in items)
             {
                 object layout;
                 if (item.AdditionalProperties.TryGetValue(KEY_LAYOUT_TYPE, out layout))
                     item.Selected = (LayoutType)layout == currentLayout;
-            }
-        }
-
-        public ItemsList Items
-        {
-            get
-            {
-                UpdateSelectedFlag();
-                return items;
             }
         }
     }

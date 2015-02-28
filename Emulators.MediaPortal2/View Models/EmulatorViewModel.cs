@@ -1,4 +1,5 @@
 ﻿using Emulators.ImageHandlers;
+using Emulators.MediaPortal2.Models;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using System;
@@ -11,11 +12,11 @@ namespace Emulators.MediaPortal2
 {
     public class EmulatorViewModel : ItemViewModel
     {
-        EmulatorsWorkflowModel model;
+        EmulatorsMainModel model;
 
         public Emulator Emulator { get; private set; }
 
-        public EmulatorViewModel(Emulator emu, EmulatorsWorkflowModel model)
+        public EmulatorViewModel(Emulator emu, EmulatorsMainModel model)
         {
             this.model = model;
             Emulator = emu;

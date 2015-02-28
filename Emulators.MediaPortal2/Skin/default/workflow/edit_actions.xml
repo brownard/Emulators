@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- OnlineVideos workflow state actions -->
+<Workflow DescriptorVersion="1.0">
+    <MenuActions>
+        <!-- This is the workflow action which will be shown in the main menu in the home screen.
+         A PushNavigationTransition is a static action which is always visible in one or more defined
+         workflow states. When executed, the given target state will be pushed onto the workflow navigation stack.
+         There are also other action types which can be used at this place, for example it is possible to
+         make the action visible and invisible programmatically when using a workflow contributor action.
+
+         The action's name is only needed for debugging purposes and won't be shown to the user.
+
+         The DisplayCategory is used to group actions together. There is no detailed definition which groups
+         are present but the idea is that each plugin developer uses its own display categories to group its actions
+         together. There are also some common display categories which can be reused here. Use the first letter
+         as an indicator for the sort ordering, for example "z" for actions which should be posed at the end,
+         "a" for the beginning, etc.
+
+         The SortOrder is used for finer grained sorting inside a display category. We suggest to use a single, lower-case
+         letter here.
+
+         The SourceState attribute is needed to tell the system in which states the action should be visible.
+         Use the state's id here. You can also use a star ("*"). In that case, the action will be shown in each
+         state.
+
+         The TargetState attribute must always contain an id of a valid target state where the sytem will navigate to
+         when this action is executed.
+
+         The DisplayTitle will be shown in the main menu for this action. -->
+      <PushNavigationTransition Id="08672C7A-15E1-4C33-8F59-B063EDA61596"
+      Name="Emulators->CreateNewEmulator"
+      DisplayCategory="a-Emulators"
+      SortOrder="a"
+      SourceStates="2F7DEE79-8952-45F2-A6F9-D4F3896816C3"
+      TargetState="C69A5500-0059-4E4E-A331-2FD9835C4D0B"
+      DisplayTitle="[Emulators.NewEmulator]"
+      NavigationContextDisplayLabel="[Emulators.NewEmulator]"/>
+      
+      <PushNavigationTransition Id="D981D709-AAAA-4D52-9003-B2C0F2DD1DEA"
+      Name="Edit_Emulator->Profiles"
+      DisplayCategory="a-Emulators"
+      SortOrder="a"
+      SourceStates="4824523F-ABC2-4E41-B645-166C3189EAF0"
+      TargetState="FCDF2FC6-AF61-40E1-8022-CB9C32398C78"
+      DisplayTitle="[Emulators.Profiles]"
+      NavigationContextDisplayLabel="[Emulators.Profiles]"/>
+      
+      <PushNavigationTransition Id="655B6514-65E2-4EBE-9566-09C2A15172B7"
+      Name="Edit_Profile->AdvancedSettings"
+      DisplayCategory="a-Emulators"
+      SortOrder="a"
+      SourceStates="B6DA5181-293B-4ADB-82D9-020D985F353C"
+      TargetState="8B10CB9D-A13F-4E59-9DF0-CF8EA59EB041"
+      DisplayTitle="[Emulators.Advanced]"
+      NavigationContextDisplayLabel="[Emulators.Advanced]"/>
+
+      <PushNavigationTransition Id="A19023DA-5F1F-44FC-B65A-DCA8948AF95C"
+      Name="Edit_Profile->GoodmergeSettings"
+      DisplayCategory="a-Emulators"
+      SortOrder="b"
+      SourceStates="B6DA5181-293B-4ADB-82D9-020D985F353C"
+      TargetState="BA597FFA-8BA3-4AD9-8425-9D85D89EE50C"
+      DisplayTitle="[Emulators.Goodmerge]"
+      NavigationContextDisplayLabel="[Emulators.Goodmerge]"/>
+
+    </MenuActions>
+</Workflow>

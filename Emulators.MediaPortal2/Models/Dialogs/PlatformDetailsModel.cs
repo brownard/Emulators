@@ -57,6 +57,7 @@ namespace Emulators.MediaPortal2.Models.Dialogs
                 var platformInfo = importer.GetPlatformInfo(platform.Id);
                 if (platformInfo != null)
                 {
+                    System.Threading.Thread.Sleep(2000);
                     SetProgress(string.Format("Updating {0}", emulator.Title), 67);
                     emulator.Title = platformInfo.Title;
                     emulator.Developer = platformInfo.Developer;

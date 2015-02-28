@@ -1,4 +1,5 @@
 ﻿using Emulators.ImageHandlers;
+using Emulators.MediaPortal2.Models;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
 using System;
@@ -11,11 +12,11 @@ namespace Emulators.MediaPortal2
 {
     public class GroupViewModel : ItemViewModel
     {
-        EmulatorsWorkflowModel model;
+        EmulatorsMainModel model;
 
         public RomGroup Group { get; private set; }
 
-        public GroupViewModel(RomGroup group, EmulatorsWorkflowModel model)
+        public GroupViewModel(RomGroup group, EmulatorsMainModel model)
         {
             this.model = model;
             Group = group;

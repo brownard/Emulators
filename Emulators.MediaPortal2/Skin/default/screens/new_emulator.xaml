@@ -77,8 +77,15 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Button x:Name="FinishButton" Grid.Column="2" Style="{ThemeResource DialogButtonStyle}"
-                        Content="Finish" IsEnabled="{Binding IsEmulatorValid}"
-                        Command="{Command FinishEmulatorConfig}"/>
+                        Content="Finish" IsEnabled="{Binding IsEmulatorValid}">
+                        <Button.Command>
+                            <CommandList>
+                                <Command Path="SaveNewEmulator" />
+                                <!--<Command Source="{Service ScreenManager}" Path="CloseDialog"
+                                    Parameters="{LateBoundValue BindingValue={Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Screen}},Path=ScreenInstanceId}}"/>-->
+                            </CommandList>
+                        </Button.Command>
+                    </Button>
                 </Grid>
             </Grid>
         </ControlTemplate>

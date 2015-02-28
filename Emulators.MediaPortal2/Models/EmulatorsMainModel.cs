@@ -18,9 +18,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.Models
 {
-    public class EmulatorsWorkflowModel : IWorkflowModel
+    public class EmulatorsMainModel : IWorkflowModel
     {
         #region Static Methods
 
@@ -56,10 +56,10 @@ namespace Emulators.MediaPortal2
             workflowManager.NavigatePushTransientAsync(newState, GetContextConfig(navigationData));
         }
 
-        public static EmulatorsWorkflowModel Instance()
+        public static EmulatorsMainModel Instance()
         {
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            return (EmulatorsWorkflowModel)workflowManager.GetModel(Guids.WorkflowSatesMain);
+            return (EmulatorsMainModel)workflowManager.GetModel(Guids.EmulatorsMainModel);
         }
 
         #endregion
@@ -77,7 +77,7 @@ namespace Emulators.MediaPortal2
 
         #region Ctor/Dtor
 
-        public EmulatorsWorkflowModel()
+        public EmulatorsMainModel()
         {
             _layoutTypeProperty = new WProperty(typeof(LayoutType), LayoutType.List);
             _focusedItemProperty = new WProperty(typeof(ListItem), null);
@@ -139,10 +139,10 @@ namespace Emulators.MediaPortal2
                     startupState = value;
                     var workflowManager = ServiceRegistration.Get<IWorkflowManager>();
                     var currentContext = workflowManager.CurrentNavigationContext;
-                    if (currentContext.WorkflowState.StateId == Guids.WorkflowSatesEmulators)
+                    if (currentContext.WorkflowState.StateId == Guids.ViewItemsState)
                         updateState(currentContext);
-                    else if (currentContext.WorkflowModelId == Guids.WorkflowSatesMain)
-                        workflowManager.NavigatePopToState(Guids.WorkflowSatesEmulators, false);
+                    else if (currentContext.WorkflowModelId == Guids.EmulatorsMainModel)
+                        workflowManager.NavigatePopToState(Guids.ViewItemsState, false);
                 }
             }
         }
@@ -230,7 +230,7 @@ namespace Emulators.MediaPortal2
         {
             bool updateList = false;
             navigationData = GetNavigationData(context);
-            if (context.WorkflowState.StateId == Guids.WorkflowSatesEmulators && (navigationData == null || navigationData.StartupState != startupState))
+            if (context.WorkflowState.StateId == Guids.ViewItemsState && (navigationData == null || navigationData.StartupState != startupState))
             {
                 updateList = true;
                 navigationData = getStartupNavigationData();
@@ -359,7 +359,7 @@ namespace Emulators.MediaPortal2
 
         public Guid ModelId
         {
-            get { return Guids.WorkflowSatesMain; }
+            get { return Guids.EmulatorsMainModel; }
         }
 
         public void UpdateMenuActions(MediaPortal.UI.Presentation.Workflow.NavigationContext context, IDictionary<Guid, MediaPortal.UI.Presentation.Workflow.WorkflowAction> actions)

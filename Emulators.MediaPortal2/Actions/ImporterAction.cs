@@ -38,7 +38,7 @@ namespace Emulators.MediaPortal2.Actions
 
         public bool IsActionVisible(NavigationContext context)
         {
-            return context.WorkflowModelId == Guids.WorkflowSatesMain;
+            return context.WorkflowModelId == Guids.EmulatorsMainModel;
         }
 
         public event ContributorStateChangeDelegate StateChanged;

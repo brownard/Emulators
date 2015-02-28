@@ -9,10 +9,9 @@ using System.Text;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    public class ListDialogModel
+    public class ListDialogModel : ListDialogBase
     {
         public string Header { get; private set; }
-        public ItemsList Items { get; private set; }
 
         public static ListDialogModel Instance()
         {
@@ -22,7 +21,7 @@ namespace Emulators.MediaPortal2.Models.Dialogs
         public void ShowDialog(string header, ItemsList items)
         {
             Header = header;
-            Items = items;
+            this.items = items;
 
             IScreenManager screenManager = ServiceRegistration.Get<IScreenManager>();
             screenManager.ShowDialog(Consts.DIALOG_LIST);

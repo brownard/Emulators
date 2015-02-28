@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_dialog_menu.xaml"
+    >
+    <Include.Resources>
+
+        <Model x:Key="Model" Id="03F534A5-4495-4223-A7EB-0FC8D477CF4B"/>
+        <!-- Dialog title -->
+        <ResourceWrapper x:Key="Dialog_Header_Text" Resource="[Emulators.Dialogs.SelectProfile]"/>
+
+        <ResourceWrapper x:Key="Menu_Items" EnableBindings="True" Resource="{Binding Source={StaticResource Model},Path=CurrentProfiles,Mode=OneTime}"/>
+        
+        <CommandBridge x:Key="Menu_Command" Command="{Binding Command}"/>
+        
+    </Include.Resources>
+</Include>

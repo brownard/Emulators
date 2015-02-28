@@ -8,11 +8,9 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    public class PlatformSelectModel
+    public class PlatformSelectModel : ListDialogBase
     {
         const string KEY_PLATFORM = "Platform";
-
-        ItemsList items;
 
         public PlatformSelectModel()
         {
@@ -32,13 +30,13 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
         protected void UpdatePlatform(string platform)
         {
-            var model = NewEmulatorModel.Instance();
+            var model = ConfigureEmulatorModel.Instance();
             model.Platform = platform;
         }
 
-        protected void UpdateSelectedFlag()
+        protected override void UpdateSelectedFlag()
         {
-            var model = NewEmulatorModel.Instance();
+            var model = ConfigureEmulatorModel.Instance();
             string currentPlatform = model.Platform;
             foreach (ListItem item in items)
             {
@@ -48,15 +46,6 @@ namespace Emulators.MediaPortal2.Models.Dialogs
                     item.Selected = true;
                     break;
                 }
-            }
-        }
-
-        public ItemsList Items
-        {
-            get
-            {
-                UpdateSelectedFlag();
-                return items;
             }
         }
     }

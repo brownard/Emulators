@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    public class ViewModeModel
+    public class ViewModeModel : ListDialogBase
     {
         const string KEY_STARTUP_STATE = "StartupState";
-        ItemsList items;
 
         public ViewModeModel()
         {
@@ -36,13 +35,13 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
         protected void SetStartupState(StartupState startupState)
         {
-            var model = EmulatorsWorkflowModel.Instance();
+            var model = EmulatorsMainModel.Instance();
             model.StartupState = startupState;
         }
 
-        protected void UpdateSelectedFlag()
+        protected override void UpdateSelectedFlag()
         {
-            var model = EmulatorsWorkflowModel.Instance();
+            var model = EmulatorsMainModel.Instance();
             StartupState currentState = model.StartupState;
             foreach (ListItem item in items)
             {
@@ -50,15 +49,6 @@ namespace Emulators.MediaPortal2.Models.Dialogs
                 if (item.AdditionalProperties.TryGetValue(KEY_STARTUP_STATE, out state))
                     item.Selected = (StartupState)state == currentState;
             }
-        }
-
-        public ItemsList Items 
-        { 
-            get 
-            {
-                UpdateSelectedFlag();
-                return items; 
-            } 
         }
     }
 }

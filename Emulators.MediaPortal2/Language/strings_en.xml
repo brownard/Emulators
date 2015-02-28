@@ -7,16 +7,37 @@
   <string name="Emulators.Favourites">Favourites</string>
   <string name="Emulators.LastUsed">Last Used</string>
 
+  <string name="Emulators.Config.StartupView">Startup View</string>
+  <string name="Emulators.Config.StartupView.Help">The view to show on first open</string>
+
   <string name="Emulators.NewEmulator">New Emulator</string>
+  <string name="Emulators.EditEmulator">Edit Emulator</string>
+  <string name="Emulators.EditEmulators">Edit Emulators</string>
+  <string name="Emulators.EditEmulators.Help">Add and configure emulators</string>
+  <string name="Emulators.EditProfile">Edit Profile</string>
+  <string name="Emulators.Profiles">Profiles</string>
+  
+  <string name="Emulators.Advanced">Advanced</string>
+  <string name="Emulators.Goodmerge">Goodmerge</string>
   <string name="Emulators.Name">Name</string>
   <string name="Emulators.Platform">Platform</string>
   <string name="Emulators.Filters">Filters</string>
   <string name="Emulators.EmulatorPath">Emulator Path</string>
   <string name="Emulators.Arguments">Arguments</string>
   <string name="Emulators.RomDirectory">Rom Directory</string>
-  <string name="Emulators.SelectPlatform">Select Platform</string>
-  <string name="Emulators.EnableGoodmerge">Enable Goodmerge Support</string>
+  <string name="Emulators.WorkingDirectory">Working Directory</string>
+  <string name="Emulators.LaunchedProcess">Launched Process</string>
+  <string name="Emulators.PreCommand">Pre Command</string>
+  <string name="Emulators.PostCommand">Post Command</string>
+  <string name="Emulators.WaitForExit">Wait for command to exit</string>
+  <string name="Emulators.ShowWindow">Show command window</string>
+  <string name="Emulators.UseQuotes">Use quotes around paths</string>
+  <string name="Emulators.EscToExit">Send Esc key to exit</string>
+  <string name="Emulators.WarnNoControllers">Warn if there are no controllers connected</string>
+  <string name="Emulators.EnableGoodmerge">Enable Goodmerge</string>
+  <string name="Emulators.GoodmergeTags">Preferred Tags</string>
   
+  <string name="Emulators.SelectPlatform">Select Platform</string>  
   <string name="Emulators.SelectGoodmerge">Select Goodmerge</string>
 
   <string name="Emulators.Dialogs.PlatformImporter">Platform Importer</string>
@@ -24,6 +45,7 @@
   <string name="Emulators.Dialogs.SwitchView">View</string>
   <string name="Emulators.Dialogs.SelectMatch">Select Match</string>
   <string name="Emulators.Dialogs.ChangeLayout">Layout</string>
+  <string name="Emulators.Dialogs.SelectProfile">Select Profile</string>
 
   <string name="Emulators.Importer">Importer</string>
   <string name="Emulators.Import.NoFilesToImport">No files to import</string>

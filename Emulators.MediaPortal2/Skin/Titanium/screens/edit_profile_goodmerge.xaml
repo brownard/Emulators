@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- This screen acts as a simple base screen for each special screen which shows media items and which
+     doesn't bring in special images/controls/etc. -->
+<Include
+    xmlns="www.team-mediaportal.com/2008/mpf/directx"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Source="screens\master_configuration_menu.xaml"
+    >
+    <Include.Resources>
+
+
+        <!-- Header_Text resource has to be added by including screen -->
+        <ResourceWrapper x:Key="Header_Text" Resource="[Emulators.Goodmerge]"/>
+        <!-- Contents -->
+        <ControlTemplate x:Key="Contents_Template">
+            <Control VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Control.TemplateControl>
+                    <Include Source="screens\EditProfileGoodmerge.inc"/>
+                </Control.TemplateControl>
+            </Control>
+        </ControlTemplate>
+    </Include.Resources>
+</Include>
