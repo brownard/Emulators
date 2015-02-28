@@ -279,6 +279,7 @@ namespace Emulators.MediaPortal2.Models
             PostCommand = null;
             PostCommandWaitForExit = true;
             PostCommandShowWindow = false;
+            WarnNoControllers = false;
             EnableGoodmerge = false;
             GoodmergeTags = null;
         }
@@ -315,7 +316,6 @@ namespace Emulators.MediaPortal2.Models
 
             SaveProfile();
             SaveEmulator();
-            getEmulators();
 
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
             workflowManager.NavigatePopToState(Guids.NewEmulatorState, true);
@@ -332,6 +332,7 @@ namespace Emulators.MediaPortal2.Models
                 currentEmulator.PathToRoms = RomDirectory;
                 currentEmulator.CaseAspect = CaseAspect;
                 currentEmulator.Commit();
+                getEmulators();
             }
         }
 
@@ -340,11 +341,20 @@ namespace Emulators.MediaPortal2.Models
             if (currentProfile != null)
             {
                 currentProfile.EmulatorPath = EmulatorPath;
-                currentProfile.EnableGoodmerge = EnableGoodmerge;
                 currentProfile.Arguments = Arguments;
                 currentProfile.WorkingDirectory = WorkingDirectory;
                 currentProfile.UseQuotes = UseQuotes;
                 currentProfile.EscapeToExit = EscToExit;
+                currentProfile.LaunchedExe = LaunchedFile;
+                currentProfile.PreCommand = PreCommand;
+                currentProfile.PreCommandWaitForExit = PreCommandWaitForExit;
+                currentProfile.PreCommandShowWindow = PreCommandShowWindow;
+                currentProfile.PostCommand = PostCommand;
+                currentProfile.PostCommandWaitForExit = PostCommandWaitForExit;
+                currentProfile.PostCommandShowWindow = PostCommandShowWindow;
+                currentProfile.CheckController = WarnNoControllers;
+                currentProfile.EnableGoodmerge = EnableGoodmerge;
+                currentProfile.GoodmergeTags = GoodmergeTags;
                 currentProfile.Commit();
             }
         }
@@ -373,6 +383,18 @@ namespace Emulators.MediaPortal2.Models
                     setupEmulator(emuObject as Emulator);
                 if (newContext.ContextVariables.TryGetValue(KEY_PROFILE_EDIT, out emuObject))
                     setupProfile(emuObject as EmulatorProfile);
+            }
+        }
+
+        void saveOldState(NavigationContext oldContext, bool push)
+        {
+            if (!push)
+            {
+                Guid stateId = oldContext.WorkflowState.StateId;
+                if (stateId == Guids.EditEmulatorState)
+                    SaveEmulator();
+                else if (stateId == Guids.EditProfileState)
+                    SaveProfile();
             }
         }
 
@@ -412,11 +434,20 @@ namespace Emulators.MediaPortal2.Models
             {
                 currentProfile = profile;
                 EmulatorPath = profile.EmulatorPath;
-                EnableGoodmerge = profile.EnableGoodmerge;
                 Arguments = profile.Arguments;
                 WorkingDirectory = profile.WorkingDirectory;
                 UseQuotes = profile.UseQuotes;
                 EscToExit = profile.EscapeToExit;
+                LaunchedFile = currentProfile.LaunchedExe;
+                PreCommand = currentProfile.PreCommand;
+                PreCommandWaitForExit = currentProfile.PreCommandWaitForExit;
+                PreCommandShowWindow = currentProfile.PreCommandShowWindow;
+                PostCommand = currentProfile.PostCommand;
+                PostCommandWaitForExit = currentProfile.PostCommandWaitForExit;
+                PostCommandShowWindow = currentProfile.PostCommandShowWindow;
+                WarnNoControllers = currentProfile.CheckController;
+                EnableGoodmerge = profile.EnableGoodmerge;
+                GoodmergeTags = currentProfile.GoodmergeTags;
             }
         }
 
@@ -502,6 +533,7 @@ namespace Emulators.MediaPortal2.Models
 
         public void ChangeModelContext(NavigationContext oldContext, NavigationContext newContext, bool push)
         {
+            saveOldState(oldContext, push);
             updateState(newContext);
         }
 
@@ -517,7 +549,7 @@ namespace Emulators.MediaPortal2.Models
 
         public void ExitModelContext(NavigationContext oldContext, NavigationContext newContext)
         {
-
+            saveOldState(oldContext, false);
         }
 
         public Guid ModelId
