@@ -131,27 +131,30 @@
   <!-- Contents of '/Plugins/EmulatorsPlugin' section -->
   <Register Location="/Configuration/Settings/Plugins/EmulatorsPlugin">
     <ConfigSection
-        Id="Emulators"
+        Id="EmulatorsConfigure"
         Redundant="true"
-        Text="Emulators"/>
+        Text="[Emulators.Config.Configure]"/>
     <ConfigSection
         Id="Importer"
         Redundant="true"
         Text="Importer"/>
-    <CustomConfigSetting
-        Id="EditEmulatorsList"
-        Text="[Emulators.EditEmulators]"
-        HelpText="[Emulators.EditEmulators.Help]"
-        ClassName="Emulators.MediaPortal2.Settings.EditEmulatorsSetting"
-        AdditionalData="WorkflowState=2F7DEE79-8952-45F2-A6F9-D4F3896816C3,ConfAppPanel=..."/>
     <ConfigSetting
         Id="EmulatorsStartupState"
         Text="[Emulators.Config.StartupView]"
         HelpText="[Emulators.Config.StartupView.Help]"
         ClassName="Emulators.MediaPortal2.Settings.StartupStateSetting"/>
   </Register>
+  
+  <Register Location="/Configuration/Settings/Plugins/EmulatorsPlugin/EmulatorsConfigure">
+    <CustomConfigSetting
+        Id="EditEmulatorsList"
+        Text="[Emulators.EditEmulators]"
+        HelpText="[Emulators.EditEmulators.Help]"
+        ClassName="Emulators.MediaPortal2.Settings.EditEmulatorsSetting"
+        AdditionalData="WorkflowState=2F7DEE79-8952-45F2-A6F9-D4F3896816C3,ConfAppPanel=..."/>
+  </Register>
 
-<Register Location="/Configuration/Settings/Plugins/EmulatorsPlugin/Importer">
+  <Register Location="/Configuration/Settings/Plugins/EmulatorsPlugin/Importer">
     <CustomConfigSetting
         Id="ImporterConfig"
         Text="Importer"
