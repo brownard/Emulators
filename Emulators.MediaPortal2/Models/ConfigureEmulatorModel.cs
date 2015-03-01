@@ -404,8 +404,20 @@ namespace Emulators.MediaPortal2.Models
 
         void getEmulators()
         {
+            bool fireChange;
+            ItemsList items = Emulators;
+            if (items == null)
+            {
+                items = new ItemsList();
+                fireChange = false;
+            }
+            else
+            {
+                items.Clear();
+                fireChange = true;
+            }
+
             var emulators = Emulator.GetAll();
-            ItemsList items = new ItemsList();
             for (int i = 0; i < emulators.Count; i++)
             {
                 Emulator emulator = emulators[i];
@@ -414,7 +426,11 @@ namespace Emulators.MediaPortal2.Models
                     Command = new MethodDelegateCommand(() => EditEmulator(emulator))
                 });
             }
-            Emulators = items;
+
+            if (fireChange)
+                items.FireChange();
+            else
+                Emulators = items;
         }
 
         void setupEmulator(Emulator emulator)
