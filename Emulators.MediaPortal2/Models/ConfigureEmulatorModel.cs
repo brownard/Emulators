@@ -326,13 +326,17 @@ namespace Emulators.MediaPortal2.Models
         {
             if (currentEmulator != null)
             {
+                bool reImport = currentEmulator.PathToRoms != RomDirectory;
+                if (reImport)
+                    currentEmulator.PathToRoms = RomDirectory;
                 currentEmulator.Title = Name;
                 currentEmulator.Platform = Platform;
                 currentEmulator.Filter = Filters;
-                currentEmulator.PathToRoms = RomDirectory;
                 currentEmulator.CaseAspect = CaseAspect;
                 currentEmulator.Commit();
                 getEmulators();
+                if (reImport)
+                    restartImporter();
             }
         }
 
@@ -520,6 +524,12 @@ namespace Emulators.MediaPortal2.Models
                         EscToExit = emulatorConfig.ProfileConfig.EscapeToExit.Value;
                 }
             }
+        }
+
+        void restartImporter()
+        {
+            IEmulatorsService emulatorsService = ServiceRegistration.Get<IEmulatorsService>();
+            emulatorsService.Importer.Restart();
         }
 
         #endregion
