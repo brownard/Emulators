@@ -27,7 +27,7 @@ namespace Emulators.MediaPortal2.Models.Dialogs
             _headerProperty = new WProperty(typeof(string), null);
         }
 
-        protected virtual void DoTask()
+        protected virtual void DoTask(NavigationContext context)
         {
 
         }
@@ -41,7 +41,7 @@ namespace Emulators.MediaPortal2.Models.Dialogs
         void onEnterContext(NavigationContext context)
         {
             currentBackgroundTask = ServiceRegistration.Get<IThreadPool>().Add(
-                DoTask, a => closeDialog(context));
+                () => DoTask(context), a => closeDialog(context));
         }
 
         void closeDialog(NavigationContext context)

@@ -15,6 +15,9 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 {
     class PlatformDetailsModel : ProgressDialogModel
     {
+        public const string KEY_PLATFORM_STRING = "PlatformDetailsPlatformString";
+        public const string KEY_EMULATOR = "PlatformDetailsEmulator";
+
         IPlatformImporter importer;
         string platformStr;
         Emulator emulator;
@@ -26,29 +29,30 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 
         public static void GetPlatformInfo(string platformStr, Emulator emulator)
         {
+            IDictionary<string, object> contextVariables = new Dictionary<string, object>();
+            contextVariables[KEY_PLATFORM_STRING] = platformStr;
+            contextVariables[KEY_EMULATOR] = emulator;
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            PlatformDetailsModel instance = (PlatformDetailsModel)workflowManager.GetModel(Guids.PlatformDetailsModel);
-            instance.Platform = platformStr;
-            instance.Emulator = emulator;
-            workflowManager.NavigatePushAsync(Guids.PlatformDetailsState);
+            workflowManager.NavigatePushAsync(Guids.PlatformDetailsState, new NavigationContextConfig() { AdditionalContextVariables = contextVariables });
         }
 
         public string Platform
         {
             get { return platformStr; }
-            set { platformStr = value; }
         }
 
         public Emulator Emulator
         {
             get { return emulator; }
-            set { emulator = value; }
         }
 
         public override Guid ModelId { get { return Guids.PlatformDetailsModel; } }
 
-        protected override void DoTask()
+        protected override void DoTask(NavigationContext context)
         {
+            if (!getParameters(context))
+                return;
+
             SetProgress(string.Format("Looking up {0}", platformStr), 0);
             var platform = importer.GetPlatformByName(platformStr);
             if (platform != null)
@@ -85,6 +89,23 @@ namespace Emulators.MediaPortal2.Models.Dialogs
                     emulator.Commit();
                 }
             }
+        }
+
+        bool getParameters(NavigationContext context)
+        {
+            platformStr = null;
+            emulator = null;
+
+            object parameter;
+            if (!context.ContextVariables.TryGetValue(KEY_PLATFORM_STRING, out parameter))
+                return false;
+            platformStr = parameter as string;
+
+            if (!context.ContextVariables.TryGetValue(KEY_EMULATOR, out parameter))
+                return false;
+            emulator = parameter as Emulator;
+
+            return platformStr != null && emulator != null;
         }
     }
 }

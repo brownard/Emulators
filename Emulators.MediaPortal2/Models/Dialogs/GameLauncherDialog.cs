@@ -17,27 +17,30 @@ namespace Emulators.MediaPortal2.Models.Dialogs
 {
     class GameLauncherDialog : ProgressDialogModel
     {
+        public const string KEY_GAME = "GameLauncherGame";
+
         Game game = null;
         GameLauncher launcher;
 
         public static void Launch(Game game)
         {
+            IDictionary<string, object> contextVariables = new Dictionary<string, object>();
+            contextVariables[KEY_GAME] = game;
             IWorkflowManager workflowManager = ServiceRegistration.Get<IWorkflowManager>();
-            GameLauncherDialog instance = (GameLauncherDialog)workflowManager.GetModel(Guids.GameLauncherDialogModel);
-            instance.Game = game;
-            workflowManager.NavigatePushAsync(Guids.GameLauncherDialogState);
+            workflowManager.NavigatePushAsync(Guids.GameLauncherDialogState, new NavigationContextConfig() { AdditionalContextVariables = contextVariables });
         }
 
         public Game Game
         {
             get { return game; }
-            set { game = value; }
         }
 
         public override Guid ModelId { get { return Guids.GameLauncherDialogModel; } }
 
-        protected override void DoTask()
-        {          
+        protected override void DoTask(NavigationContext context)
+        {
+            if (!getParameters(context))
+                return;
             SetProgress("Launching " + game.Title, 0);
             launcher = new GameLauncher(game);
             launcher.ExtractionProgress += (s, e) => SetProgress(string.Format("Extracting {0}%", e.Percent), e.Percent);
@@ -49,6 +52,16 @@ namespace Emulators.MediaPortal2.Models.Dialogs
         void launcher_Exited(object sender, EventArgs e)
         {
             ((GameLauncher)sender).Game.UpdateAndSaveGamePlayInfo();
+        }
+
+        bool getParameters(NavigationContext context)
+        {
+            game = null;
+            object gameObject;
+            if (!context.ContextVariables.TryGetValue(KEY_GAME, out gameObject))
+                return false;
+            game = gameObject as Game;
+            return game != null;
         }
     }
 }
