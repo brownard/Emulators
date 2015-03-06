@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.ListItems
 {
     public class GroupViewModel : ItemViewModel
     {

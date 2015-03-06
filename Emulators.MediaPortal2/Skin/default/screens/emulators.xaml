@@ -4,7 +4,7 @@
 <Include
     xmlns="www.team-mediaportal.com/2008/mpf/directx"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:emu="clr-namespace:Emulators.MediaPortal2;assembly=Emulators.MediaPortal2"
+    xmlns:emuListItem="clr-namespace:Emulators.MediaPortal2.ListItems;assembly=Emulators.MediaPortal2"
     Source="screens\master_menu.xaml"
     >
     <Include.Resources>
@@ -36,14 +36,14 @@
                 <ContentPresenter Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" Width="930"
                  Content="{Binding FocusedItem}">
                     <ContentPresenter.Resources>
-                        
-                        <DataTemplate DataType="{x:Type emu:EmulatorViewModel}">
+
+                        <DataTemplate DataType="{x:Type emuListItem:EmulatorViewModel}">
                             <Control Template="{StaticResource emuEmulatorDetailsTemplate}"/>
                         </DataTemplate>
-                        <DataTemplate DataType="{x:Type emu:GameViewModel}">
+                        <DataTemplate DataType="{x:Type emuListItem:GameViewModel}">
                             <Control Template="{StaticResource emuGameDetailsTemplate}"/>
                         </DataTemplate>
-                        <DataTemplate DataType="{x:Type emu:GroupViewModel}">
+                        <DataTemplate DataType="{x:Type emuListItem:GroupViewModel}">
                             <Control Template="{StaticResource emuGroupDetailsTemplate}"/>
                         </DataTemplate>
 

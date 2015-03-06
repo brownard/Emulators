@@ -1,20 +1,17 @@
-﻿using MediaPortal.Common.Commands;
-using MediaPortal.Common.General;
-using MediaPortal.UI.Presentation.DataObjects;
+﻿using MediaPortal.Common.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.ListItems
 {
-    public class ItemViewModel : ListItem
+    public class ItemViewModel : ContextListItem
     {
         protected AbstractProperty _nameProperty;
         protected AbstractProperty _descriptionProperty;
         protected AbstractProperty _frontCoverProperty;
         protected AbstractProperty _fanartProperty;
-        protected AbstractProperty _contextCommandProperty;
 
         public ItemViewModel()
         {
@@ -22,7 +19,6 @@ namespace Emulators.MediaPortal2
             _descriptionProperty = new WProperty(typeof(string));
             _frontCoverProperty = new WProperty(typeof(string));
             _fanartProperty = new WProperty(typeof(string));
-            _contextCommandProperty = new WProperty(typeof(ICommand));
         }
 
         public AbstractProperty NameProperty { get { return _nameProperty; } }
@@ -51,13 +47,6 @@ namespace Emulators.MediaPortal2
         {
             get { return (string)_fanartProperty.GetValue(); }
             set { _fanartProperty.SetValue(value); }
-        }
-
-        public AbstractProperty ContextCommandProperty { get { return _contextCommandProperty; } }
-        public ICommand ContextCommand
-        {
-            get { return (ICommand)_contextCommandProperty.GetValue(); }
-            set { _contextCommandProperty.SetValue(value); }
         }
     }
 }

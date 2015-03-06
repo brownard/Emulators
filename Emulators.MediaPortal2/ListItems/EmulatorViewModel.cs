@@ -6,31 +6,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Emulators.MediaPortal2
+namespace Emulators.MediaPortal2.ListItems
 {
-    public class GameViewModel : ItemViewModel
+    public class EmulatorViewModel : ItemViewModel
     {
         EmulatorsMainModel model;
 
-        public Game Game { get; private set; }
+        public Emulator Emulator { get; private set; }
 
-        public GameViewModel(Game game, EmulatorsMainModel model)
+        public EmulatorViewModel(Emulator emu, EmulatorsMainModel model)
         {
             this.model = model;
-            Game = game;
-            Name = game.Title;
-            Description = game.Description;
-            using (ThumbGroup thumbs = new ThumbGroup(game))
+            Emulator = emu;
+            Name = emu.Title;
+            Description = emu.Description;
+            using (ThumbGroup thumbs = new ThumbGroup(emu))
             {
                 FrontCover = thumbs.FrontCoverDefaultPath;
                 Fanart = thumbs.FanartDefaultPath;
             }
 
             Command = new MethodDelegateCommand(() =>
-                {
-                    model.GameSelected(Game);
-                });
+            {
+                model.EmulatorSelected(Emulator);
+            });
         }
     }
 }

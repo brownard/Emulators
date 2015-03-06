@@ -2,7 +2,7 @@
 <ResourceDictionary
     xmlns="www.team-mediaportal.com/2008/mpf/directx"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:emu="clr-namespace:Emulators.MediaPortal2;assembly=Emulators.MediaPortal2"
+    xmlns:emuListItem="clr-namespace:Emulators.MediaPortal2.ListItems;assembly=Emulators.MediaPortal2"
     DependsOnStyleResources="Buttons,Colors,Consts">
 
     <Model x:Key="EmulatorsModel" Id="3C370162-2586-416A-963C-F34DDDE184D4"/>
@@ -38,7 +38,7 @@
     </ControlTemplate>
 
     <!--Layout selection-->
-    <DataTemplate DataType="{x:Type emu:ItemViewModel}">
+    <DataTemplate DataType="{x:Type emuListItem:ItemViewModel}">
         <Control>
             <Control.Template>
                 <MultiBinding Converter="{StaticResource ExpressionMultiValueConverter}" ConverterParameter="{}{0} == {LayoutType}.{List} ? {1} : {2}">

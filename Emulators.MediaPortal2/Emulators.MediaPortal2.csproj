@@ -96,15 +96,16 @@
     <Compile Include="Settings\EditProfileSetting.cs" />
     <Compile Include="Settings\ImporterSetting.cs" />
     <Compile Include="Settings\StartupStateSettings.cs" />
-    <Compile Include="View Models\GroupViewModel.cs" />
-    <Compile Include="View Models\ItemViewModel.cs" />
-    <Compile Include="View Models\RomMatchViewModel.cs" />
+    <Compile Include="ListItems\ContextListItem.cs" />
+    <Compile Include="ListItems\GroupViewModel.cs" />
+    <Compile Include="ListItems\ItemViewModel.cs" />
+    <Compile Include="ListItems\RomMatchViewModel.cs" />
     <Content Include="Language\strings_en.xml">
       <SubType>Designer</SubType>
     </Content>
     <Compile Include="SQLProvider.cs" />
-    <Compile Include="View Models\EmulatorViewModel.cs" />
-    <Compile Include="View Models\GameViewModel.cs" />
+    <Compile Include="ListItems\EmulatorViewModel.cs" />
+    <Compile Include="ListItems\GameViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="plugin.xml">
