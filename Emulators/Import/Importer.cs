@@ -192,6 +192,15 @@ namespace Emulators.Import
             }
         }
 
+        public ReadOnlyCollection<RomMatch> AllMatches
+        {
+            get 
+            {
+                lock (lookupSync)
+                    return new List<RomMatch>(lookupMatch.Values).AsReadOnly();
+            }
+        }
+
         // Matches that have not yet been scraped.
         public ReadOnlyCollection<RomMatch> PendingMatches
         {
@@ -240,6 +249,7 @@ namespace Emulators.Import
                 if (threadCount < 1) //0 threads will take a very long time to complete :)
                     threadCount = 1;
 
+                lookupMatch = new Dictionary<int, RomMatch>();
                 pendingMatches = new List<RomMatch>();
                 priorityPendingMatches = new List<RomMatch>();
                 matchesNeedingInput = new List<RomMatch>();
@@ -248,7 +258,6 @@ namespace Emulators.Import
                 commitedMatches = new List<RomMatch>();
 
                 importerThreads = new List<Thread>();
-                lookupMatch = new Dictionary<int, RomMatch>();
                 scraperProvider = new ScraperProvider();
                 scraperProvider.DoWork += new DoWorkDelegate(() => doWork);
             }
@@ -295,7 +304,7 @@ namespace Emulators.Import
                 refreshDatabase();
                 if (!doWork)
                     return;
-                getFilesToImport(); //first thread needs to locate games for import
+                populatePendingMatches(); //first thread needs to locate games for import
                 if (doWork)
                 {
                     ImporterStatus = ImportAction.ImportStarted;
@@ -710,20 +719,9 @@ namespace Emulators.Import
 
         #region Refresh Database
 
-        //Refreshes the DB and builds list of RomMatches based on Game.IsInfoChecked
-        //called first when started
-        void getFilesToImport()
+        void populatePendingMatches()
         {
-            List<RomMatch> localMatches = new List<RomMatch>();
-            foreach (Game game in Game.GetAll(false))
-            {
-                game.Reset();
-                localMatches.Add(new RomMatch(game));
-            }
-
-            if (!doWork)
-                return;
-
+            List<RomMatch> localMatches = getGamesNeedingImport();
             if (localMatches.Count == 0)
             {
                 if (isBackground)
@@ -733,12 +731,10 @@ namespace Emulators.Import
                 return;
             }
 
-            Logger.LogDebug("Adding {0} item{1} to importer", localMatches.Count, localMatches.Count == 1 ? "" : "s");
-            for (int x = 0; x < localMatches.Count; x++)
+            Logger.LogDebug("Adding {0} items to importer", localMatches.Count);
+            lock (lookupSync)
             {
-                RomMatch romMatch = localMatches[x];
-                OnProgressChanged(new ImportProgressEventArgs((x * 100) / localMatches.Count, x, localMatches.Count, string.Format("Importing {0}", romMatch.Path)));
-                lock (lookupSync)
+                foreach (RomMatch romMatch in localMatches)
                 {
                     if (!lookupMatch.ContainsKey(romMatch.ID))
                     {
@@ -748,134 +744,28 @@ namespace Emulators.Import
                     }
                 }
             }
+
             OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.PendingFilesAdded, localMatches));
             OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Ready"));
         }
 
-        void refreshDatabase()
+        List<RomMatch> getGamesNeedingImport()
         {
-            Logger.LogDebug("Refreshing database");
-            OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Refreshing database"));
-            List<Game> allGames = Game.GetAll();
-
-            deleteMissingGames(allGames);
-            if (!doWork) 
-                return;
-
-            List<string> dbPaths = EmulatorsCore.Database.GetAll<GameDisc>().Select(g => g.Path).ToList();
-            List<Emulator> emus = Emulator.GetAll();
-            if (!doWork) 
-                return;
-
-            List<Game> newGames = new List<Game>();
-            int filesFound = 0;
-            //loop through each emu
-            foreach (Emulator emu in emus)
+            List<RomMatch> matches = new List<RomMatch>();
+            foreach (Game game in Game.GetAll(false))
             {
-                if (!doWork)
-                    return;
-
-                Logger.LogDebug("Getting files for emulator {0}", emu.Title);
-                //check if rom dir exists
-                string romDir = emu.PathToRoms;
-                if (string.IsNullOrEmpty(romDir) || !System.IO.Directory.Exists(romDir))
-                {
-                    Logger.LogWarn("Could not locate {0} rom directory '{1}'", emu.Title, romDir);
-                    continue;
-                }
-
-                //get list of files using each filter
-                foreach (string filter in emu.Filter.Split(';'))
-                {
-                    if (!doWork) 
-                        return;
-
-                    string[] gamePaths;
-                    try { gamePaths = System.IO.Directory.GetFiles(romDir, filter, System.IO.SearchOption.AllDirectories); }
-                    catch
-                    {
-                        Logger.LogError("Error locating files in {0} rom directory using filter '{1}'", emu.Title, filter);
-                        continue;
-                    }
-
-                    for (int x = 0; x < gamePaths.Length; x++)
-                    {
-                        if (!doWork) return;
-                        string path = gamePaths[x];
-                        //check that path is not ignored, already in DB or not already picked up by a previous filter
-                        if (!EmulatorsCore.Options.ShouldIgnoreFile(path) && !dbPaths.Contains(path))
-                        {
-                            filesFound++;
-                            OnProgressChanged(new ImportProgressEventArgs(0, 0, filesFound, string.Format("Updating {0}", emu.Title)));
-                            dbPaths.Add(path);
-                            newGames.Add(new Game(emu, path));
-                        }
-                    }
-                }
+                game.Reset();
+                matches.Add(new RomMatch(game));
             }
-
-            Logger.LogDebug("Found {0} new game(s)", filesFound);
-            if (filesFound < 1)
-                return;
-
-            int filesAdded = 0;
-            EmulatorsCore.Database.BeginTransaction();
-            foreach (Game game in newGames)
-            {
-                filesAdded++;
-                Logger.LogDebug("Commiting " + game.Title);
-                OnProgressChanged(new ImportProgressEventArgs((filesAdded * 100) / filesFound, filesAdded, filesFound, "Commiting " + game.Title));
-                game.Commit();
-            }
-            EmulatorsCore.Database.EndTransaction();
-            OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NewFilesFound, null));
+            return matches;
         }
 
-        void deleteMissingGames(List<Game> games)
+        void refreshDatabase()
         {
-            OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, "Removing deleted games"));
-            List<string> missingDrives = new List<string>();
-            EmulatorsCore.Database.BeginTransaction();
-            foreach (Game game in games)
-            {
-                List<GameDisc> missingDiscs = new List<GameDisc>();
-                foreach (GameDisc disc in game.Discs)
-                {
-                    string path = disc.Path;
-                    string drive = Path.GetPathRoot(path);
-                    if (!missingDrives.Contains(drive))
-                    {
-                        //if path root is missing assume file is on disconnected
-                        //removable/network drive and don't delete
-                        if (!Directory.Exists(drive))
-                            missingDrives.Add(drive);
-                        else if (!File.Exists(path))
-                            missingDiscs.Add(disc);
-                    }
-                }
-
-                if (missingDiscs.Count == game.Discs.Count)
-                {
-                    Logger.LogDebug("Removing {0} from the database, file not found", game.Title);
-                    OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, string.Format("Removing {0}", game.Title)));
-                    game.Delete();
-                }
-                else if (missingDiscs.Count > 0)
-                {
-                    foreach (GameDisc disc in missingDiscs)
-                    {
-                        Logger.LogDebug("Removing disc {0}, file not found", disc.Path);
-                        OnProgressChanged(new ImportProgressEventArgs(0, 0, 0, string.Format("Removing disc {0}", disc.Path)));
-                        game.Discs.Remove(disc);
-                        disc.Delete();
-                    }
-                    Logger.LogDebug("Updating {0}, disc not found", game.Title);
-                    game.Discs.Commit();
-                }
-                if (!doWork) 
-                    break;
-            }
-            EmulatorsCore.Database.EndTransaction();
+            DBRefresh dbRefresh = new DBRefresh();
+            dbRefresh.DeleteMissingGames();
+            if (dbRefresh.RefreshDatabase())
+                OnImportStatusChanged(new ImportStatusEventArgs(ImportAction.NewFilesFound, null));
         }
 
         #endregion
@@ -1074,6 +964,7 @@ namespace Emulators.Import
             dbGame.InfoChecked = true;
             dbGame.Commit();
         }
+
         #endregion
 
         // removes the given match from all pending process lists

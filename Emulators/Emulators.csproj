@@ -72,6 +72,7 @@
     <Compile Include="Database\DatabaseUpgrader.cs" />
     <Compile Include="Database\DBField.cs" />
     <Compile Include="Database\DBFieldAttribute.cs" />
+    <Compile Include="Database\DBRefresh.cs" />
     <Compile Include="Database\DBRelationList.cs" />
     <Compile Include="Database\DBRelationInfo.cs" />
     <Compile Include="Database\DBTableAttribute.cs" />
