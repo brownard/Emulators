@@ -1,4 +1,5 @@
 ﻿using Emulators.AutoConfig;
+using Emulators.MediaPortal2.ListItems;
 using Emulators.MediaPortal2.Models.Dialogs;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
@@ -88,6 +89,7 @@ namespace Emulators.MediaPortal2.Models
         protected AbstractProperty _goodmergeTagsProperty = new WProperty(typeof(string), null);
 
         PathBrowserCloseWatcher _pathBrowserCloseWatcher;
+        DialogCloseWatcher confirmDeleteCloseWatcher;
         object syncRoot = new object();
         Emulator currentEmulator;
         EmulatorProfile currentProfile;
@@ -379,9 +381,8 @@ namespace Emulators.MediaPortal2.Models
                 currentEmulator = Emulator.CreateNewEmulator();
                 currentProfile = currentEmulator.DefaultProfile;
             }
-            else if (stateId == Guids.EditEmulatorState || stateId == Guids.EditProfileState)
+            else
             {
-                Reset();
                 object emuObject;
                 if (newContext.ContextVariables.TryGetValue(KEY_EMULATOR_EDIT, out emuObject))
                     setupEmulator(emuObject as Emulator);
@@ -404,26 +405,17 @@ namespace Emulators.MediaPortal2.Models
 
         void getEmulators()
         {
-            bool fireChange;
             ItemsList items = Emulators;
-            if (items == null)
-            {
-                items = new ItemsList();
-                fireChange = false;
-            }
-            else
-            {
-                items.Clear();
-                fireChange = true;
-            }
+            bool fireChange = createOrResetList(ref items);
 
             var emulators = Emulator.GetAll();
             for (int i = 0; i < emulators.Count; i++)
             {
                 Emulator emulator = emulators[i];
-                items.Add(new ListItem(Consts.KEY_NAME, emulator.Title)
+                items.Add(new ContextListItem(Consts.KEY_NAME, emulator.Title)
                 {
-                    Command = new MethodDelegateCommand(() => EditEmulator(emulator))
+                    Command = new MethodDelegateCommand(() => EditEmulator(emulator)),
+                    ContextCommand = new MethodDelegateCommand(() => showEmulatorContext(emulator))
                 });
             }
 
@@ -433,9 +425,48 @@ namespace Emulators.MediaPortal2.Models
                 Emulators = items;
         }
 
+        void showEmulatorContext(Emulator emulator)
+        {
+            ItemsList items = new ItemsList();
+            items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Profiles]")
+            {
+                Command = new MethodDelegateCommand(() => ShowProfileSelectDialog(emulator))
+            });
+            items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Dialogs.Delete]")
+            {
+                Command = new MethodDelegateCommand(() => confirmEmulatorDelete(emulator))
+            });
+            ListDialogModel.Instance().ShowDialog(emulator.Title, items);
+        }
+
+        void confirmEmulatorDelete(Emulator emulator)
+        {
+            IDialogManager dialogManager = ServiceRegistration.Get<IDialogManager>();
+            Guid dialogHandle = dialogManager.ShowDialog(emulator.Title, "[Emulators.Dialogs.ConfirmDelete]", DialogType.YesNoDialog, false, DialogButtonType.No);
+            confirmDeleteCloseWatcher = new DialogCloseWatcher(this, dialogHandle, dialogResult => 
+            {
+                if (dialogResult == DialogResult.Yes)
+                    emulator.Delete();
+            });
+        }
+
+        static bool createOrResetList(ref ItemsList items)
+        {
+            if (items == null)
+            {
+                items = new ItemsList();
+                return false;
+            }
+            else
+            {
+                items.Clear();
+                return true;
+            }
+        }
+
         void setupEmulator(Emulator emulator)
         {
-            if (emulator != null)
+            if (emulator != null && emulator != currentEmulator)
             {
                 currentEmulator = emulator;
                 Name = emulator.Title;
@@ -443,31 +474,7 @@ namespace Emulators.MediaPortal2.Models
                 Filters = emulator.Filter;
                 RomDirectory = emulator.PathToRoms;
                 CaseAspect = emulator.CaseAspect;
-
                 setupProfileList();
-            }
-        }
-
-        void setupProfile(EmulatorProfile profile)
-        {
-            if (profile != null)
-            {
-                currentProfile = profile;
-                EmulatorPath = profile.EmulatorPath;
-                Arguments = profile.Arguments;
-                WorkingDirectory = profile.WorkingDirectory;
-                UseQuotes = profile.UseQuotes;
-                EscToExit = profile.EscapeToExit;
-                LaunchedFile = currentProfile.LaunchedExe;
-                PreCommand = currentProfile.PreCommand;
-                PreCommandWaitForExit = currentProfile.PreCommandWaitForExit;
-                PreCommandShowWindow = currentProfile.PreCommandShowWindow;
-                PostCommand = currentProfile.PostCommand;
-                PostCommandWaitForExit = currentProfile.PostCommandWaitForExit;
-                PostCommandShowWindow = currentProfile.PostCommandShowWindow;
-                WarnNoControllers = currentProfile.CheckController;
-                EnableGoodmerge = profile.EnableGoodmerge;
-                GoodmergeTags = currentProfile.GoodmergeTags;
             }
         }
 
@@ -486,6 +493,29 @@ namespace Emulators.MediaPortal2.Models
                     });
                 }
                 CurrentProfiles = items;
+            }
+        }
+
+        void setupProfile(EmulatorProfile profile)
+        {
+            if (profile != null && profile != currentProfile)
+            {
+                currentProfile = profile;
+                EmulatorPath = profile.EmulatorPath;
+                Arguments = profile.Arguments;
+                WorkingDirectory = profile.WorkingDirectory;
+                UseQuotes = profile.UseQuotes;
+                EscToExit = profile.EscapeToExit;
+                LaunchedFile = currentProfile.LaunchedExe;
+                PreCommand = currentProfile.PreCommand;
+                PreCommandWaitForExit = currentProfile.PreCommandWaitForExit;
+                PreCommandShowWindow = currentProfile.PreCommandShowWindow;
+                PostCommand = currentProfile.PostCommand;
+                PostCommandWaitForExit = currentProfile.PostCommandWaitForExit;
+                PostCommandShowWindow = currentProfile.PostCommandShowWindow;
+                WarnNoControllers = currentProfile.CheckController;
+                EnableGoodmerge = profile.EnableGoodmerge;
+                GoodmergeTags = currentProfile.GoodmergeTags;
             }
         }
 
@@ -548,6 +578,23 @@ namespace Emulators.MediaPortal2.Models
             emulatorsService.Importer.Restart();
         }
 
+        protected void ReleaseModelData()
+        {
+            Emulators = null;
+            CurrentProfiles = null;
+            Reset();
+            if (confirmDeleteCloseWatcher != null)
+            {
+                confirmDeleteCloseWatcher.Dispose();
+                confirmDeleteCloseWatcher = null;
+            }
+            if (_pathBrowserCloseWatcher != null)
+            {
+                _pathBrowserCloseWatcher.Dispose();
+                _pathBrowserCloseWatcher = null;
+            }
+        }
+
         #endregion
 
         #region IWorkflow
@@ -576,6 +623,7 @@ namespace Emulators.MediaPortal2.Models
         public void ExitModelContext(NavigationContext oldContext, NavigationContext newContext)
         {
             saveOldState(oldContext, false);
+            ReleaseModelData();
         }
 
         public Guid ModelId

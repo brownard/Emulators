@@ -11,12 +11,12 @@ namespace Emulators.MediaPortal2.ListItems
 {
     public class ContextListItem : ListItem
     {
-        protected AbstractProperty _contextCommandProperty;
+        protected AbstractProperty _contextCommandProperty = new WProperty(typeof(ICommand));
 
-        public ContextListItem()
-        {
-            _contextCommandProperty = new WProperty(typeof(ICommand));
-        }
+        public ContextListItem() { }
+
+        public ContextListItem(string name, string value)
+            : base(name, value) { }
 
         public AbstractProperty ContextCommandProperty { get { return _contextCommandProperty; } }
         public ICommand ContextCommand

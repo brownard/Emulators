@@ -75,6 +75,10 @@
         </Setter>
     </Style>
 
+    <Style x:Key="emuContentsMenuListViewStyle" BasedOn="{ThemeResource ContentsMenuListViewStyle}">
+        <Setter Property="ItemContainerStyle" Value="{ThemeResource emuItemContainerStyle}"/>
+    </Style>
+
     <Style x:Key="emuItemsListViewStyle" TargetType="{x:Type ListView}">
         <Setter Property="ItemTemplate"/>
         <!-- Don't inherit the ItemTemplate from ContentsMenuListViewStyle - It should remain null to make the SkinEngine choose an appropriate template -->

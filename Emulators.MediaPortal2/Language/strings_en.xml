@@ -48,6 +48,8 @@
   <string name="Emulators.Dialogs.SelectMatch">Select Match</string>
   <string name="Emulators.Dialogs.ChangeLayout">Layout</string>
   <string name="Emulators.Dialogs.SelectProfile">Select Profile</string>
+  <string name="Emulators.Dialogs.Delete">Delete</string>
+  <string name="Emulators.Dialogs.ConfirmDelete">Are you sure you want to delete?</string>
 
   <string name="Emulators.Importer">Importer</string>
   <string name="Emulators.Import.NoFilesToImport">No files to import</string>
