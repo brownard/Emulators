@@ -1,6 +1,8 @@
 ﻿using Emulators.Import;
+using Emulators.MediaPortal2.Messaging;
 using MediaPortal.Common;
 using MediaPortal.Common.General;
+using MediaPortal.Common.Messaging;
 using MediaPortal.UI.Presentation.DataObjects;
 using MediaPortal.UI.Presentation.Models;
 using MediaPortal.UI.Presentation.Workflow;
@@ -18,6 +20,7 @@ namespace Emulators.MediaPortal2.Models
         Dictionary<int, RomMatchViewModel> itemsDictionary;
         ItemsList items;
         bool importerInit;
+        AsynchronousMessageQueue messageQueue;
 
         AbstractProperty _statusProperty;
         AbstractProperty _progressProperty;
@@ -26,6 +29,19 @@ namespace Emulators.MediaPortal2.Models
         {
             _statusProperty = new WProperty(typeof(string), null);
             _progressProperty = new WProperty(typeof(int), 0);
+
+            messageQueue = new AsynchronousMessageQueue(this, new[] { ImporterMessaging.Channel });
+            messageQueue.MessageReceived += messageQueue_MessageReceived;
+        }
+
+        void messageQueue_MessageReceived(AsynchronousMessageQueue queue, SystemMessage message)
+        {
+            if (message.ChannelName == ImporterMessaging.Channel)
+            {
+                ImporterMessaging.MessageType messageType = (ImporterMessaging.MessageType)message.MessageType;
+                if (messageType == ImporterMessaging.MessageType.Init)
+                    initImporter();
+            }
         }
 
         public void SelectItem(RomMatchViewModel romMatchModel)
@@ -51,6 +67,7 @@ namespace Emulators.MediaPortal2.Models
                 items = new ItemsList();
 
                 Importer importer = ServiceRegistration.Get<IEmulatorsService>().Importer;
+                rebuildItemsList(importer.AllMatches);
                 importer.ImportStatusChanged += importer_ImportStatusChanged;
                 importer.ProgressChanged += importer_ProgressChanged;
                 importer.RomStatusChanged += importer_RomStatusChanged;
@@ -111,7 +128,7 @@ namespace Emulators.MediaPortal2.Models
             items.FireChange();
         }
 
-        void rebuildItemsList(List<RomMatch> newItems)
+        void rebuildItemsList(IEnumerable<RomMatch> newItems)
         {
             lock (syncRoot)
             {

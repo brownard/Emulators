@@ -75,6 +75,7 @@
     <Compile Include="EmulatorsSettings.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="LayoutType.cs" />
+    <Compile Include="Messaging\ImporterMessaging.cs" />
     <Compile Include="Models\Dialogs\LayoutTypeModel.cs" />
     <Compile Include="Models\Dialogs\ListDialogBase.cs" />
     <Compile Include="Models\Dialogs\PlatformSelectModel.cs" />

@@ -1,5 +1,7 @@
 ﻿using Emulators.Import;
+using Emulators.MediaPortal2.Messaging;
 using MediaPortal.Common;
+using MediaPortal.Common.Logging;
 using MediaPortal.Common.PluginManager;
 using System;
 using System.Collections.Generic;
@@ -38,6 +40,7 @@ namespace Emulators.MediaPortal2
             importer = new Importer();
             EmulatorsCore.Database.OnItemDeleting += Database_OnItemDeleting;
             ServiceRegistration.Set<IEmulatorsService>(this);
+            ImporterMessaging.SendImporterMessage(ImporterMessaging.MessageType.Init);
         }
 
         public void Continue()
