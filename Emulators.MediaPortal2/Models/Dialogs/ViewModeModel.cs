@@ -10,13 +10,14 @@ using System.Threading.Tasks;
 
 namespace Emulators.MediaPortal2.Models.Dialogs
 {
-    public class ViewModeModel : ListDialogBase
+    public class ViewModeModel
     {
-        const string KEY_STARTUP_STATE = "StartupState";
+        const string KEY_STARTUP_STATE = "EmulatorsStartupState";
+        protected ItemsList startupItems;
 
         public ViewModeModel()
         {
-            items = new ItemsList();
+            startupItems = new ItemsList();
             var startupStates = StartupStateSetting.StartupStates;
             foreach (string key in startupStates.Keys)
             {
@@ -28,9 +29,14 @@ namespace Emulators.MediaPortal2.Models.Dialogs
                         Command = new MethodDelegateCommand(() => SetStartupState(state))
                     };
                     item.AdditionalProperties[KEY_STARTUP_STATE] = state;
-                    items.Add(item);
+                    startupItems.Add(item);
                 }
             }
+        }
+
+        public ItemsList Items
+        {
+            get { return GetItems(); }
         }
 
         protected void SetStartupState(StartupState startupState)
@@ -39,16 +45,41 @@ namespace Emulators.MediaPortal2.Models.Dialogs
             model.StartupState = startupState;
         }
 
-        protected override void UpdateSelectedFlag()
+        protected ItemsList GetItems()
         {
             var model = EmulatorsMainModel.Instance();
             StartupState currentState = model.StartupState;
-            foreach (ListItem item in items)
+
+            bool showPC = Emulator.GetPC().Games.Count > 0;
+            if (!showPC && currentState == StartupState.PCGAMES)
+                currentState = StartupState.EMULATORS;
+
+            ItemsList items = new ItemsList();
+            foreach (ListItem item in startupItems)
             {
-                object state;
-                if (item.AdditionalProperties.TryGetValue(KEY_STARTUP_STATE, out state))
-                    item.Selected = (StartupState)state == currentState;
+                StartupState state;
+                if (tryGetStartupState(item.AdditionalProperties, out state))
+                {
+                    if (state != StartupState.PCGAMES || showPC)
+                    {
+                        item.Selected = (StartupState)state == currentState;
+                        items.Add(item);
+                    }
+                }
             }
+            return items;
+        }
+
+        static bool tryGetStartupState(IDictionary<string, object> properties, out StartupState state)
+        {
+            object stateOb;
+            if (properties.TryGetValue(KEY_STARTUP_STATE, out stateOb))
+            {
+                state = (StartupState)stateOb;
+                return true;
+            }
+            state = StartupState.EMULATORS;
+            return false;
         }
     }
 }
