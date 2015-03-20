@@ -2,7 +2,7 @@
 <DockPanel
       xmlns="www.team-mediaportal.com/2008/mpf/directx"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      DataContext="{Binding Source={Model 03F534A5-4495-4223-A7EB-0FC8D477CF4B}}"
+      DataContext="{Binding Source={Model 03F534A5-4495-4223-A7EB-0FC8D477CF4B}, Path=ProfileModel}"
       LastChildFill="True"
     >
 

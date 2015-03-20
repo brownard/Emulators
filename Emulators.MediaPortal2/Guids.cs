@@ -17,6 +17,8 @@ namespace Emulators.MediaPortal2
         public static readonly Guid ConfigureEmulatorModel = new Guid("03F534A5-4495-4223-A7EB-0FC8D477CF4B");
         public static readonly Guid NewEmulatorState = new Guid("C69A5500-0059-4E4E-A331-2FD9835C4D0B");
         public static readonly Guid EditEmulatorState = new Guid("4824523F-ABC2-4E41-B645-166C3189EAF0");
+
+        public static readonly Guid ConfigureProfileModel = new Guid("6A412924-8AF1-4287-B3EE-072FD528C91B");
         public static readonly Guid EditProfileState = new Guid("B6DA5181-293B-4ADB-82D9-020D985F353C");
         public static readonly Guid EditProfileAdvancedState = new Guid("8B10CB9D-A13F-4E59-9DF0-CF8EA59EB041");
         public static readonly Guid EditProfileGoodmergeState = new Guid("BA597FFA-8BA3-4AD9-8425-9D85D89EE50C");

@@ -76,6 +76,7 @@
     <Compile Include="Guids.cs" />
     <Compile Include="LayoutType.cs" />
     <Compile Include="Messaging\ImporterMessaging.cs" />
+    <Compile Include="Models\ConfigureProfileModel.cs" />
     <Compile Include="Models\Dialogs\LayoutTypeModel.cs" />
     <Compile Include="Models\Dialogs\ListDialogBase.cs" />
     <Compile Include="Models\Dialogs\PlatformSelectModel.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="Models\Dialogs\ProgressDialogModel.cs" />
     <Compile Include="MP2Logger.cs" />
     <Compile Include="Navigation\NavigationData.cs" />
+    <Compile Include="PathBrowser\PathBrowserHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\CreateEmulatorSetting.cs" />
     <Compile Include="Settings\EditEmulatorsSetting.cs" />

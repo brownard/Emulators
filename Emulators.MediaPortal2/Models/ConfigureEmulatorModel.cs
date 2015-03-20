@@ -1,6 +1,7 @@
 ﻿using Emulators.AutoConfig;
 using Emulators.MediaPortal2.ListItems;
 using Emulators.MediaPortal2.Models.Dialogs;
+using Emulators.MediaPortal2.PathBrowser;
 using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
@@ -65,41 +66,44 @@ namespace Emulators.MediaPortal2.Models
 
         #region Members
 
-        protected AbstractProperty _emulatorPathProperty = new WProperty(typeof(string), null);
         protected AbstractProperty _nameProperty = new WProperty(typeof(string), null);
         protected AbstractProperty _platformProperty = new WProperty(typeof(string), null);
         protected AbstractProperty _romDirectoryProperty = new WProperty(typeof(string), null);
         protected AbstractProperty _filtersProperty = new WProperty(typeof(string), null);
-        protected AbstractProperty _enableGoodmergeProperty = new WProperty(typeof(bool), false);
+        protected AbstractProperty _caseAspectProperty = new WProperty(typeof(double), 0.0);
         protected AbstractProperty _isEmulatorValidProperty = new WProperty(typeof(bool), false);
 
-        protected AbstractProperty _caseAspectProperty = new WProperty(typeof(double), 0.0);
-        protected AbstractProperty _argumentsProperty = new WProperty(typeof(string), null);
-        protected AbstractProperty _workingDirectoryProperty = new WProperty(typeof(string), null);
-        protected AbstractProperty _launchedFileProperty = new WProperty(typeof(string), null);
-        protected AbstractProperty _preCommandProperty = new WProperty(typeof(string), null);
-        protected AbstractProperty _preCommandWaitForExitProperty = new WProperty(typeof(bool), true);
-        protected AbstractProperty _preCommandShowWindowProperty = new WProperty(typeof(bool), false);
-        protected AbstractProperty _postCommandProperty = new WProperty(typeof(string), null);
-        protected AbstractProperty _postCommandWaitForExitProperty = new WProperty(typeof(bool), true);
-        protected AbstractProperty _postCommandShowWindowProperty = new WProperty(typeof(bool), false);
-        protected AbstractProperty _useQuotesProperty = new WProperty(typeof(bool), false);
-        protected AbstractProperty _escToExitProperty = new WProperty(typeof(bool), false);
-        protected AbstractProperty _warnNoControllersProperty = new WProperty(typeof(bool), false);
-        protected AbstractProperty _goodmergeTagsProperty = new WProperty(typeof(string), null);
+        protected AbstractProperty _profileModelProperty = new WProperty(typeof(ConfigureProfileModel), new ConfigureProfileModel());
 
-        PathBrowserCloseWatcher _pathBrowserCloseWatcher;
+        PathBrowserHandler pathBrowserHandler = new PathBrowserHandler();
         DialogCloseWatcher confirmDeleteCloseWatcher;
         object syncRoot = new object();
         Emulator currentEmulator;
-        EmulatorProfile currentProfile;
 
         #endregion
+
+        public ConfigureEmulatorModel()
+        {
+            ProfileModel.EmulatorPathProperty.Attach(emulatorPathChangedHandler);
+        }
+
+        void emulatorPathChangedHandler(AbstractProperty property, object oldValue)
+        {
+            updateConfig(property.GetValue() as string);
+            updateValidStatus();
+        }
 
         #region GUI Properties
 
         public ItemsList Emulators { get; set; }
         public ItemsList CurrentProfiles { get; set; }
+
+        public AbstractProperty ProfileModelProperty { get { return _profileModelProperty; } }
+        public ConfigureProfileModel ProfileModel
+        {
+            get { return (ConfigureProfileModel)_profileModelProperty.GetValue(); }
+            set { _profileModelProperty.SetValue(value); }
+        }
 
         public AbstractProperty NameProperty { get { return _nameProperty; } }
         public string Name
@@ -117,17 +121,6 @@ namespace Emulators.MediaPortal2.Models
         {
             get { return (string)_platformProperty.GetValue(); }
             set { _platformProperty.SetValue(value); }
-        }
-
-        public AbstractProperty EmulatorPathProperty { get { return _emulatorPathProperty; } }
-        public string EmulatorPath
-        {
-            get { return (string)_emulatorPathProperty.GetValue(); }
-            set
-            {
-                _emulatorPathProperty.SetValue(value);
-                updateValidStatus();
-            }
         }
 
         public AbstractProperty RomDirectoryProperty { get { return _romDirectoryProperty; } }
@@ -151,104 +144,6 @@ namespace Emulators.MediaPortal2.Models
             set { _caseAspectProperty.SetValue(value); }
         }
 
-        public AbstractProperty ArgumentsProperty { get { return _argumentsProperty; } }
-        public string Arguments
-        {
-            get { return (string)_argumentsProperty.GetValue(); }
-            set { _argumentsProperty.SetValue(value); }
-        }
-
-        public AbstractProperty WorkingDirectoryProperty { get { return _workingDirectoryProperty; } }
-        public string WorkingDirectory
-        {
-            get { return (string)_workingDirectoryProperty.GetValue(); }
-            set { _workingDirectoryProperty.SetValue(value); }
-        }
-
-        public AbstractProperty LaunchedFileProperty { get { return _launchedFileProperty; } }
-        public string LaunchedFile
-        {
-            get { return (string)_launchedFileProperty.GetValue(); }
-            set { _launchedFileProperty.SetValue(value); }
-        }
-
-        public AbstractProperty PreCommandProperty { get { return _preCommandProperty; } }
-        public string PreCommand
-        {
-            get { return (string)_preCommandProperty.GetValue(); }
-            set { _preCommandProperty.SetValue(value); }
-        }
-
-        public AbstractProperty PreCommandWaitForExitProperty { get { return _preCommandWaitForExitProperty; } }
-        public bool PreCommandWaitForExit
-        {
-            get { return (bool)_preCommandWaitForExitProperty.GetValue(); }
-            set { _preCommandWaitForExitProperty.SetValue(value); }
-        }
-
-        public AbstractProperty PreCommandShowWindowProperty { get { return _preCommandShowWindowProperty; } }
-        public bool PreCommandShowWindow
-        {
-            get { return (bool)_preCommandShowWindowProperty.GetValue(); }
-            set { _preCommandShowWindowProperty.SetValue(value); }
-        }
-
-        public AbstractProperty PostCommandProperty { get { return _postCommandProperty; } }
-        public string PostCommand
-        {
-            get { return (string)_postCommandProperty.GetValue(); }
-            set { _postCommandProperty.SetValue(value); }
-        }
-
-        public AbstractProperty PostCommandWaitForExitProperty { get { return _postCommandWaitForExitProperty; } }
-        public bool PostCommandWaitForExit
-        {
-            get { return (bool)_postCommandWaitForExitProperty.GetValue(); }
-            set { _postCommandWaitForExitProperty.SetValue(value); }
-        }
-
-        public AbstractProperty PostCommandShowWindowProperty { get { return _postCommandShowWindowProperty; } }
-        public bool PostCommandShowWindow
-        {
-            get { return (bool)_postCommandShowWindowProperty.GetValue(); }
-            set { _postCommandShowWindowProperty.SetValue(value); }
-        }
-
-        public AbstractProperty UseQuotesProperty { get { return _useQuotesProperty; } }
-        public bool UseQuotes
-        {
-            get { return (bool)_useQuotesProperty.GetValue(); }
-            set { _useQuotesProperty.SetValue(value); }
-        }
-
-        public AbstractProperty EscToExitProperty { get { return _escToExitProperty; } }
-        public bool EscToExit
-        {
-            get { return (bool)_escToExitProperty.GetValue(); }
-            set { _escToExitProperty.SetValue(value); }
-        }
-
-        public AbstractProperty WarnNoControllersProperty { get { return _warnNoControllersProperty; } }
-        public bool WarnNoControllers
-        {
-            get { return (bool)_warnNoControllersProperty.GetValue(); }
-            set { _warnNoControllersProperty.SetValue(value); }
-        }
-
-        public AbstractProperty EnableGoodmergeProperty { get { return _enableGoodmergeProperty; } }
-        public bool EnableGoodmerge
-        {
-            get { return (bool)_enableGoodmergeProperty.GetValue(); }
-            set { _enableGoodmergeProperty.SetValue(value); }
-        }
-
-        public AbstractProperty GoodmergeTagsProperty { get { return _goodmergeTagsProperty; } }
-        public string GoodmergeTags
-        {
-            get { return (string)_goodmergeTagsProperty.GetValue(); }
-            set { _goodmergeTagsProperty.SetValue(value); }
-        }
-
         public AbstractProperty IsEmulatorValidProperty { get { return _isEmulatorValidProperty; } }
         public bool IsEmulatorValid
         {
@@ -263,46 +158,17 @@ namespace Emulators.MediaPortal2.Models
         protected void Reset()
         {
             currentEmulator = null;
-            currentProfile = null;
-            EmulatorPath = null;
             Name = null;
             Platform = null;
             Filters = null;
             RomDirectory = null;
             CaseAspect = 0;
-            Arguments = null;
-            WorkingDirectory = null;
-            UseQuotes = true;
-            EscToExit = false;
-            LaunchedFile = null;
-            PreCommand = null;
-            PreCommandWaitForExit = true;
-            PreCommandShowWindow = false;
-            PostCommand = null;
-            PostCommandWaitForExit = true;
-            PostCommandShowWindow = false;
-            WarnNoControllers = false;
-            EnableGoodmerge = false;
-            GoodmergeTags = null;
-        }
-
-        public void ChooseEmulatorPath()
-        {
-            doPathSelect("[Emulators.EmulatorPath]", EmulatorPath, true, p => p.IsExecutable(), p =>
-                {
-                    EmulatorPath = p;
-                    updateConfig(p);
-                });
+            ProfileModel.Reset();
         }
 
         public void ChooseRomDirectory()
         {
-            doPathSelect("[Emulators.RomDirectory]", RomDirectory, false, p => !string.IsNullOrEmpty(p), p => RomDirectory = p);
-        }
-
-        public void ChooseWorkingDirectory()
-        {
-            doPathSelect("[Emulators.WorkingDirectory]", WorkingDirectory, false, p => !string.IsNullOrEmpty(p), p => WorkingDirectory = p);
+            pathBrowserHandler.ShowPathSelect("[Emulators.RomDirectory]", RomDirectory, false, p => !string.IsNullOrEmpty(p), p => RomDirectory = p);
         }
 
         public void ChoosePlatform()
@@ -344,25 +210,7 @@ namespace Emulators.MediaPortal2.Models
 
         public void SaveProfile()
         {
-            if (currentProfile != null)
-            {
-                currentProfile.EmulatorPath = EmulatorPath;
-                currentProfile.Arguments = Arguments;
-                currentProfile.WorkingDirectory = WorkingDirectory;
-                currentProfile.UseQuotes = UseQuotes;
-                currentProfile.EscapeToExit = EscToExit;
-                currentProfile.LaunchedExe = LaunchedFile;
-                currentProfile.PreCommand = PreCommand;
-                currentProfile.PreCommandWaitForExit = PreCommandWaitForExit;
-                currentProfile.PreCommandShowWindow = PreCommandShowWindow;
-                currentProfile.PostCommand = PostCommand;
-                currentProfile.PostCommandWaitForExit = PostCommandWaitForExit;
-                currentProfile.PostCommandShowWindow = PostCommandShowWindow;
-                currentProfile.CheckController = WarnNoControllers;
-                currentProfile.EnableGoodmerge = EnableGoodmerge;
-                currentProfile.GoodmergeTags = GoodmergeTags;
-                currentProfile.Commit();
-            }
+            ProfileModel.SaveProfile();
         }
 
         #endregion
@@ -379,7 +227,8 @@ namespace Emulators.MediaPortal2.Models
             {
                 Reset();
                 currentEmulator = Emulator.CreateNewEmulator();
-                currentProfile = currentEmulator.DefaultProfile;
+                setupProfileList();
+                ProfileModel.SetProfile(currentEmulator.DefaultProfile);
             }
             else
             {
@@ -387,7 +236,7 @@ namespace Emulators.MediaPortal2.Models
                 if (newContext.ContextVariables.TryGetValue(KEY_EMULATOR_EDIT, out emuObject))
                     setupEmulator(emuObject as Emulator);
                 if (newContext.ContextVariables.TryGetValue(KEY_PROFILE_EDIT, out emuObject))
-                    setupProfile(emuObject as EmulatorProfile);
+                    ProfileModel.SetProfile(emuObject as EmulatorProfile);
             }
         }
 
@@ -496,51 +345,9 @@ namespace Emulators.MediaPortal2.Models
             }
         }
 
-        void setupProfile(EmulatorProfile profile)
-        {
-            if (profile != null && profile != currentProfile)
-            {
-                currentProfile = profile;
-                EmulatorPath = profile.EmulatorPath;
-                Arguments = profile.Arguments;
-                WorkingDirectory = profile.WorkingDirectory;
-                UseQuotes = profile.UseQuotes;
-                EscToExit = profile.EscapeToExit;
-                LaunchedFile = currentProfile.LaunchedExe;
-                PreCommand = currentProfile.PreCommand;
-                PreCommandWaitForExit = currentProfile.PreCommandWaitForExit;
-                PreCommandShowWindow = currentProfile.PreCommandShowWindow;
-                PostCommand = currentProfile.PostCommand;
-                PostCommandWaitForExit = currentProfile.PostCommandWaitForExit;
-                PostCommandShowWindow = currentProfile.PostCommandShowWindow;
-                WarnNoControllers = currentProfile.CheckController;
-                EnableGoodmerge = profile.EnableGoodmerge;
-                GoodmergeTags = currentProfile.GoodmergeTags;
-            }
-        }
-
-        void doPathSelect(string displayLabel, string initialPath, bool fileSelect, Func<string, bool> validate, Action<string> completed)
-        {
-            initialPath = string.IsNullOrEmpty(initialPath) ? null : DosPathHelper.GetDirectory(initialPath);
-            Guid dialogHandle = ServiceRegistration.Get<IPathBrowser>().ShowPathBrowser(displayLabel, fileSelect, false,
-                string.IsNullOrEmpty(initialPath) ? null : LocalFsResourceProviderBase.ToResourcePath(initialPath),
-                path =>
-                {
-                    string choosenPath = LocalFsResourceProviderBase.ToDosPath(path.LastPathSegment.Path);
-                    return validate(choosenPath);
-                });
-            if (_pathBrowserCloseWatcher != null)
-                _pathBrowserCloseWatcher.Dispose();
-            _pathBrowserCloseWatcher = new PathBrowserCloseWatcher(this, dialogHandle, chosenPath =>
-            {
-                completed(LocalFsResourceProviderBase.ToDosPath(chosenPath));
-            },
-                null);
-        }
-
         void updateValidStatus()
         {
-            IsEmulatorValid = !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(EmulatorPath);
+            IsEmulatorValid = !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(ProfileModel.EmulatorPath);
         }
 
         void updateConfig(string emulatorPath)
@@ -560,14 +367,16 @@ namespace Emulators.MediaPortal2.Models
                 if (emulatorConfig.ProfileConfig != null)
                 {
                     ProfileConfig profileConfig = emulatorConfig.ProfileConfig;
-                    if (string.IsNullOrEmpty(Arguments))
-                        Arguments = profileConfig.Arguments;
-                    if (string.IsNullOrEmpty(WorkingDirectory))
-                        WorkingDirectory = profileConfig.WorkingDirectory;
+                    ConfigureProfileModel profileModel = ProfileModel;
+
+                    if (string.IsNullOrEmpty(profileModel.Arguments))
+                        profileModel.Arguments = profileConfig.Arguments;
+                    if (string.IsNullOrEmpty(profileModel.WorkingDirectory))
+                        profileModel.WorkingDirectory = profileConfig.WorkingDirectory;
                     if (profileConfig.UseQuotes.HasValue)
-                        UseQuotes = profileConfig.UseQuotes.Value;
+                        profileModel.UseQuotes = profileConfig.UseQuotes.Value;
                     if (profileConfig.EscapeToExit.HasValue)
-                        EscToExit = emulatorConfig.ProfileConfig.EscapeToExit.Value;
+                        profileModel.EscToExit = emulatorConfig.ProfileConfig.EscapeToExit.Value;
                 }
             }
         }
@@ -583,15 +392,11 @@ namespace Emulators.MediaPortal2.Models
             Emulators = null;
             CurrentProfiles = null;
             Reset();
+            pathBrowserHandler.Dispose();
             if (confirmDeleteCloseWatcher != null)
             {
                 confirmDeleteCloseWatcher.Dispose();
                 confirmDeleteCloseWatcher = null;
-            }
-            if (_pathBrowserCloseWatcher != null)
-            {
-                _pathBrowserCloseWatcher.Dispose();
-                _pathBrowserCloseWatcher = null;
             }
         }
 
