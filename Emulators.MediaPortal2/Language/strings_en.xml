@@ -8,6 +8,7 @@
   <string name="Emulators.LastUsed">Last Used</string>
 
   <string name="Emulators.Config.Configure">Configure</string>
+  <string name="Emulators.Config.Edit">Edit</string>
   <string name="Emulators.Config.StartupView">Startup View</string>
   <string name="Emulators.Config.StartupView.Help">The view to show on first open</string>
 

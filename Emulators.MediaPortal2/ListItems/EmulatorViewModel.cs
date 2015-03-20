@@ -1,7 +1,11 @@
 ﻿using Emulators.ImageHandlers;
 using Emulators.MediaPortal2.Models;
+using Emulators.MediaPortal2.Models.Dialogs;
+using MediaPortal.Common;
 using MediaPortal.Common.Commands;
 using MediaPortal.Common.General;
+using MediaPortal.UI.Presentation.DataObjects;
+using MediaPortal.UI.Presentation.Workflow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +18,16 @@ namespace Emulators.MediaPortal2.ListItems
     {
         EmulatorsMainModel model;
 
-        public Emulator Emulator { get; private set; }
+        Emulator emulator;
+        public Emulator Emulator { get { return emulator; } }
 
-        public EmulatorViewModel(Emulator emu, EmulatorsMainModel model)
+        public EmulatorViewModel(Emulator emulator, EmulatorsMainModel model)
         {
             this.model = model;
-            Emulator = emu;
-            Name = emu.Title;
-            Description = emu.Description;
-            using (ThumbGroup thumbs = new ThumbGroup(emu))
+            this.emulator = emulator;
+            Name = emulator.Title;
+            Description = emulator.Description;
+            using (ThumbGroup thumbs = new ThumbGroup(emulator))
             {
                 FrontCover = thumbs.FrontCoverDefaultPath;
                 Fanart = thumbs.FanartDefaultPath;
@@ -30,8 +35,21 @@ namespace Emulators.MediaPortal2.ListItems
 
             Command = new MethodDelegateCommand(() =>
             {
-                model.EmulatorSelected(Emulator);
+                model.EmulatorSelected(emulator);
             });
+
+            ContextCommand = new MethodDelegateCommand(showContext);
+
+        }
+
+        void showContext()
+        {
+            ItemsList items = new ItemsList();
+            items.Add(new ListItem(Consts.KEY_NAME, "[Emulators.Config.Edit]")
+            {
+                Command = new MethodDelegateCommand(() => ConfigureEmulatorModel.EditEmulator(emulator))
+            });
+            ListDialogModel.Instance().ShowDialog(emulator.Title, items);
         }
     }
 }
