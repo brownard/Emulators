@@ -194,12 +194,11 @@ namespace Emulators.MediaPortal2.Models
         {
             if (currentEmulator != null)
             {
-                bool reImport = currentEmulator.PathToRoms != RomDirectory;
-                if (reImport)
-                    currentEmulator.PathToRoms = RomDirectory;
+                bool reImport = currentEmulator.PathToRoms != RomDirectory || currentEmulator.Filter != Filters;
+                currentEmulator.PathToRoms = RomDirectory;
+                currentEmulator.Filter = Filters;
                 currentEmulator.Title = Name;
                 currentEmulator.Platform = Platform;
-                currentEmulator.Filter = Filters;
                 currentEmulator.CaseAspect = CaseAspect;
                 currentEmulator.Commit();
                 getEmulators();
